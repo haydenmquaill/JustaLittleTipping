@@ -316,6 +316,7 @@
   .bet .b-sub{font-size:10px;line-height:1.1;color:var(--mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .bet .b-px{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;color:var(--ink-soft);flex-shrink:0}
   .bet .b-inline{display:flex;gap:14px;align-items:flex-end;margin-left:auto;flex-shrink:0;text-align:right}
+  .bet .b-foot{display:flex;justify-content:flex-end;border-top:1px solid var(--line);padding-top:6px;margin-top:2px}
   .bet .b-inline .cl{display:block;font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--mid);line-height:1}
   .bet .b-inline .cv{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;
     color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.05}
@@ -2255,8 +2256,10 @@ function betRowInner(b, opts){
     const sub = marketInfo(l.market).title + (m ? ' · '+shortMatch(m) : '') + (b.kind==='multi' && l.round ? ` · R${l.round}` : '');
     const px = b.kind!=='single' ? `<span class="b-px">${fmtPx(l.price)}</span>` : '';
     return `<div class="b-legrow">${badge}<span class="b-leg"><span class="b-hname">${esc(selText(l, l.market))}</span>`+
-      `<span class="b-sub">${esc(sub)}</span></span>${px}${marks ? legMark(marks[i]) : ''}${i===legs.length-1 ? inline : ''}</div>`;
+      `<span class="b-sub">${esc(sub)}</span></span>${px}${marks ? legMark(marks[i]) : ''}</div>`;
   });
+  // stake / return get their own row under the legs
+  if(inline) rows.push(`<div class="b-foot">${inline}</div>`);
   const status = opts.statusTag ? `<span class="b-status ${opts.statusTag}">${esc(opts.statusText||opts.statusTag)}</span>` : '';
   // multis get a progress row under the title: ✓✓✓○○
   const prog = marks && legs.length>1 ? `<div class="b-prog">${marks.map(legMark).join('')}</div>` : '';
