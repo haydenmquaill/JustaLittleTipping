@@ -170,13 +170,20 @@ foreach($ri in 0..1){
   foreach($g in $games){
     $id = $g.providerId
     $item = Get-Json "https://api.afl.com.au/cfs/afl/matchItem/$id" $H
-    $events = @($item.scoringEvents | ForEach-Object {
+    $events = @($item.score.scoreWorm.scoringEvents | ForEach-Object {
       $n = $_.playerScore.player.playerName
       [ordered]@{ team = ([string]$_.homeOrAway).ToLower(); type = $(if($_.scoreType -eq 'GOAL'){ 'goal' } else { 'behind' })
         q = [int]$_.periodNumber; secs = [int]$_.periodSeconds; player = $(if($n){ "$($n.givenName) $($n.surname)" } else { 'Rushed' }) } })
     $players = AflPlayers $id
-    # real length of each quarter: its last score plus a bit, at least 28 minutes
-    $plen = @(1..4 | ForEach-Object { $q = $_; [Math]::Max(1680, (($events | Where-Object { $_.q -eq $q } | ForEach-Object secs | Measure-Object -Maximum).Maximum) + 90) })
+    # real length of each quarter from the match clock; failing that, its last score plus a bit, at least 28 minutes
+    $plen = @(1..4 | ForEach-Object { $q = $_
+      $clk = [int](@($item.score.matchClock.periods | Where-Object { $_.periodNumber -eq $q })[0].periodSeconds)
+      $last = [int](($events | Where-Object { $_.q -eq $q } | ForEach-Object secs | Measure-Object -Maximum).Maximum)
+      if($clk -ge $last -and $clk -gt 0){ $clk } else { [Math]::Max(1680, $last + 90) } })
+    # the replay is only any good if the events add up to the real final score
+    $hs = 0; $as = 0; $events | ForEach-Object { $p = $(if($_.type -eq 'goal'){ 6 } else { 1 }); if($_.team -eq 'home'){ $hs += $p } else { $as += $p } }
+    if($hs -ne $item.score.homeTeamScore.matchScore.totalScore -or $as -ne $item.score.awayTeamScore.matchScore.totalScore){
+      throw "AFL $id scoring events add up to $hs-$as, not the final $($item.score.homeTeamScore.matchScore.totalScore)-$($item.score.awayTeamScore.matchScore.totalScore)" }
     $hTeam = $g.home.team.name; $aTeam = $g.away.team.name
     $odds = AflOdds $hTeam $aTeam $pre $players $avg
     $allMatches.Add(@{
@@ -278,6 +285,10 @@ foreach($ri in 0..1){
         $gs = [int]$ev.gameSeconds; $q = $(if($gs -lt 2400){ 1 } else { 2 })
         [ordered]@{ team = $(if([string]$ev.teamId -eq $homeId){ 'home' } else { 'away' }); type = $type; q = $q
           secs = [Math]::Min(2400, $gs - ($q-1)*2400); player = $names[[string]$ev.playerId] } } })
+    # the replay is only any good if the events add up to the real final score
+    $hs = 0; $as = 0; $events | ForEach-Object { $p = @{ try=4; conversion=2; penalty=2; field_goal=1; field_goal_2=2 }[$_.type]; if($_.team -eq 'home'){ $hs += $p } else { $as += $p } }
+    if($hs -ne [int]$mc.homeTeam.score -or $as -ne [int]$mc.awayTeam.score){
+      throw "NRL $($mc.matchId) scoring events add up to $hs-$as, not the final $($mc.homeTeam.score)-$($mc.awayTeam.score)" }
     $players = @(NrlPlayers $mc)
     $odds = NrlOdds $g.homeTeam.nickName $g.awayTeam.nickName $pre $players $avg
     $allMatches.Add(@{
