@@ -1,10 +1,10 @@
 {
-  "id": "/JustaLittleFun-Tipping/",
+  "id": "/JustaLittleTipping/",
   "name": "JALF Footy Tipping",
   "short_name": "JALF Footy",
   "description": "Footy tipping with your mates: odds, multis, live scores and a season-long ladder.",
-  "start_url": "/JustaLittleFun-Tipping/",
-  "scope": "/JustaLittleFun-Tipping/",
+  "start_url": "/JustaLittleTipping/",
+  "scope": "/JustaLittleTipping/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0d1f12",
