@@ -1,0 +1,43 @@
+{
+  "afl": [
+    { "abbr": "ADE", "name": "Adelaide",         "nick": "Crows",       "match": ["adelaide", "crows"],                 "colours": ["#002b5c", "#e21937"] },
+    { "abbr": "BRI", "name": "Brisbane",         "nick": "Lions",       "match": ["brisbane", "lions"],                 "colours": ["#a30046", "#0055a3"] },
+    { "abbr": "CAR", "name": "Carlton",          "nick": "Blues",       "match": ["carlton", "blues"],                  "colours": ["#031a29", "#ffffff"] },
+    { "abbr": "COL", "name": "Collingwood",      "nick": "Magpies",     "match": ["collingwood", "magpies"],            "colours": ["#000000", "#ffffff"] },
+    { "abbr": "ESS", "name": "Essendon",         "nick": "Bombers",     "match": ["essendon", "bombers"],               "colours": ["#000000", "#cc2031"] },
+    { "abbr": "FRE", "name": "Fremantle",        "nick": "Dockers",     "match": ["fremantle", "dockers"],              "colours": ["#2a1a54", "#ffffff"] },
+    { "abbr": "GEE", "name": "Geelong",          "nick": "Cats",        "match": ["geelong", "cats"],                   "colours": ["#002b5c", "#ffffff"] },
+    { "abbr": "GCS", "name": "Gold Coast",       "nick": "Suns",        "match": ["gold coast", "suns"],                "colours": ["#d93e39", "#f6bd00"] },
+    { "abbr": "GWS", "name": "GWS",              "nick": "Giants",      "match": ["greater western", "gws", "giants"],  "colours": ["#f15c22", "#4a4f55"] },
+    { "abbr": "HAW", "name": "Hawthorn",         "nick": "Hawks",       "match": ["hawthorn", "hawks"],                 "colours": ["#4d2004", "#fbbf15"] },
+    { "abbr": "MEL", "name": "Melbourne",        "nick": "Demons",      "match": ["melbourne", "demons"],               "colours": ["#0f1131", "#cc2031"] },
+    { "abbr": "NTH", "name": "North Melbourne",  "nick": "Kangaroos",   "match": ["north melbourne", "kangaroos"],       "colours": ["#013b9f", "#ffffff"] },
+    { "abbr": "PTA", "name": "Port Adelaide",    "nick": "Power",       "match": ["port adelaide", "power"],            "colours": ["#008aab", "#000000"] },
+    { "abbr": "RIC", "name": "Richmond",         "nick": "Tigers",      "match": ["richmond", "tigers"],                "colours": ["#000000", "#fed102"] },
+    { "abbr": "STK", "name": "St Kilda",         "nick": "Saints",      "match": ["st kilda", "saints"],                "colours": ["#ed0f05", "#000000"] },
+    { "abbr": "SYD", "name": "Sydney",           "nick": "Swans",       "match": ["sydney", "swans"],                   "colours": ["#ed171f", "#ffffff"] },
+    { "abbr": "TAS", "name": "Tasmania",         "nick": "Devils",      "match": ["tasmania", "devils"],                "colours": ["#004b35", "#e4002b"], "joins": 2028 },
+    { "abbr": "WCE", "name": "West Coast",       "nick": "Eagles",      "match": ["west coast", "eagles"],              "colours": ["#062ee2", "#ffd200"] },
+    { "abbr": "WBD", "name": "Western Bulldogs", "nick": "Bulldogs",    "match": ["western bulldogs", "bulldogs"],      "colours": ["#014896", "#e21937"] }
+  ],
+  "nrl": [
+    { "abbr": "BRI", "name": "Broncos",          "nick": "Broncos",     "match": ["broncos"],                           "colours": ["#4a0e29", "#fbb900"] },
+    { "abbr": "CAN", "name": "Raiders",          "nick": "Raiders",     "match": ["raiders"],                           "colours": ["#6dbe45", "#002b5c"] },
+    { "abbr": "CBY", "name": "Bulldogs",         "nick": "Bulldogs",    "match": ["bulldogs", "canterbury"],            "colours": ["#00539f", "#ffffff"] },
+    { "abbr": "CRO", "name": "Sharks",           "nick": "Sharks",      "match": ["sharks", "cronulla"],                "colours": ["#00a5db", "#000000"] },
+    { "abbr": "DOL", "name": "Dolphins",         "nick": "Dolphins",    "match": ["dolphins"],                          "colours": ["#e0132e", "#f9c100"] },
+    { "abbr": "GLD", "name": "Titans",           "nick": "Titans",      "match": ["titans"],                            "colours": ["#009fdf", "#fbb900"] },
+    { "abbr": "MAN", "name": "Sea Eagles",       "nick": "Sea Eagles",  "match": ["sea eagles", "manly"],               "colours": ["#6f163d", "#ffffff"] },
+    { "abbr": "MEL", "name": "Storm",            "nick": "Storm",       "match": ["storm"],                             "colours": ["#4b2d84", "#fbbd00"] },
+    { "abbr": "NEW", "name": "Knights",          "nick": "Knights",     "match": ["knights", "newcastle"],              "colours": ["#0c3d7b", "#e41f26"] },
+    { "abbr": "NQL", "name": "Cowboys",          "nick": "Cowboys",     "match": ["cowboys", "north queensland"],       "colours": ["#002b5c", "#ffc425"] },
+    { "abbr": "PAR", "name": "Eels",             "nick": "Eels",        "match": ["eels", "parramatta"],                "colours": ["#006eb5", "#ffd200"] },
+    { "abbr": "PEN", "name": "Panthers",         "nick": "Panthers",    "match": ["panthers", "penrith"],               "colours": ["#222222", "#e1338b"] },
+    { "abbr": "PER", "name": "Bears",            "nick": "Bears",       "match": ["bears", "perth"],                    "colours": ["#c8102e", "#111111"], "joins": 2027 },
+    { "abbr": "SOU", "name": "Rabbitohs",        "nick": "Rabbitohs",   "match": ["rabbitohs", "south sydney"],         "colours": ["#006a3e", "#e2231a"] },
+    { "abbr": "STG", "name": "Dragons",          "nick": "Dragons",     "match": ["dragons", "st george"],              "colours": ["#e2231a", "#ffffff"] },
+    { "abbr": "SYD", "name": "Roosters",         "nick": "Roosters",    "match": ["roosters"],                          "colours": ["#002b5c", "#e2231a"] },
+    { "abbr": "WAR", "name": "Warriors",         "nick": "Warriors",    "match": ["warriors"],                          "colours": ["#231f20", "#00a99d"] },
+    { "abbr": "WST", "name": "Wests Tigers",     "nick": "Wests Tigers", "match": ["wests tigers", "tigers"],            "colours": ["#f68b1f", "#000000"] }
+  ]
+}

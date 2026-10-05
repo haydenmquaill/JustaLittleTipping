@@ -25,7 +25,7 @@ window.createMockApi = function(page){
     const at = ms => new Date(Math.abs(ms)<HR ? now+ms : Math.round((now+ms)/(5*MIN))*(5*MIN)).toISOString();
     const season = { id:2027 };
     const ME = 'mock-user';
-    const STORE = 'ft-mock-v6';
+    const STORE = 'ft-mock-v7';
     // round, home, away, kick-off offset, status, venue, live: [quarter, clock secs, home g.b per qtr, away g.b per qtr]
     const FX = [
       [5,'Carlton Blues','Richmond Tigers',-26*HR,'concluded','MCG',
@@ -245,6 +245,14 @@ window.createMockApi = function(page){
           ],
         },
         mine:{ 'c-office':[], 'c-famnrl':[] },        // compId → my bets
+        // who barracks for whom (you haven't picked yet, so the picker can be tested)
+        profiles:Object.fromEntries([
+          ['q-gazza',{ afl:'HAW', nrl:'MEL' }], ['q-shazza',{ afl:'GEE' }], ['q-kev',{ afl:'RIC', nrl:'PEN' }], ['q-tones',{ afl:'COL' }],
+          ['q-davo',{ afl:'COL' }], ['q-jules',{ afl:'BRI' }], ['q-robbo',{ afl:'CAR', nrl:'SOU' }],
+          ['o-priya',{ afl:'GEE' }], ['o-steve',{ afl:'ESS' }], ['o-anna',{ afl:'SYD' }], ['o-kim',{ afl:'WCE' }],
+          ['b-bec',{ afl:'BRI' }], ['b-wal',{ afl:'COL' }], ['y-tommo',{ afl:'CAR' }], ['y-fitzy',{ afl:'WCE' }],
+          ['l-mick',{ nrl:'STG' }], ['l-dazza',{ nrl:'PEN' }], ['l-jas',{ nrl:'BRI' }],
+        ].map(([id, t]) => [id, Object.fromEntries(Object.entries(t).map(([sp, team]) => [sp, { team, season:2027, since_round:1, changes:0 }]))])),
       };
     }
     let st = null;
@@ -254,6 +262,21 @@ window.createMockApi = function(page){
       // you start in the family comp too, mid-season with a bit of history
       const q = st.comps['c-quaill'], h = seedMyHistory(q);
       q.members[ME] = { display_name:'Hayden', balance:h.balance, history:h.history, joined_at:at(-40*DAY) };
+      // weekly-allowance comps (the rest stay one-off, so both kinds can be tested)
+      ['c-quaill','c-boys','c-famnrl'].forEach(id => weeklyize(st.comps[id]));
+    }
+    // turn a seeded one-off comp into a weekly-allowance one with the same profits: each member is
+    // paid from the first round they have history for, and history becomes { b:balance, f:funded }
+    function weeklyize(c){
+      const A = c.starting_balance, cr = CUR[c.sport];
+      c.rules = { ...c.rules, bankroll:'weekly' };
+      Object.values(c.members).forEach(m => {
+        const rs = Object.keys(m.history||{}).map(Number);
+        const jr = rs.length ? Math.min(...rs) : cr;
+        m.history = Object.fromEntries(rs.map(r => [r, { b:m.history[r] + A*(r-jr), f:A*(r-jr+1) }]));
+        m.balance = Math.round((m.balance + A*(cr-jr))*100)/100;
+        m.funded = A*(cr-jr+1);
+      });
     }
     const save = () => { try{ localStorage.setItem(STORE, JSON.stringify(st)); }catch(e){} };
     const comp = id => { const c = st.comps[id]; if(!c) throw new Error('Competition not found.'); return c; };
@@ -328,13 +351,15 @@ window.createMockApi = function(page){
       async entrant(id){ const m = comp(id).members[ME]; return m ? { ...m, user_id:ME } : null; },
       async findComp(code){
         const c = Object.values(st.comps).find(x => x.code===code.toUpperCase());
-        return c ? { id:c.id, name:c.name, sport:c.sport, member:!!c.members[ME], members:Object.keys(c.members).length, starting_balance:c.starting_balance } : null;
+        return c ? { id:c.id, name:c.name, sport:c.sport, member:!!c.members[ME], members:Object.keys(c.members).length,
+          starting_balance:c.starting_balance, bankroll:(c.rules && c.rules.bankroll) || 'once' } : null;
       },
       async hostComp({ name, display_name, sport='afl', starting_balance, rules }){
         const id = 'c-'+uid().slice(0,8);
+        rules = { ...rules, bankroll: rules && rules.bankroll==='once' ? 'once' : 'weekly' };
         st.comps[id] = { id, sport, name, code:newCode(), host_id:ME, starting_balance, start_round:CUR[sport], rules, pinned:null,
           created_at:new Date().toISOString(),
-          members:{ [ME]:{ display_name, balance:starting_balance, history:{}, joined_at:new Date().toISOString() } }, bets:[] };
+          members:{ [ME]:{ display_name, balance:starting_balance, funded:starting_balance, history:{}, joined_at:new Date().toISOString() } }, bets:[] };
         st.chat.comp[id] = [];
         st.mine[id] = [];
         save();
@@ -344,9 +369,9 @@ window.createMockApi = function(page){
         const c = comp(id);
         if(c.members[ME]) return { ...c.members[ME], user_id:ME };
         if(nameTaken(c, display_name)) throw new Error('That username is taken in this comp.');
-        const start = id==='c-quaill' ? seedMyHistory(c) : { history:{}, balance:c.starting_balance };
+        // a new member gets this round's allowance (or the one-off balance) — no back-pay
         if(!st.mine[id]) st.mine[id] = [];
-        c.members[ME] = { display_name, balance:start.balance, history:start.history, joined_at:new Date().toISOString() };
+        c.members[ME] = { display_name, balance:c.starting_balance, funded:c.starting_balance, history:{}, joined_at:new Date().toISOString() };
         save();
         return { ...c.members[ME], user_id:ME };
       },
@@ -366,12 +391,30 @@ window.createMockApi = function(page){
       async pin(id, msgId){ const c = comp(id); if(c.host_id!==ME) throw new Error('Only the host can do that.'); c.pinned = msgId; save(); return meta(c); },
       async members(id){
         // oldest members first
-        return Object.entries(comp(id).members).map(([user_id,m]) => ({ user_id, display_name:m.display_name, balance:m.balance, joined_at:m.joined_at }))
+        return Object.entries(comp(id).members).map(([user_id,m]) => ({ user_id, display_name:m.display_name, balance:m.balance, funded:m.funded, joined_at:m.joined_at }))
           .sort((a,b) => new Date(a.joined_at) - new Date(b.joined_at));
       },
       // ── leaderboard ──
       async standings(id){
-        return Object.entries(comp(id).members).map(([user_id,m]) => ({ user_id, display_name:m.display_name, balance:m.balance, history:m.history||{} }));
+        return Object.entries(comp(id).members).map(([user_id,m]) => ({ user_id, display_name:m.display_name, balance:m.balance, funded:m.funded, history:m.history||{} }));
+      },
+      // ── who you barrack for (same rules as ft_set_team) ──
+      async profiles(ids){
+        st.profiles = st.profiles || {};
+        return Object.fromEntries(ids.filter(id => st.profiles[id]).map(id => [id, JSON.parse(JSON.stringify(st.profiles[id]))]));
+      },
+      async setTeam(sport, team){
+        st.profiles = st.profiles || {};
+        const p = st.profiles[ME] = st.profiles[ME] || {}, cur = p[sport];
+        if(cur && cur.team===team) return JSON.parse(JSON.stringify(p));
+        let changes = 0;
+        if(cur && cur.season===season.id){
+          if((cur.changes||0) >= 1) throw new Error(`You’ve already changed your ${sport.toUpperCase()} team this season. It unlocks again next season.`);
+          changes = (cur.changes||0) + 1;
+        }
+        p[sport] = { team, season:season.id, since_round:CUR[sport], changes };
+        save();
+        return JSON.parse(JSON.stringify(p));
       },
       async moments(id, round){
         const c = comp(id);
@@ -394,7 +437,7 @@ window.createMockApi = function(page){
         const round = CUR[sport] - 1, nrl = sport==='nrl';
         let s = (nrl ? 7 : 3) * 104729 % 233280;
         const rnd = () => (s = (s*9301 + 49297) % 233280) / 233280;
-        const names = (TEAMS[sport] || []).map(t => t[2]);
+        const names = (TEAMS[sport] || []).filter(t => !t.joins || t.joins <= 2027).map(t => t.name);
         const rows = names.map(team => {
           const byes = nrl ? (rnd() < .6 ? 1 : 2) : 0;
           const played = round - byes;
@@ -469,7 +512,7 @@ window.createMockApi = function(page){
       },
       reset(){
         try{
-          ['ft-mock-v1','ft-mock-v2','ft-mock-v3','ft-mock-v4','ft-mock-v5', STORE].forEach(k => localStorage.removeItem(k));
+          ['ft-mock-v1','ft-mock-v2','ft-mock-v3','ft-mock-v4','ft-mock-v5','ft-mock-v6', STORE].forEach(k => localStorage.removeItem(k));
           Object.keys(localStorage).filter(k => k.startsWith('ft-slip-') || k.startsWith('ft-chat-read-')).forEach(k => localStorage.removeItem(k));
         }catch(e){}
       },

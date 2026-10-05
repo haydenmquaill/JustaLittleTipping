@@ -145,6 +145,8 @@
     font-size:10px;letter-spacing:.02em;color:#fff;
     text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
   .tb.sm{width:22px;height:22px;font-size:8px}
+  .tb.logo{background:none;border-radius:0;overflow:visible}
+  .tb.logo img{width:100%;height:100%;object-fit:contain;display:block}
 
   /* ── match tile ── */
   .match{background:#fff;color:var(--ink);margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.25)}
@@ -377,6 +379,15 @@
   .lb .pl.up{color:var(--ok)}.lb .pl.down{color:var(--err)}
   .lb .bl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;color:var(--blue);
     font-variant-numeric:tabular-nums}
+  .lb .bl.up{color:var(--ok)}.lb .bl.down{color:var(--err)}
+  .lb .bl-w{display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0}
+  .lb .bl-s{font-size:10px;color:var(--mid);font-variant-numeric:tabular-nums}
+  .lb .nm{display:flex;align-items:center;gap:5px}
+  .lb .nm .nm-t{overflow:hidden;text-overflow:ellipsis;min-width:0}
+  /* flair: the badge someone shows next to their name (for now, their team) */
+  .flair{display:inline-flex;flex-shrink:0;width:16px;height:16px}
+  .flair img{width:100%;height:100%;object-fit:contain}
+  .msg-meta .flair{width:13px;height:13px}
 
   /* ── ladder ── */
   .ld{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.25)}
@@ -532,6 +543,17 @@
   .modal p{font-size:14px;line-height:1.5;color:var(--ink-soft)}
   .modal p b{color:var(--ink)}
   .modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+  /* team picker: a grid of club logos */
+  .modal.team-pick{max-width:440px;max-height:calc(100vh - 48px);display:flex;flex-direction:column}
+  .modal.team-pick h3{font-size:19px}
+  .tp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:6px;overflow-y:auto;padding:2px}
+  .tp{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;background:var(--offwhite);border:2px solid transparent;
+    border-radius:8px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;text-transform:uppercase;
+    color:var(--ink);line-height:1.05;text-align:center}
+  .tp img{width:44px;height:44px;object-fit:contain}
+  .tp:hover{border-color:var(--line)}
+  .tp.cur{border-color:var(--gold);background:#fff7e0}
+  .modal.team-pick .modal-actions{grid-template-columns:1fr}
   .modal-actions .big-btn{margin-top:0;font-size:18px;padding:11px}
   .modal-actions .btn-cancel{font-family:'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
     font-size:18px;border-radius:8px;padding:11px;cursor:pointer;background:#fff;color:var(--ink-soft);border:2px solid var(--line)}
@@ -716,10 +738,14 @@
         <input id="host-name" type="text" maxlength="40" placeholder="e.g. Quaill Family Tipping" required></div>
       <div class="fld"><label for="host-user">Your username</label>
         <input id="host-user" type="text" maxlength="24" autocomplete="nickname" placeholder="Shown on the leaderboard" required></div>
-      <div class="fld"><label for="host-bank">Starting balance</label>
-        <select id="host-bank"><option value="500">$500</option><option value="1000" selected>$1,000</option>
-          <option value="2000">$2,000</option><option value="5000">$5,000</option><option value="10000">$10,000</option></select>
-        <div class="hint">Everyone starts with this, and it carries across the whole season.</div></div>
+      <div class="fld-row">
+        <div class="fld"><label for="host-bankroll">Bankroll</label>
+          <select id="host-bankroll"><option value="weekly" selected>Weekly allowance</option><option value="once">One-off</option></select></div>
+        <div class="fld"><label for="host-bank" id="host-bank-l">Each round</label>
+          <select id="host-bank"><option value="500">$500</option><option value="1000" selected>$1,000</option>
+            <option value="2000">$2,000</option><option value="5000">$5,000</option><option value="10000">$10,000</option></select></div>
+      </div>
+      <div class="hint" id="host-bank-hint" style="margin:-6px 0 12px"></div>
       <div class="rules"><h4>Rules</h4>
         <div class="fld-row">
           <div class="fld"><label for="host-legs">Max multi legs</label>
@@ -981,6 +1007,7 @@ const S = {
   membersAll:false,                 // Account host tools: show every member, not just the top 10
   tlView:'worm',                    // Match Stats timeline: worm | table
   board:{ round:null, tab:'standings', scope:'round' },
+  profiles:{},                      // user id → who they barrack for: { afl:{ team, season, since_round, changes }, nrl:{…} } (null = none)
   slip:[],                          // [{ id, kind:'single'|'multi'|'sgm', match_id?, legs, stake }] — local until confirmed
   editing:null,                     // slip item id the stake pad is editing
   stakeStr:'',
@@ -1051,6 +1078,11 @@ function maxLegs(){ return Math.min(LEG_CAP, Number(S.comp && S.comp.rules && S.
 function maxStake(){ return Number(S.comp && S.comp.rules && S.comp.rules.max_stake) || 0; }          // 0 = no limit
 function propsOn(){ return !(S.comp && S.comp.rules && S.comp.rules.props===false); }
 function startBal(){ return Number(S.comp && S.comp.starting_balance) || 0; }
+// bankroll: 'weekly' adds starting_balance every round; 'once' (and older comps) is one balance for the season
+function isWeekly(c=S.comp){ return !!(c && c.rules && c.rules.bankroll==='weekly'); }
+// everything a member has been given; profit is balance minus that, and the leaderboard ranks on it
+function fundedOf(e){ return e && e.funded!=null ? Number(e.funded) : startBal(); }
+function profitOf(e){ return (Number(e.balance)||0) - fundedOf(e); }
 function isHost(){ return !!S.comp && S.comp.host_id===S.user.id; }
 // one sport per comp — it's shown in front of the comp name and nowhere else, e.g. "AFL · Office Tipping"
 function compLabel(c){ return `${String(c.sport||SPORT).toUpperCase()} · ${c.name}`; }
@@ -1058,62 +1090,60 @@ function compLabel(c){ return `${String(c.sport||SPORT).toUpperCase()} · ${c.na
 function isCollapsed(key){ return DEFAULT_OPEN.has(key) ? S.toggled.has(key) : !S.toggled.has(key); }
 
 /* ════════ teams (badge colours + short names) ════════ */
-// [keywords, abbr, short name, colour 1, colour 2] — first keyword hit wins, so order matters.
+// teams.json: { afl:[…], nrl:[…] }, each { abbr, name, match:[names it goes by], colours:[c1, c2], joins? }.
 // Looked up in the current comp's sport, so "Brisbane" means the Lions in AFL and the Broncos in NRL.
-const TEAMS = {
-  afl:[
-    [['port adelaide','power'],'PTA','Port Adelaide','#008aab','#000000'],
-    [['adelaide','crows'],'ADE','Adelaide','#002b5c','#e21937'],
-    [['brisbane','lions'],'BRI','Brisbane','#a30046','#0055a3'],
-    [['carlton','blues'],'CAR','Carlton','#031a29','#ffffff'],
-    [['collingwood','magpies'],'COL','Collingwood','#000000','#ffffff'],
-    [['essendon','bombers'],'ESS','Essendon','#000000','#cc2031'],
-    [['fremantle','dockers'],'FRE','Fremantle','#2a1a54','#ffffff'],
-    [['geelong','cats'],'GEE','Geelong','#002b5c','#ffffff'],
-    [['gold coast','suns'],'GCS','Gold Coast','#d93e39','#f6bd00'],
-    [['greater western','gws','giants'],'GWS','GWS','#f15c22','#4a4f55'],
-    [['hawthorn','hawks'],'HAW','Hawthorn','#4d2004','#fbbf15'],
-    [['north melbourne','kangaroos'],'NTH','North Melbourne','#013b9f','#ffffff'],
-    [['melbourne','demons'],'MEL','Melbourne','#0f1131','#cc2031'],
-    [['richmond','tigers'],'RIC','Richmond','#000000','#fed102'],
-    [['st kilda','saints'],'STK','St Kilda','#ed0f05','#000000'],
-    [['sydney','swans'],'SYD','Sydney','#ed171f','#ffffff'],
-    [['west coast','eagles'],'WCE','West Coast','#062ee2','#ffd200'],
-    [['western bulldogs','bulldogs'],'WBD','Western Bulldogs','#014896','#e21937'],
-  ],
-  nrl:[
-    [['broncos'],'BRI','Broncos','#4a0e29','#fbb900'],
-    [['raiders'],'CAN','Raiders','#6dbe45','#002b5c'],
-    [['bulldogs','canterbury'],'CBY','Bulldogs','#00539f','#ffffff'],
-    [['sharks','cronulla'],'CRO','Sharks','#00a5db','#000000'],
-    [['dolphins'],'DOL','Dolphins','#e0132e','#f9c100'],
-    [['titans'],'GLD','Titans','#009fdf','#fbb900'],
-    [['sea eagles','manly'],'MAN','Sea Eagles','#6f163d','#ffffff'],
-    [['storm'],'MEL','Storm','#4b2d84','#fbbd00'],
-    [['knights','newcastle'],'NEW','Knights','#0c3d7b','#e41f26'],
-    [['cowboys','north queensland'],'NQL','Cowboys','#002b5c','#ffc425'],
-    [['eels','parramatta'],'PAR','Eels','#006eb5','#ffd200'],
-    [['panthers','penrith'],'PEN','Panthers','#222222','#e1338b'],
-    [['rabbitohs','south sydney'],'SOU','Rabbitohs','#006a3e','#e2231a'],
-    [['dragons','st george'],'STG','Dragons','#e2231a','#ffffff'],
-    [['roosters'],'SYD','Roosters','#002b5c','#e2231a'],
-    [['warriors'],'WAR','Warriors','#231f20','#00a99d'],
-    [['wests tigers','tigers'],'WST','Wests Tigers','#f68b1f','#000000'],
-  ],
-};
+// If it can't load, every team just gets a plain tile.
+const TEAMS = await fetch('./teams.json').then(r => r.json()).catch(() => ({ afl:[], nrl:[] }));
 function teamInfo(name){
   const n = String(name||'').toLowerCase();
-  for(const [keys,abbr,short,c1,c2] of (TEAMS[curSport()] || TEAMS.afl)){
-    if(keys.some(k=>n.includes(k))) return { abbr, short, c1, c2 };
+  // the longest matching name wins, so "port adelaide" beats "adelaide" and "wests tigers" beats "tigers"
+  let best = null, len = 0;
+  for(const t of (TEAMS[curSport()] || TEAMS.afl || [])){
+    for(const k of t.match || []) if(k.length > len && n.includes(k)){ best = t; len = k.length; }
   }
+  if(best) return { abbr:best.abbr, short:best.name, c1:best.colours[0], c2:best.colours[1], known:true };
   const words = String(name||'?').split(/\s+/);
   return { abbr:words.map(w=>w[0]).join('').slice(0,3).toUpperCase(), short:name||'?', c1:'#1a2e5a', c2:'#243d7a' };
 }
-function teamBadge(name, cls=''){
-  const t = teamInfo(name);
+// club logo from assets/teams/<sport>/<ABBR>.svg; a club without one (or an unknown team) gets the colour tile
+function teamTile(t, cls){
   return `<span class="tb ${cls}" style="background:linear-gradient(135deg,${t.c1} 0 50%,${t.c2} 50% 100%)">${esc(t.abbr)}</span>`;
 }
+function teamBadge(name, cls=''){
+  const t = teamInfo(name);
+  if(!t.known) return teamTile(t, cls);
+  return `<span class="tb logo ${cls}" data-c1="${t.c1}" data-c2="${t.c2}" data-abbr="${esc(t.abbr)}">`+
+    `<img src="assets/teams/${curSport()}/${t.abbr}.svg" alt="${esc(t.abbr)}" onerror="teamLogoMissing(this)"></span>`;
+}
+window.teamLogoMissing = img => {
+  const el = img.parentNode, d = el.dataset;
+  el.outerHTML = teamTile({ abbr:d.abbr, c1:d.c1, c2:d.c2 }, el.className.replace(/\b(tb|logo)\b/g, '').trim());
+};
 function teamName(name){ return teamInfo(name).short || name; }
+function teamByAbbr(sport, abbr){ return (TEAMS[sport] || []).find(t => t.abbr===abbr) || null; }
+// clubs you can pick this season (new clubs show up from the season they join)
+function pickableTeams(sport){ return (TEAMS[sport] || []).filter(t => !t.joins || t.joins <= Number(S.season && S.season.id)); }
+
+/* ════════ flair ════════
+   The badge shown next to someone's name in the leaderboard and chat. For now it's the club
+   they barrack for in that code; achievements will add more to choose from. */
+function flairHTML(userId, sport=curSport()){
+  const p = S.profiles[userId], pick = p && p[sport];
+  const t = pick && teamByAbbr(sport, pick.team);
+  if(!t) return '';
+  return `<span class="flair" title="${esc(t.name)} supporter"><img src="assets/teams/${sport}/${t.abbr}.svg" alt="" onerror="this.parentNode.remove()"></span>`;
+}
+// fetch profiles we haven't seen yet; resolves true if anything new came in
+async function ensureProfiles(ids, force=false){
+  const need = [...new Set(ids.filter(id => id && (force || !(id in S.profiles))))];
+  if(!need.length) return false;
+  need.forEach(id => { if(!(id in S.profiles)) S.profiles[id] = null; });     // don't ask twice while it loads
+  try{
+    const got = await api.profiles(need);
+    need.forEach(id => { S.profiles[id] = got[id] || null; });
+    return need.some(id => S.profiles[id]);
+  }catch(e){ console.warn(e); return false; }
+}
 
 /* ════════ helpers ════════ */
 function money(n){
@@ -1283,6 +1313,17 @@ $('go-join').addEventListener('click', () => { showGate('gate-join'); $('join-co
 document.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click', startFlow));
 document.querySelectorAll('[data-cancel]').forEach(b => b.addEventListener('click', () => showGate(null)));
 
+// bankroll: the amount's label and hint follow the choice
+function hostBankHint(){
+  const weekly = $('host-bankroll').value==='weekly', amt = cur(Number($('host-bank').value));
+  $('host-bank-l').textContent = weekly ? 'Each round' : 'Starting balance';
+  $('host-bank-hint').textContent = weekly
+    ? `Everyone gets ${amt} at the start of every round, on top of what they have left. The leaderboard ranks on profit, so late joiners start level.`
+    : `Everyone starts with ${amt}, and it has to last the whole season.`;
+}
+['host-bankroll','host-bank'].forEach(id => $(id).addEventListener('change', hostBankHint));
+hostBankHint();
+
 // hosting always asks for a username — it's your name in the new comp
 $('host-form').addEventListener('submit', async e => {
   e.preventDefault();
@@ -1293,7 +1334,7 @@ $('host-form').addEventListener('submit', async e => {
     const comp = await api.hostComp({
       name, display_name:user, sport:$('host-sport').value, starting_balance:Number($('host-bank').value),
       rules:{ max_legs:Number($('host-legs').value), max_stake:Number($('host-stake').value), props:$('host-props').checked,
-              cashout:Number($('host-cashout').value) },
+              cashout:Number($('host-cashout').value), bankroll:$('host-bankroll').value },
     });
     await openComp(comp.id);
   }catch(err){ $('host-msg').textContent = err.message || 'Could not create the comp.'; $('host-btn').disabled = false; }
@@ -1315,7 +1356,7 @@ $('join-form').addEventListener('submit', async e => {
       if(!found){ msg.textContent = 'No comp with that code. Check it and try again.'; return; }
       if(found.member){ await openComp(found.id); return; }
       _joinFound = found;
-      $('join-found').innerHTML = `Joining <b>${esc(compLabel(found))}</b> · ${found.members} member${found.members===1?'':'s'} · everyone starts with ${cur(found.starting_balance)}`;
+      $('join-found').innerHTML = `Joining <b>${esc(compLabel(found))}</b> · ${found.members} member${found.members===1?'':'s'} · ${found.bankroll==='weekly' ? `${cur(found.starting_balance)} every round` : `everyone starts with ${cur(found.starting_balance)}`}`;
       $('join-step2').classList.remove('hidden');
       $('join-btn').textContent = 'Join comp';
       $('join-name').focus();
@@ -1381,7 +1422,13 @@ function listenLive(){
       else if(S.comp.pinned===row.id) S.comp.pinned = null;
       if(S.chat.open) renderChat();
     },
-    member: row => { if(row.comp_id===compId) setBalance(row.balance); },
+    // your balance moving: bets, payouts, cash outs, and the weekly allowance landing
+    member: row => {
+      if(row.comp_id!==compId) return;
+      if(row.funded!=null) S.entrant.funded = row.funded;
+      S.entrant.balance = row.balance;
+      setBalance(row.balance);
+    },
     bets: () => { if(S.view==='mybets') renderMyBets(); else animateBtn('btn-mybets','pulse'); },
     match: row => {
       const m = S.matchIdx[row.id]; if(!m) return;
@@ -2692,24 +2739,34 @@ async function renderLadder(){
 }
 
 /* ════════ LEADERBOARD ════════
-   Standings for a round: the current round uses live balances; past rounds use the
-   end-of-round snapshot. Movement compares with the previous round's ranking. */
+   Ranked on profit (balance minus everything you've been given), so a weekly allowance or a late
+   start doesn't skew it. The current round uses live figures; past rounds use the end-of-round
+   snapshot ({ b, f }, or a plain balance from before allowances). Movement compares with the
+   previous round's ranking. */
 function standingsFor(entrants, r, cr){
   const start = startBal();
-  const balAt = (e, rr) => rr===cr ? e.balance : rr<(S.comp.start_round||1) ? start : (e.history[rr] ?? start);
+  const at = (e, rr) => {
+    if(rr===cr) return { bal:Number(e.balance)||0, profit:profitOf(e) };
+    const h = rr<(S.comp.start_round||1) ? null : (e.history||{})[rr];
+    if(h==null) return { bal:start, profit:0 };                       // before the comp started, or before they joined
+    if(typeof h==='number') return { bal:h, profit:h-start };
+    return { bal:Number(h.b)||0, profit:(Number(h.b)||0)-(Number(h.f)||0) };
+  };
   const rankAt = rr => {
-    const order = entrants.slice().sort((a,b) => balAt(b,rr)-balAt(a,rr));
+    const order = entrants.slice().sort((a,b) => at(b,rr).profit-at(a,rr).profit || at(b,rr).bal-at(a,rr).bal);
     const map = {}; order.forEach((e,i) => { map[e.user_id] = i+1; }); return map;
   };
   const now = rankAt(r), prev = r>(S.comp.start_round||1) ? rankAt(r-1) : null;
-  return entrants.map(e => ({ ...e, bal:balAt(e,r), roundNet:balAt(e,r)-balAt(e,r-1), rank:now[e.user_id],
-    move: prev ? prev[e.user_id]-now[e.user_id] : 0 })).sort((a,b) => a.rank-b.rank);
+  return entrants.map(e => { const a = at(e,r);
+    return { ...e, bal:a.bal, profit:a.profit, roundNet:a.profit-at(e,r-1).profit, rank:now[e.user_id],
+      move: prev ? prev[e.user_id]-now[e.user_id] : 0 }; }).sort((a,b) => a.rank-b.rank);
 }
 async function renderBoard(){
   const list = $('board-list');
   const cr = currentRound(), r = S.board.round ?? cr;
   if(S.board.tab==='moments'){ renderMoments(r); return; }
   const entrants = await api.standings(S.comp.id);
+  await ensureProfiles(entrants.map(e => e.user_id));
   if(S.view!=='board' || S.board.tab!=='standings') return;
   if(!entrants.length){ list.innerHTML = '<div class="empty">Nobody has joined yet.</div>'; return; }
   const MEDALS = ['🥇','🥈','🥉'];
@@ -2718,9 +2775,10 @@ async function renderBoard(){
     const mv = p.move>0 ? `<span class="mv up">▲${p.move}</span>` : p.move<0 ? `<span class="mv down">▼${-p.move}</span>` : `<span class="mv">–</span>`;
     return `<div class="lb${i===0?' gold':''}${me?' me':''}">`+
       `<span class="rk">${p.rank}</span>${mv}`+
-      `<span class="who"><div class="nm">${esc(p.display_name)}${i<3?`<span class="md">${MEDALS[i]}</span>`:''}${me?'<span class="tag">YOU</span>':''}</div>`+
+      `<span class="who"><div class="nm">${flairHTML(p.user_id)}<span class="nm-t">${esc(p.display_name)}</span>${i<3?`<span class="md">${MEDALS[i]}</span>`:''}${me?'<span class="tag">YOU</span>':''}</div>`+
         `<div class="pl ${p.roundNet>0?'up':p.roundNet<0?'down':''}">${p.roundNet===0 ? 'Even' : signed(p.roundNet)} in round ${r}${r===cr?' so far':''}</div></span>`+
-      `<span class="bl">${cur(p.bal)}</span></div>`;
+      `<span class="bl-w"><span class="bl ${p.profit>0?'up':p.profit<0?'down':''}">${p.profit===0 ? '$0' : signed(p.profit)}</span>`+
+        `<span class="bl-s">${cur(p.bal)} bal</span></span></div>`;
   }).join('');
 }
 // biggest wins and losses settled in the round (or across the season)
@@ -2790,18 +2848,81 @@ function confirmModal({ title, body, ok='Confirm', cancel='Cancel' }){
   });
 }
 
+/* ── barracking for ──
+   One club per code. Pick any time while it's empty; after that, one change a season,
+   then it's locked until next season (stops people hopping onto the underdog each week). */
+function teamPickState(sport){
+  const pick = (S.profiles[S.user.id] || {})[sport];
+  const season = Number(S.season.id);
+  if(!pick || Number(pick.season)!==season) return { pick:pick || null, canChange:true, first:true,
+    note: pick ? `From ${pick.season}. Pick again for ${season}.` : 'Not picked yet. Your club shows next to your name.' };
+  const left = Math.max(0, 1 - (Number(pick.changes)||0));
+  return { pick, canChange:left>0, first:false,
+    note: left ? `Since round ${pick.since_round} · 1 change left this season` : 'Locked in until next season' };
+}
+function barrackingCard(){
+  const rows = ['afl','nrl'].map(sport => {
+    const st = teamPickState(sport), t = st.pick && teamByAbbr(sport, st.pick.team);
+    const badge = t ? `<span class="tb logo"><img src="assets/teams/${sport}/${t.abbr}.svg" alt=""></span>`
+                    : `<span class="tb" style="background:#e3e7ef;color:var(--mid);text-shadow:none">?</span>`;
+    return `<div class="comp-row">${badge}<span class="w"><div class="n">${SP(sport).label} · ${t ? esc(t.name) : 'No team yet'}</div>`+
+      `<div class="s">${esc(st.note)}</div></span>`+
+      (st.canChange ? `<button class="btn-sm" data-team-pick="${sport}" type="button">${t && !st.first ? 'Change' : 'Pick'}</button>` : '')+`</div>`;
+  }).join('');
+  return `<div class="acct"><h3>Barracking for</h3>${rows}</div>`;
+}
+// grid of club logos; resolves the chosen abbreviation, or null
+function teamPicker(sport, current){
+  return new Promise(resolve => {
+    const scrim = document.createElement('div');
+    scrim.className = 'modal-scrim';
+    scrim.innerHTML = `<div class="modal team-pick" role="dialog" aria-modal="true"><h3>Who do you barrack for? · ${SP(sport).label}</h3>`+
+      `<div class="tp-grid">${pickableTeams(sport).map(t =>
+        `<button type="button" class="tp${t.abbr===current?' cur':''}" data-abbr="${t.abbr}">`+
+          `<img src="assets/teams/${sport}/${t.abbr}.svg" alt=""><span>${esc(t.name)}</span></button>`).join('')}</div>`+
+      `<div class="modal-actions"><button class="btn-cancel" data-act="no">Cancel</button></div></div>`;
+    const done = v => { document.removeEventListener('keydown', onKey); scrim.remove(); resolve(v); };
+    const onKey = e => { if(e.key==='Escape') done(null); };
+    scrim.addEventListener('click', e => {
+      if(e.target===scrim || e.target.closest('[data-act="no"]')) return done(null);
+      const b = e.target.closest('[data-abbr]'); if(b) done(b.dataset.abbr);
+    });
+    document.addEventListener('keydown', onKey);
+    $('app').appendChild(scrim);
+  });
+}
+async function pickTeam(sport){
+  const st = teamPickState(sport);
+  const abbr = await teamPicker(sport, st.pick && st.pick.team);
+  if(!abbr || (st.pick && st.pick.team===abbr && !st.first)) return;
+  const t = teamByAbbr(sport, abbr);
+  const ok = await confirmModal({
+    title: `Barrack for ${esc(t.name)}?`,
+    body: st.first
+      ? `They’ll show next to your name in ${SP(sport).label} comps. You can change once more this season after this.`
+      : `This uses your one change for the season. You’ll be locked in with ${esc(t.name)} until next season.`,
+    ok: st.first ? 'Pick them' : 'Switch',
+  });
+  if(!ok) return;
+  try{
+    S.profiles[S.user.id] = await api.setTeam(sport, abbr);
+    renderAccount();
+  }catch(err){ await confirmModal({ title:'Couldn’t change team', body:esc(err.message || 'Please try again.'), ok:'OK', cancel:'Close' }); }
+}
+
 function rulesText(c){
   const r = c.rules || {};
-  return `Starting balance <b>${cur(c.starting_balance)}</b> · Max multi legs <b>${Math.min(LEG_CAP, r.max_legs||LEG_CAP)}</b> · `+
+  return (isWeekly(c) ? `Weekly allowance <b>${cur(c.starting_balance)}</b> every round` : `Starting balance <b>${cur(c.starting_balance)}</b>`)+
+    ` · Max multi legs <b>${Math.min(LEG_CAP, r.max_legs||LEG_CAP)}</b> · `+
     `Max stake <b>${r.max_stake ? cur(r.max_stake) : 'no limit'}</b> · Player markets <b>${r.props===false ? 'off' : 'on'}</b> · `+
     `Cash out <b>${r.cashout!=null && r.cashout<0 ? 'off' : (r.cashout==null ? 5 : r.cashout)+'% cut per open leg'}</b>`;
 }
 async function renderAccount(){
   const body = $('account-body');
-  const [bets, members] = await Promise.all([api.myBets(S.comp.id), api.members(S.comp.id)]);
+  const [bets, members] = await Promise.all([api.myBets(S.comp.id), api.members(S.comp.id), ensureProfiles([S.user.id], true)]);
   S.comps = await api.myComps();
   if(S.view!=='account') return;
-  const start = startBal(), net = S.balance - start;
+  const start = startBal(), funded = fundedOf(S.entrant), net = S.balance - funded;
   const H = highlights(bets);
   const joined = S.entrant.joined_at ? new Date(S.entrant.joined_at).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }) : '—';
   const row = (l, v, cls='') => `<div class="acct-row"><span class="l">${l}</span><span class="v ${cls}">${v}</span></div>`;
@@ -2852,10 +2973,14 @@ async function renderAccount(){
     `</div>`+
     `<div class="acct"><h3>Balance</h3>`+
       row('Joined', esc(joined))+
-      row('Starting balance', cur(start))+
+      (isWeekly()
+        ? row('Weekly allowance', `${cur(start)} every round`)+row('Received so far', cur(funded))
+        : row('Starting balance', cur(start)))+
       row('Current balance', cur(S.balance))+
       row('Profit / loss', net===0 ? '$0' : signed(net), net>0?'up':net<0?'down':'')+
+      (isWeekly() ? `<div class="rule-list" style="margin-top:6px">The leaderboard ranks on profit: your balance minus everything you’ve been given.</div>` : '')+
     `</div>`+
+    barrackingCard()+
     `<form class="acct" id="acct-form">`+
       `<h3>Username</h3>`+
       `<label for="acct-name">Your name in ${esc(S.comp.name)}</label>`+
@@ -2880,6 +3005,7 @@ async function renderAccount(){
       `<button class="btn-sec" id="acct-reset" type="button">Reset mock data</button>`+
     `</div>` : '');
 
+  body.querySelectorAll('[data-team-pick]').forEach(b => b.addEventListener('click', () => pickTeam(b.dataset.teamPick)));
   // comp card
   $('code-copy').addEventListener('click', async e => {
     const b = e.currentTarget;
@@ -3050,12 +3176,14 @@ function renderChat(){
     const from = room==='sport' ? ` · ${esc(m.comp_name)}`
       : room==='global' ? ` · ${esc(SP(m.sport).label)} · ${esc(m.comp_name)}` : '';
     const pinBtn = (room==='comp' && isHost() && S.comp.pinned!==m.id) ? `<button class="msg-pin-btn" data-pin="${esc(m.id)}">Pin</button>` : '';
-    html += `<div class="msg-row${me?' me':''}"><div class="msg-meta"><b>${who}${from}</b>${isHostMsg?'<span class="host">HOST</span>':''}<span>${fmtMsgTime(m.ts)}</span>${pinBtn}</div>`+
+    html += `<div class="msg-row${me?' me':''}"><div class="msg-meta">${flairHTML(m.user_id, m.sport || curSport())}<b>${who}${from}</b>${isHostMsg?'<span class="host">HOST</span>':''}<span>${fmtMsgTime(m.ts)}</span>${pinBtn}</div>`+
       `<div class="bubble">${esc(m.text)}</div></div>`;
   });
   list.innerHTML = html;
   list.querySelectorAll('[data-pin]').forEach(b => b.addEventListener('click', async () => { S.comp = await api.pin(S.comp.id, b.dataset.pin); renderChat(); }));
   list.scrollTop = list.scrollHeight;
+  // flairs for anyone we haven't looked up yet
+  ensureProfiles(msgs.map(m => m.user_id)).then(got => { if(got && S.chat.open && S.chat.room===room) renderChat(); });
 }
 // incoming message — counts as unread unless you're looking at that room
 function onChatMessage(room, compId, msg){
@@ -3178,7 +3306,8 @@ async function liveApi(){
   // backup for the reset-link case; deferred so the page has finished setting up first
   sb.auth.onAuthStateChange(event => { if(event==='PASSWORD_RECOVERY') setTimeout(() => showAuth('reset'), 0); });
 
-  const mapMember = r => r && ({ user_id:r.user_id, display_name:r.username, balance:n(r.balance), history:r.history||{}, joined_at:r.joined_at, is_host:r.is_host });
+  const mapMember = r => r && ({ user_id:r.user_id, display_name:r.username, balance:n(r.balance), funded:n(r.funded),
+    history:r.history||{}, joined_at:r.joined_at, is_host:r.is_host });
   const mapBet = r => ({ ...r, stake:n(r.stake), price:n(r.price), potential_payout:n(r.potential_payout), payout:n(r.payout) });
   const mapChat = r => ({ id:r.id, comp_id:r.comp_id, room:r.room, user_id:r.user_id, name:r.username,
     comp_name:r.comp_name||'', sport:r.sport, text:r.body, ts:Date.parse(r.created_at) });
@@ -3240,7 +3369,8 @@ async function liveApi(){
     },
     async findComp(code){
       const r = (chk(await sb.rpc('ft_find_comp', { p_code:code })) || [])[0];
-      return r ? { id:r.id, name:r.name, sport:r.sport, members:r.members, starting_balance:n(r.starting_balance), member:r.is_member } : null;
+      return r ? { id:r.id, name:r.name, sport:r.sport, members:r.members, starting_balance:n(r.starting_balance),
+        bankroll:r.bankroll, member:r.is_member } : null;
     },
     async hostComp({ name, display_name, sport, starting_balance, rules }){
       return chk(await sb.rpc('ft_host_comp', { p_name:name, p_username:display_name, p_starting_balance:starting_balance,
@@ -3260,6 +3390,13 @@ async function liveApi(){
 
     // ── leaderboard ──
     async standings(id){ return this.members(id); },
+
+    // ── who you barrack for ──
+    async profiles(ids){
+      const rows = chk(await sb.from('ft_profiles').select('user_id, teams').in('user_id', ids)) || [];
+      return Object.fromEntries(rows.map(r => [r.user_id, r.teams || {}]));
+    },
+    async setTeam(sport, team){ return chk(await sb.rpc('ft_set_team', { p_sport:sport, p_team:team, p_season:SEASON })); },
     // settled bets in the comp (plus your own pending ones) — row level security hides others' pending bets
     async moments(id, round){
       let q = sb.from('ft_bets').select('*').eq('comp_id', id);
@@ -3318,7 +3455,7 @@ async function liveApi(){
       const ch = sb.channel(`ft-${compId}-${uid}`)
         .on('postgres_changes', { event:'INSERT', schema:'public', table:'ft_chats' }, p => p.new && h.chat(mapChat(p.new)))
         .on('postgres_changes', { event:'UPDATE', schema:'public', table:'ft_chats', filter:`comp_id=eq.${compId}` }, p => p.new && h.pin(p.new))
-        .on('postgres_changes', { event:'UPDATE', schema:'public', table:'ft_members', filter:`user_id=eq.${uid}` }, p => p.new && h.member({ ...p.new, balance:n(p.new.balance) }))
+        .on('postgres_changes', { event:'UPDATE', schema:'public', table:'ft_members', filter:`user_id=eq.${uid}` }, p => p.new && h.member({ ...p.new, balance:n(p.new.balance), funded:n(p.new.funded) }))
         .on('postgres_changes', { event:'*', schema:'public', table:'ft_bets', filter:`user_id=eq.${uid}` }, () => h.bets())
         .on('postgres_changes', { event:'UPDATE', schema:'public', table:'ft_matches' }, p => p.new && h.match(p.new))
         .subscribe();
