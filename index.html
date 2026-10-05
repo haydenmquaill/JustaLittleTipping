@@ -77,8 +77,11 @@
   }
   .seg button + button{border-left:1px solid rgba(255,255,255,.2)}
   .seg button.active{background:#fff;color:var(--blue)}
-  .seg button.has-bets{background:#fff;color:var(--blue)}
-  .seg button.has-bets .cnt{background:var(--blue);color:#fff}
+  /* Slip: green while bets are waiting in it, white only while it's open (like My Bets) */
+  .seg button.has-bets{background:var(--green-acc);color:#fff}
+  .seg button.has-bets .cnt{background:#fff;color:var(--green-acc)}
+  .seg button.active.has-bets{background:#fff;color:var(--blue)}
+  .seg button.active.has-bets .cnt{background:var(--blue);color:#fff}
   .seg button.pulse{animation:segpulse 1s ease-in-out 3}
   .seg button.bump{animation:segbump .35s ease-out}
   @keyframes segpulse{0%,100%{background:rgba(255,255,255,.06);color:#fff}50%{background:var(--green-acc);color:#08230f}}
@@ -464,6 +467,74 @@
   .fb-grid{display:flex;flex-wrap:wrap;gap:6px;padding:4px 0}
   .fb-grid .fb{max-width:100%}
   .ach-hint{font-size:11px;color:var(--mid);margin:-2px 0 8px}
+  /* ── people: avatars, profiles, friends ── */
+  .av{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:50%;overflow:hidden;background:#dfe5ef;
+    color:var(--blue);font-family:'Barlow Condensed',sans-serif;font-weight:800;line-height:1}
+  .av img{width:100%;height:100%;object-fit:cover;display:block}
+  .av.none{background:linear-gradient(135deg,#dfe5ef,#c9d3e3)}
+  .av.grp{background:#e8edf5}
+  .msg-line{display:flex;align-items:flex-end;gap:6px;max-width:100%;min-width:0}
+  .msg-line .bubble{min-width:0}
+  .msg-row:not(.me) .msg-meta,.msg-row:not(.me) .msg-acts{padding-left:34px}
+  .pv-head .av{box-shadow:0 0 0 2px #fff,0 0 0 3px var(--line)}
+  .pv-head .pv-real{font-size:12px;color:var(--ink-soft);margin-top:1px}
+  .btn-sm.prim{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .fa-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid #eef0f4}
+  .fa-note{font-size:12px;color:var(--mid);margin-right:auto}
+  .pc-clubs{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .pc-club{display:inline-flex;align-items:center;gap:6px;padding:4px 9px 4px 5px;background:var(--offwhite);border-radius:14px;
+    font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;text-transform:uppercase;color:var(--ink)}
+  .pc-club img{width:20px;height:20px;object-fit:contain}
+  .pc-club small{font-family:Inter,system-ui,sans-serif;font-weight:500;font-size:10px;color:var(--mid);text-transform:none}
+  button.comp-row{width:100%;background:none;border:none;border-top:1px solid #eef0f4;text-align:left;cursor:pointer;font:inherit;color:inherit}
+  .mem-row{cursor:pointer}
+  .me-row{display:flex;align-items:center;gap:12px;margin-top:10px}
+  .me-row .w{flex:1;min-width:0}
+  .me-row .s{font-size:11px;color:var(--mid);margin-top:5px}
+  .me-row label.btn-sm{cursor:pointer}
+  .rn-row{display:flex;gap:6px;align-items:center}
+  .rn-row input{flex:1;min-width:0}
+  .fr-h{font-family:'Oswald',sans-serif;font-weight:700;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin:12px 0 4px}
+  .fr-row{cursor:pointer}
+  .fr-row .btn-sm{flex-shrink:0}
+  .code-box.id-box .c{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;letter-spacing:0;word-break:break-all;font-weight:600}
+  /* friends chats */
+  .th-row{display:flex;align-items:center;gap:10px;width:100%;padding:9px 6px;background:#fff;border:none;border-radius:10px;margin-bottom:6px;
+    text-align:left;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.06);font:inherit;color:var(--ink)}
+  .th-row .w{flex:1;min-width:0}
+  .th-row .n{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;text-transform:uppercase;line-height:1.1;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .th-row .n small,.th-name small{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:11px;text-transform:none;color:var(--mid)}
+  .th-row .s{font-size:12px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+  .th-row.unread .s{color:var(--ink);font-weight:600}
+  .th-row .r{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+  .th-row .tm{font-size:10px;color:var(--mid)}
+  .th-row .unread{min-width:18px;height:18px;border-radius:9px;background:var(--err);color:#fff;font-size:11px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;padding:0 5px}
+  /* lists in pop-ups (new chat, group members, picking friends) */
+  .fp-list{display:flex;flex-direction:column;gap:6px;overflow-y:auto;padding:2px;max-height:50vh}
+  .fp{display:flex;align-items:center;gap:10px;width:100%;padding:7px 10px;background:var(--offwhite);border:2px solid transparent;border-radius:8px;cursor:pointer;
+    text-align:left;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;text-transform:uppercase;color:var(--ink)}
+  .fp input[type=checkbox]{width:18px;height:18px;accent-color:var(--blue);flex-shrink:0}
+  .fp:has(input:checked){border-color:var(--blue);background:#eef3fb}
+  .modal .fp[data-group]{margin-bottom:4px;background:#eef3fb}
+  .th-back{border:none;background:none;font-size:24px;line-height:1;color:var(--blue);cursor:pointer;padding:0 4px 2px 0}
+  .th-name{flex:1;min-width:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;text-transform:uppercase;color:var(--ink);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .th-name[data-person]{cursor:pointer}
+  .chat-sub .btn-sm{flex-shrink:0;padding:4px 10px}
+  /* messages: tap your own for Edit / Delete; names open their page */
+  .bubble.can-act{cursor:pointer}
+  .bubble.gone{font-style:italic;color:var(--mid);background:transparent;box-shadow:none;border:1px dashed var(--line)}
+  .msg-row.me .bubble.gone{background:transparent;color:var(--mid)}
+  .msg-acts{display:none;gap:6px;margin-top:4px}
+  .msg-row.acts .msg-acts{display:flex}
+  .msg-acts button{border:1px solid var(--line);background:#fff;border-radius:12px;padding:3px 11px;font-size:12px;font-weight:600;color:var(--blue);cursor:pointer}
+  .msg-acts button.del{color:var(--err)}
+  .msg-meta .edited{font-style:italic}
+  .who-link{cursor:pointer}
+  .who-link:hover{text-decoration:underline}
+  .chat-pin .pin-t{white-space:pre-wrap;overflow-wrap:anywhere}
   /* loading: the view area dims, dots in the middle, and can't be tapped until the new view is in */
   .busy-ov{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;
     background:rgba(8,18,38,.55);opacity:0;pointer-events:none;transition:opacity .18s ease}
@@ -1008,6 +1079,7 @@
       <div class="scroll hidden" id="pane-board"><div id="board-list"></div></div>
       <div class="scroll hidden" id="pane-account"><div id="account-body"></div></div>
       <div class="scroll hidden" id="pane-player"><div id="player-body"></div></div>
+      <div class="scroll hidden" id="pane-person"><div id="person-body"></div></div>
 
       <div class="sgm-pad hidden" id="sgm-pad">
         <div class="sg-kind" id="sg-kind">Multi</div>
@@ -1061,6 +1133,7 @@
         <button class="type-chip active" data-room="comp">Competition<span class="unread hidden" id="unread-comp"></span></button>
         <button class="type-chip" data-room="sport"><span id="room-sport-label">AFL</span><span class="unread hidden" id="unread-sport"></span></button>
         <button class="type-chip" data-room="global">Global<span class="unread hidden" id="unread-global"></span></button>
+        <button class="type-chip" data-room="friends">Friends<span class="unread hidden" id="unread-friends"></span></button>
         <button class="chat-x" id="chat-x" aria-label="Close chat">✕</button>
       </div>
       <div class="chat-sub" id="chat-sub"></div>
@@ -1162,7 +1235,7 @@ const S = {
   comp:null,                        // the competition you're in: { id, name, code, host_id, starting_balance, start_round, rules, pinned }
   comps:[],                         // every comp you're a member of: [{ id, name, code, host_id, display_name }]
   entrant:null,                     // your membership in the current comp: { display_name, balance, history, joined_at }
-  chat:{ room:'comp', open:false, msgs:{ comp:[], sport:[], global:[] }, unread:{ comp:0, sport:0, global:0 } },
+  chat:{ room:'comp', open:false, msgs:{ comp:[], sport:[], global:[] }, unread:{ comp:0, sport:0, global:0, friends:0 }, thread:null },
   matchesSport:null,                // which code's fixture is loaded
   balance:0,
   round:null,                       // round being viewed on the Matches tab
@@ -1676,9 +1749,10 @@ async function boot(){
     S.comps = await api.myComps();
     // links from notifications: ?comp=<id>&chat=<room> / &overview=1, or ?achievements=1
     const q = new URLSearchParams(location.search);
-    const link = { comp:q.get('comp'), chat:q.get('chat'), overview:q.has('overview'), achievements:q.has('achievements'), view:q.get('view') };
-    if(link.comp || link.chat || link.overview || link.achievements || link.view){
-      ['comp','chat','overview','achievements','view'].forEach(k => q.delete(k));
+    const link = { comp:q.get('comp'), chat:q.get('chat'), overview:q.has('overview'), achievements:q.has('achievements'), view:q.get('view'),
+                   thread:q.get('thread'), friends:q.has('friends'), player:q.get('player') };
+    if(Object.values(link).some(Boolean)){
+      ['comp','chat','overview','achievements','view','thread','friends','player'].forEach(k => q.delete(k));
       history.replaceState(null, '', location.pathname + (q.toString() ? '?'+q : '') + location.hash);
     }
     const last = api.lastComp();
@@ -1723,6 +1797,9 @@ async function openComp(id, opts={}){
   await maybeRoundOverview(opts.overview).catch(e => console.warn(e));
   if(opts.chat && ROOMS.includes(opts.chat)){ openChat(); setRoom(opts.chat); }
   if(opts.view==='mybets') setView('mybets');
+  if(opts.player) openPlayer(opts.player);
+  if(opts.friends){ S.friendsOpen = true; setView('account'); }
+  if(opts.thread) openThread(opts.thread);
 }
 
 /* live updates for the open comp: chat, pins, your balance, your bets settling, scores */
@@ -1738,6 +1815,20 @@ function listenLive(){
       if(S.chat.open) renderChat();
     },
     unlock: row => queueUnlock(row),
+    // someone edited or deleted a message in a room you've got loaded
+    chatUpdate: msg => {
+      ROOMS.forEach(r => { const m = S.chat.msgs[r].find(x => x.id===msg.id); if(m) Object.assign(m, { text:msg.text, edited:msg.edited, deleted:msg.deleted }); });
+      if(S.chat.open && S.chat.room!=='friends') renderChat();
+    },
+    // a message in one of your friends chats (new, edited or deleted)
+    message: msg => {
+      const list = (S.threadMsgs || {})[msg.thread_id];
+      if(list){ const m = list.find(x => x.id===msg.id); if(m) Object.assign(m, msg); else list.push(msg); }
+      const viewing = S.chat.open && S.chat.room==='friends' && S.chat.thread===msg.thread_id;
+      if(viewing){ renderChat(); api.threadRead(msg.thread_id).catch(() => {}); }
+      loadThreads();
+    },
+    friends: () => { S.friendsList = null; if(S.view==='person') { CACHE.delete('person:'+S.person.id); renderPerson(); } },
     // your balance moving: bets, payouts, cash outs, and the weekly allowance landing
     member: row => {
       if(row.comp_id!==compId) return;
@@ -1855,8 +1946,8 @@ function setView(v){
   $('mode-strip').classList.toggle('hidden', v!=='round');
   $('mkt-strip').classList.toggle('hidden', v!=='match');
   $('board-strip').classList.toggle('hidden', v!=='board');
-  ['round','match','mybets','ladder','board','account','player'].forEach(p => $('pane-'+p).classList.toggle('hidden', v!==p));
-  const tab = v==='player' ? 'board' : ['ladder','board','account'].includes(v) ? v : 'sports';
+  ['round','match','mybets','ladder','board','account','player','person'].forEach(p => $('pane-'+p).classList.toggle('hidden', v!==p));
+  const tab = v==='player' ? 'board' : v==='person' ? (['ladder','board','account'].includes(S.personBack) ? S.personBack : 'sports') : ['ladder','board','account'].includes(v) ? v : 'sports';
   document.querySelectorAll('#footer .ft-btn').forEach(b => b.classList.toggle('active', b.dataset.tab===tab));
   syncChips();
   renderNavCtrl();
@@ -1868,6 +1959,7 @@ function setView(v){
   if(v==='board') renderBoard();
   if(v==='account') renderAccount();
   if(v==='player') renderPlayer();
+  if(v==='person') renderPerson();
   renderBuilder();
   updateBusy();                      // dim only if the page you just opened is still loading
   // the header height changes between pages (tab strips come and go) — keep the chat tab in range
@@ -1957,6 +2049,9 @@ function renderNav2(){
   } else if(S.view==='account'){
     row.classList.add('centred');
     row.innerHTML = title('Account', esc(S.entrant.display_name));
+  } else if(S.view==='person'){
+    row.innerHTML = `<button class="r-arrow" id="nav-back" aria-label="Back">‹</button>`+ title(esc(S.person.name || 'Profile'), 'Profile');
+    $('nav-back').addEventListener('click', () => setView(S.personBack && S.personBack!=='person' ? S.personBack : 'round'));
   } else if(S.view==='player'){
     row.innerHTML = `<button class="r-arrow" id="nav-back" aria-label="Back to the leaderboard">‹</button>`+
       title(esc(S.player.name || 'Player'), esc(S.comp.name));
@@ -1972,7 +2067,7 @@ function renderNavCtrl(){
   $('nav-ctrl').innerHTML =
     `<span class="seg">`+
       `<button id="btn-mybets" class="${S.view==='mybets'?'active':''}">My Bets</button>`+
-      `<button id="btn-slip" class="${n?'has-bets':''}">Slip ${n?`<span class="cnt">${n}</span>`:''}</button>`+
+      `<button id="btn-slip" class="${n?'has-bets':''}${S.slipOpen?' active':''}">Slip ${n?`<span class="cnt">${n}</span>`:''}</button>`+
     `</span>`;
   $('btn-mybets').addEventListener('click', () => setView(S.view==='mybets' ? S.backView : 'mybets'));
   $('btn-slip').addEventListener('click', openSlip);
@@ -2715,8 +2810,9 @@ function openSlip(){
   renderSlip();
   if(gone){ $('slip-msg').textContent = `Removed ${gone} bet${gone>1?'s':''} — the match has started.`; }
   $('slip-scrim').classList.remove('hidden');
+  S.slipOpen = true; renderNavCtrl();
 }
-function closeSlip(){ closeStakePad(); $('slip-scrim').classList.add('hidden'); $('slip-msg').textContent=''; }
+function closeSlip(){ closeStakePad(); $('slip-scrim').classList.add('hidden'); $('slip-msg').textContent=''; if(S.slipOpen){ S.slipOpen = false; renderNavCtrl(); } }
 $('slip-x').addEventListener('click', closeSlip);
 $('slip-scrim').addEventListener('click', e => { if(e.target===$('slip-scrim')) closeSlip(); });
 $('slip-clear').addEventListener('click', () => {
@@ -3290,15 +3386,15 @@ function openPlayer(id, name){
 async function renderPlayer(quiet){
   const body = $('player-body'), id = S.player.id, me = id===S.user.id;
   await swr(`player:${S.comp.id}:${id}`, body, async () => {
-      const [entrants, bets, unlocks] = await Promise.all([api.standings(S.comp.id), me ? api.myBets(S.comp.id) : api.playerBets(S.comp.id, id),
-        api.unlocks(id).catch(() => [])]);
-      await Promise.all([ensureProfiles([id]), ensureLiveFor(bets)]);
-      return { entrants, bets, unlocks };
+      const [entrants, bets, unlocks, person] = await Promise.all([api.standings(S.comp.id), me ? api.myBets(S.comp.id) : api.playerBets(S.comp.id, id),
+        api.unlocks(id).catch(() => []), api.person(id).catch(() => null)]);
+      await Promise.all([ensureProfiles([id], true), ensureLiveFor(bets)]);
+      return { entrants, bets, unlocks, person };
     },
     d => { const pane = $('pane-player'), y = pane.scrollTop; paintPlayer(body, id, me, d); pane.scrollTop = y; },
     () => S.view==='player' && S.player.id===id);
 }
-function paintPlayer(body, id, me, { entrants, bets, unlocks }){
+function paintPlayer(body, id, me, { entrants, bets, unlocks, person }){
   const cr = currentRound();
   const p = standingsFor(entrants, cr, cr).find(e => e.user_id===id);
   if(!p){ body.innerHTML = '<div class="empty">They’re no longer in this comp.</div>'; return; }
@@ -3314,12 +3410,14 @@ function paintPlayer(body, id, me, { entrants, bets, unlocks }){
   const joined = p.joined_at ? new Date(p.joined_at).toLocaleDateString('en-AU', { day:'numeric', month:'short' }) : '';
 
   body.innerHTML =
-    `<div class="acct"><div class="pv-head"><span class="pv-flair">${flair}</span>`+
+    `<div class="acct"><div class="pv-head">${(S.profiles[id] || {}).avatar_url ? avatarHTML(id, 54, p.display_name) : `<span class="pv-flair">${flair}</span>`}`+
       `<span class="pv-w"><div class="pv-n">${esc(p.display_name)}</div>`+
+        (person && person.real_name ? `<div class="pv-real">${esc(person.real_name)}</div>` : '')+
         (flairOf(id) ? `<div class="pv-t">${flairHTML(id, curSport(), 'md')}</div>` : '')+
         `<div class="pv-s">#${p.rank} of ${entrants.length}${team ? ` · ${esc(team.name)} supporter` : ''}${joined ? ` · joined ${esc(joined)}` : ''}</div></span>`+
       `<span class="pv-p"><div class="v ${p.profit>0?'up':p.profit<0?'down':''}">${p.profit===0 ? '$0' : signed(p.profit)}</div>`+
-        `<div class="s">${cur(p.bal)} balance</div></span></div></div>`+
+        `<div class="s">${cur(p.bal)} balance</div></span></div>`+
+      (me ? '' : friendActionsHTML(person))+`</div>`+
     trophyCabinet(unlocks)+
     `<div class="acct"><h3>Season ${esc(S.season.id)}</h3><div class="hl-grid">`+
       tile('Strike rate', H.strike!=null ? H.strike+'%' : '—', H.settledN ? `${H.wonN} of ${H.settledN} bets won` : 'Nothing settled yet')+
@@ -3333,6 +3431,7 @@ function paintPlayer(body, id, me, { entrants, bets, unlocks }){
     `</div>`+
     `<div id="player-bets"></div>`;
   badgeInfo($('pv-cab'), i => S._pvShown[i]);            // their badges: details on hold / hover / tap
+  wireFriendActions(body, () => { CACHE.delete(`player:${S.comp.id}:${id}`); renderPlayer(); });
   if($('pv-cab-more')) $('pv-cab-more').addEventListener('click', () => { S.pvCabAll = !S.pvCabAll; renderPlayer(true); });
   const list = $('player-bets');
   if(!bets.length){ list.innerHTML = `<div class="empty">${me ? 'No bets yet.' : 'No bets to show yet.'}</div>`; return; }
@@ -3408,6 +3507,421 @@ async function maybeRoundOverview(force){
   });
   S.entrant.seen_round = Math.max(seen || 0, r);
   api.seenRound(S.comp.id, r).catch(() => {});
+}
+
+/* ════════ PEOPLE: avatars, profiles, friends ════════
+   Some things belong to a person (avatar, flair, clubs, achievements, real name), others to their
+   place in one comp (username, rank, bets). People in your comp open on their comp page (the player
+   view); anyone else (e.g. from the AFL or global chat, or your friends list) opens on their profile.
+   Real names show only to friends. */
+function avatarHTML(userId, size=36, fallback='?'){
+  const p = S.profiles[userId], url = p && p.avatar_url;
+  const st = `width:${size}px;height:${size}px;font-size:${Math.round(size*0.45)}px`;
+  return url ? `<span class="av" style="${st}"><img src="${esc(url)}" alt="" onerror="this.parentNode.textContent='${esc(String(fallback)[0] || '?').toUpperCase()}'"></span>`
+             : `<span class="av none" style="${st}">${esc(String(fallback)[0] || '?').toUpperCase()}</span>`;
+}
+// tap a name anywhere: comp-mates open their comp page, anyone else their profile
+function openSomeone(userId, ctx={}){
+  if(!userId) return;
+  closeChat();
+  if(S.compMembers && S.compMembers.has(userId)) openPlayer(userId, ctx.name);
+  else openPerson(userId, ctx);
+}
+function openPerson(id, ctx={}){
+  if(S.view!=='person') S.personBack = S.view;
+  S.person = { id, ctx };
+  $('person-body').innerHTML = '';
+  $('pane-person').scrollTop = 0;
+  setView('person');
+}
+// the buttons for being (or becoming) friends with someone; data-fa is wired by wireFriendActions
+function friendActionsHTML(p){
+  if(!p || p.user_id===S.user.id) return '';
+  const b = (act, label, cls='btn-sm') => `<button class="${cls}" type="button" data-fa="${act}" data-uid="${esc(p.user_id)}">${label}</button>`;
+  if(p.friend==='friends') return `<div class="fa-row">${b('message', '💬 Message', 'btn-sm prim')}`+
+    `${b('notify', p.notify ? '🔔 Their bets: on' : '🔕 Their bets: off')}${b('unfriend', 'Unfriend', 'btn-sm danger')}</div>`;
+  if(p.friend==='requested') return `<div class="fa-row"><span class="fa-note">Friend request sent</span>${b('cancel', 'Cancel')}</div>`;
+  if(p.friend==='incoming') return `<div class="fa-row"><span class="fa-note">Wants to be friends</span>${b('accept', 'Accept', 'btn-sm prim')}${b('decline', 'Decline', 'btn-sm danger')}</div>`;
+  return `<div class="fa-row">${b('add', '🤝 Add friend', 'btn-sm prim')}</div>`;
+}
+function wireFriendActions(root, after){
+  root.querySelectorAll('[data-fa]').forEach(btn => btn.addEventListener('click', async () => {
+    const act = btn.dataset.fa, uid = btn.dataset.uid;
+    try{
+      if(act==='message'){ await openThreadWith(uid); return; }
+      if(act==='unfriend'){
+        const ok = await confirmModal({ title:'Unfriend?', body:'They won’t see your real name any more, and you won’t be able to message each other. Your old messages stay.', ok:'Unfriend' });
+        if(!ok) return;
+      }
+      btn.disabled = true;
+      if(act==='add') await api.friendRequest(uid);
+      else if(act==='accept') await api.friendRespond(uid, true);
+      else if(act==='decline') await api.friendRespond(uid, false);
+      else if(act==='cancel' || act==='unfriend') await api.friendRemove(uid);
+      else if(act==='notify') await api.friendNotify(uid, !/: on/.test(btn.textContent));
+      S.friendsList = null;
+      await ensureProfiles([uid], true);
+      if(after) after();
+    }catch(err){ btn.disabled = false; await confirmModal({ title:'Friends', body:esc(err.message || 'That didn’t work.'), ok:'OK', cancel:'Close' }); }
+  }));
+}
+
+/* ── profile view (someone outside your comp, or from your friends list) ── */
+async function renderPerson(){
+  const body = $('person-body'), { id, ctx } = S.person;
+  await swr('person:'+id, body, async () => {
+      const [p, unlocks] = await Promise.all([api.person(id), api.unlocks(id).catch(() => []), ensureProfiles([id], true)]);
+      return { p, unlocks };
+    },
+    d => paintPerson(body, id, ctx, d), () => S.view==='person' && S.person.id===id);
+}
+function paintPerson(body, id, ctx, { p, unlocks }){
+  const name = ctx.name || p.known_as;
+  S.person.name = name; renderNav2();
+  const teams = teamsOf(id), season = Number(S.season.id);
+  const clubs = ['afl','nrl'].map(sp => { const pk = teams[sp], t = pk && Number(pk.season)===season && teamByAbbr(sp, pk.team);
+    return t ? `<span class="pc-club"><img src="assets/teams/${sp}/${t.abbr}.svg" alt="">${esc(t.name)} <small>${SP(sp).label}</small></span>` : ''; }).join('');
+  const shared = (p.shared || []).map(s => `<button class="comp-row pc-comp" type="button" data-comp="${esc(s.comp_id)}" data-name="${esc(s.username)}">`+
+      `<span class="w"><div class="n">${esc(String(s.sport).toUpperCase())} · ${esc(s.comp_name)}</div><div class="s">As ${esc(s.username)}</div></span><span class="lb-chev">›</span></button>`).join('');
+  body.innerHTML =
+    `<div class="acct"><div class="pv-head">${avatarHTML(id, 54, name)}`+
+      `<span class="pv-w"><div class="pv-n">${esc(name)}</div>`+
+        (p.real_name ? `<div class="pv-real">${esc(p.real_name)}</div>` : '')+
+        (flairOf(id) ? `<div class="pv-t">${flairHTML(id, curSport(), 'md')}</div>` : '')+
+        (ctx.comp_name ? `<div class="pv-s">Posting from ${esc(ctx.comp_name)}</div>` : '')+
+      `</span></div>`+
+      friendActionsHTML(p)+
+      (clubs ? `<div class="pc-clubs">${clubs}</div>` : '')+
+    `</div>`+
+    (shared ? `<div class="acct"><h3>Comps you’re both in</h3>${shared}</div>` : '')+
+    trophyCabinet(unlocks);
+  wireFriendActions(body, () => { CACHE.delete('person:'+id); renderPerson(); });
+  badgeInfo($('pv-cab'), i => S._pvShown[i]);
+  if($('pv-cab-more')) $('pv-cab-more').addEventListener('click', () => { S.pvCabAll = !S.pvCabAll; paintPerson(body, id, ctx, { p, unlocks }); });
+  body.querySelectorAll('[data-comp]').forEach(b => b.addEventListener('click', async () => {
+    if(b.dataset.comp===S.comp.id){ openPlayer(id, b.dataset.name); return; }
+    await openComp(b.dataset.comp); openPlayer(id, b.dataset.name);
+  }));
+}
+
+/* ── Account: Signed in (avatar + real name) and Friends ── */
+function signedInExtrasHTML(realName){
+  return `<div class="me-row">${avatarHTML(S.user.id, 56, S.entrant.display_name)}`+
+      `<span class="w"><div class="btn-pair" style="margin:0"><label class="btn-sm prim" for="av-file">Upload photo</label>`+
+      ((S.profiles[S.user.id] || {}).avatar_url ? `<button class="btn-sm danger" id="av-remove" type="button">Remove</button>` : '')+`</div>`+
+      `<input id="av-file" type="file" accept="image/*" hidden><div class="s" id="av-msg">Square-cropped and shrunk before upload.</div></span></div>`+
+    `<form id="rn-form" class="fld" style="margin-top:10px"><label for="rn-in">Real name <small style="color:var(--mid);font-weight:400">· only your friends see it</small></label>`+
+      `<div class="rn-row"><input id="rn-in" type="text" maxlength="60" autocomplete="name" value="${esc(realName || '')}" placeholder="e.g. Gary Quaill">`+
+      `<button class="btn-sm" id="rn-save" type="submit" disabled>Save</button></div></form>`;
+}
+// shrink a photo to a 256px square JPEG on the phone before it's uploaded
+function squareJpeg(file, size=256){
+  return new Promise((resolve, reject) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const s = Math.min(img.width, img.height), c = document.createElement('canvas');
+      c.width = c.height = size;
+      c.getContext('2d').drawImage(img, (img.width - s)/2, (img.height - s)/2, s, s, 0, 0, size, size);
+      URL.revokeObjectURL(url);
+      c.toBlob(b => b ? resolve(b) : reject(new Error('Couldn’t read that photo.')), 'image/jpeg', 0.85);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('That file isn’t a photo the browser can read.')); };
+    img.src = url;
+  });
+}
+function wireSignedInExtras(realName){
+  $('av-file').addEventListener('change', async e => {
+    const f = e.target.files && e.target.files[0]; if(!f) return;
+    $('av-msg').textContent = 'Uploading…';
+    try{ await api.setAvatar(await squareJpeg(f)); await ensureProfiles([S.user.id], true); renderAccount(); }
+    catch(err){ $('av-msg').textContent = err.message || 'Upload failed.'; }
+  });
+  if($('av-remove')) $('av-remove').addEventListener('click', async () => {
+    const ok = await confirmModal({ title:'Remove your photo?', body:'Your initial shows instead.', ok:'Remove' });
+    if(!ok) return;
+    await api.removeAvatar(); await ensureProfiles([S.user.id], true); renderAccount();
+  });
+  const rn = $('rn-in'), sv = $('rn-save');
+  rn.addEventListener('input', () => { sv.disabled = rn.value.trim()===(realName || ''); });
+  $('rn-form').addEventListener('submit', async e => {
+    e.preventDefault(); sv.disabled = true;
+    try{ await api.setRealName(rn.value.trim()); rn.blur(); renderAccount(); }
+    catch(err){ sv.disabled = false; await confirmModal({ title:'Real name', body:esc(err.message || 'Couldn’t save.'), ok:'OK', cancel:'Close' }); }
+  });
+}
+function friendsCardHTML(list){
+  const friends = list.filter(f => f.status==='accepted'), incoming = list.filter(f => f.incoming), sent = list.filter(f => f.status==='pending' && !f.incoming);
+  const row = (f, actions, note) => `<div class="comp-row fr-row" data-person="${esc(f.user_id)}" data-name="${esc(f.known_as)}">${avatarHTML(f.user_id, 34, f.known_as)}`+
+    `<span class="w"><div class="n">${esc(f.known_as)}</div><div class="s">${esc(note || f.real_name || '')}</div></span>${actions}</div>`;
+  const b = (act, uid, label, cls='btn-sm') => `<button class="${cls}" type="button" data-fa="${act}" data-uid="${esc(uid)}">${label}</button>`;
+  return `<div class="acct" id="friends-card"><h3>Friends${friends.length ? ` · ${friends.length}` : ''}</h3>`+
+    // your friends, then requests (ones you've received, then ones you've sent)
+    (friends.length ? friends.map(f => row(f, b('message', f.user_id, '💬'))).join('')
+                    : `<div class="rule-list">No friends yet. Add people from their page, from chat, or with their user ID below.</div>`)+
+    (incoming.length || sent.length ? `<h4 class="fr-h">Requests · ${incoming.length + sent.length}</h4>`+
+      incoming.map(f => row(f, b('accept', f.user_id, 'Accept', 'btn-sm prim')+b('decline', f.user_id, 'Decline', 'btn-sm danger'), 'Wants to be friends')).join('')+
+      sent.map(f => row(f, b('cancel', f.user_id, 'Cancel'), 'Request sent')).join('') : '')+
+    `<h4 class="fr-h">Add by user ID</h4>`+
+    `<form id="fr-add" class="rn-row"><input id="fr-id" type="text" autocomplete="off" placeholder="Paste a mate’s user ID"><button class="btn-sm prim" type="submit">Send</button></form>`+
+    `<h4 class="fr-h">Your user ID</h4><div class="code-box id-box"><span class="c">${esc(S.user.id)}</span><button class="btn-sm" id="id-copy" type="button">Copy</button></div>`+
+    `<div class="rule-list">Send it to a mate (text it, whatever) so they can add you. All it lets them do is send you a friend request.</div>`+
+  `</div>`;
+}
+function wireFriendsCard(body){
+  const card = $('friends-card'); if(!card) return;
+  wireFriendActions(card, () => { S.friendsList = null; renderAccount(); });
+  card.querySelectorAll('[data-person]').forEach(r => r.addEventListener('click', e => {
+    if(e.target.closest('button')) return;
+    openPerson(r.dataset.person, { name:r.dataset.name });
+  }));
+  $('id-copy').addEventListener('click', async e => {
+    const b = e.currentTarget;
+    try{ await navigator.clipboard.writeText(S.user.id); b.textContent = 'Copied'; }catch(err){ b.textContent = 'Copy failed'; }
+    setTimeout(() => { b.textContent = 'Copy'; }, 1800);
+  });
+  $('fr-add').addEventListener('submit', async e => {
+    e.preventDefault();
+    const v = $('fr-id').value.trim(); if(!v) return;
+    if(!/^[0-9a-f-]{36}$/i.test(v)){ await confirmModal({ title:'Add a friend', body:'That doesn’t look like a user ID. It’s the long code in their Friends card. Copy and paste it exactly.', ok:'OK', cancel:'Close' }); return; }
+    try{
+      const st = await api.friendRequest(v);
+      $('fr-id').value = ''; S.friendsList = null; renderAccount();
+      await confirmModal({ title:st==='accepted' ? 'You’re now friends' : 'Request sent', body:st==='accepted' ? 'They’d already asked you, so you’re friends now.' : 'They’ll get a notification to accept.', ok:'OK', cancel:'Close' });
+    }catch(err){ await confirmModal({ title:'Add a friend', body:esc(err.message || 'That didn’t work.'), ok:'OK', cancel:'Close' }); }
+  });
+}
+
+/* ════════ FRIENDS CHAT: direct and group messages ════════
+   The fourth tab in the chat drawer. A list of your chats (newest first, unread counts), then a
+   chat opens full-height with ‹ back. Groups have an info sheet: members, add friends, rename,
+   mute, leave. */
+function threadTitle(t){
+  if(t.kind==='group') return t.name || 'Group';
+  const o = (t.members || []).find(m => m.user_id!==S.user.id) || {};
+  return o.known_as || 'Friend';
+}
+function threadOther(t){ return (t.members || []).find(m => m.user_id!==S.user.id) || {}; }
+async function loadThreads(){
+  try{ S.threads = await api.threads(); }catch(e){ console.warn(e); S.threads = S.threads || []; }
+  (S.threads || []).forEach(t => (t.members || []).forEach(m => { if(m.avatar_url) S.profiles[m.user_id] = { ...(S.profiles[m.user_id] || {}), avatar_url:m.avatar_url }; }));
+  S.chat.unread.friends = (S.threads || []).reduce((a, t) => a + (t.unread || 0), 0);
+  renderChatBadges();
+  if(S.chat.open && S.chat.room==='friends' && !S.chat.thread) renderChat();
+}
+function renderFriendsRoom(){
+  const sub = $('chat-sub'), list = $('chat-list');
+  $('chat-pin').classList.add('hidden');
+  const t = S.chat.thread && (S.threads || []).find(x => x.id===S.chat.thread);
+  if(!t){
+    S.chat.thread = null;
+    $('chat-form').classList.add('hidden');
+    sub.innerHTML = `<span>Direct and group chats with your friends</span><button class="btn-sm prim" id="dm-new" type="button">+ New</button>`;
+    $('dm-new').addEventListener('click', newChatPicker);
+    if(!S.threads){ list.innerHTML = `<div class="chat-day" style="margin:auto">Loading…</div>`; loadThreads(); return; }
+    if(!S.threads.length){ list.innerHTML = `<div class="chat-day" style="margin:auto;text-align:center">No chats yet.<br>Tap <b>+ New</b> to message a friend or start a group.</div>`; return; }
+    list.innerHTML = S.threads.map(t => {
+      const o = threadOther(t), title = threadTitle(t);
+      const real = t.kind==='dm' && o.real_name ? `<small>${esc(o.real_name)}</small>` : t.kind==='group' ? `<small>${(t.members || []).length} people</small>` : '';
+      const who = t.last_user===S.user.id ? 'You: ' : '';
+      const last = t.last_at ? (t.last_deleted ? '<i>Message deleted</i>' : esc(who + (t.last_body || ''))) : '<i>No messages yet</i>';
+      const av = t.kind==='group' ? `<span class="av none grp" style="width:40px;height:40px;font-size:18px">👥</span>` : avatarHTML(o.user_id, 40, title);
+      return `<button class="th-row${t.unread ? ' unread' : ''}" type="button" data-thread="${esc(t.id)}">${av}`+
+        `<span class="w"><div class="n">${esc(title)} ${real}${t.muted ? ' 🔕' : ''}</div><div class="s">${last}</div></span>`+
+        `<span class="r"><span class="tm">${t.last_at ? esc(fmtMsgDayShort(t.last_at)) : ''}</span>${t.unread ? `<span class="unread">${t.unread}</span>` : ''}</span></button>`;
+    }).join('');
+    list.scrollTop = 0;
+    list.querySelectorAll('[data-thread]').forEach(b => b.addEventListener('click', () => openThread(b.dataset.thread)));
+    return;
+  }
+  // one chat
+  $('chat-form').classList.remove('hidden');
+  const o = threadOther(t);
+  $('chat-input').placeholder = t.kind==='group' ? `Message ${t.name}…` : `Message ${threadTitle(t)}…`;
+  sub.innerHTML = `<button class="th-back" id="th-back" type="button" aria-label="Back to your chats">‹</button>`+
+    `<span class="th-name" ${t.kind==='dm' ? `data-person="${esc(o.user_id)}"` : ''}>${esc(threadTitle(t))}${t.kind==='dm' && o.real_name ? ` <small>${esc(o.real_name)}</small>` : ''}</span>`+
+    (t.kind==='group' ? `<button class="btn-sm" id="th-info" type="button">Group</button>` : '')+
+    `<button class="bell${t.muted ? ' off' : ''}" id="th-mute" type="button" title="${t.muted ? 'Muted' : 'Notifications on'}">${t.muted ? '🔕' : '🔔'}</button>`;
+  $('th-back').addEventListener('click', () => { S.chat.thread = null; $('chat-input').placeholder = 'Say something…'; loadThreads(); renderChat(); });
+  if($('th-info')) $('th-info').addEventListener('click', () => groupInfo(t));
+  $('th-mute').addEventListener('click', async () => { t.muted = !t.muted; await api.threadMute(t.id, t.muted); renderChat(); });
+  const nm = sub.querySelector('[data-person]');
+  if(nm) nm.addEventListener('click', () => openSomeone(nm.dataset.person, { name:threadTitle(t) }));
+  const msgs = (S.threadMsgs || {})[t.id];
+  if(!msgs){ list.innerHTML = `<div class="chat-day" style="margin:auto">Loading…</div>`; return; }
+  if(!msgs.length){ list.innerHTML = `<div class="chat-day" style="margin:auto">Say g’day 👋</div>`; return; }
+  const names = Object.fromEntries((t.members || []).map(m => [m.user_id, m.known_as]));
+  let day = '', html = '';
+  msgs.forEach(m => {
+    const d = fmtMsgDay(m.ts);
+    if(d!==day){ day = d; html += `<div class="chat-day">${esc(d)}</div>`; }
+    html += msgRowHTML({ ...m, name:names[m.user_id] || m.name || 'Someone' }, { room:'friends', showName:t.kind==='group' || m.user_id!==S.user.id });
+  });
+  list.innerHTML = html;
+  wireMsgActions(list, 'thread');
+  list.scrollTop = list.scrollHeight;
+}
+function fmtMsgDayShort(iso){
+  const d = new Date(iso), now = new Date();
+  if(d.toDateString()===now.toDateString()) return fmtMsgTime(d.getTime());
+  if((now - d) < 6*864e5) return d.toLocaleDateString('en-AU', { weekday:'short' });
+  return d.toLocaleDateString('en-AU', { day:'numeric', month:'short' });
+}
+async function openThread(id){
+  S.chat.room = 'friends'; S.chat.thread = id;
+  S.threadMsgs = S.threadMsgs || {};
+  if(!S.chat.open) openChat(); else renderChat();
+  try{
+    S.threadMsgs[id] = await api.threadMessages(id);
+    const t = (S.threads || []).find(x => x.id===id);
+    if(t){ t.unread = 0; S.chat.unread.friends = S.threads.reduce((a, x) => a + (x.unread || 0), 0); renderChatBadges(); }
+    api.threadRead(id).catch(() => {});
+  }catch(e){ console.warn(e); S.threadMsgs[id] = []; }
+  if(S.chat.open && S.chat.room==='friends' && S.chat.thread===id) renderChat();
+}
+// message a friend: find (or start) your direct chat with them
+async function openThreadWith(userId){
+  const id = await api.dmOpen(userId);
+  if(!(S.threads || []).some(t => t.id===id)) await loadThreads();
+  S.chat.room = 'friends';
+  openThread(id);
+}
+async function myFriends(){ if(!S.friendsList) S.friendsList = await api.friends().catch(() => []); return S.friendsList; }
+// + New: a friend to message, or start a group
+async function newChatPicker(){
+  const friends = (await myFriends()).filter(f => f.status==='accepted');
+  if(!friends.length){
+    const go = await confirmModal({ title:'No friends yet', body:'Add friends first: from someone’s page, from chat, or with their user ID in Account → Friends.', ok:'Go to Friends', cancel:'Close' });
+    if(go){ closeChat(); S.friendsOpen = true; setView('account'); }
+    return;
+  }
+  const pick = await new Promise(resolve => {
+    const scrim = document.createElement('div');
+    scrim.className = 'modal-scrim';
+    scrim.innerHTML = `<div class="modal team-pick" role="dialog" aria-modal="true"><h3>New chat</h3>`+
+      `<button class="fp" type="button" data-group="1"><span class="av none grp" style="width:34px;height:34px;font-size:16px">👥</span><span>Start a group…</span></button>`+
+      `<div class="fp-list" style="margin-top:6px">${friends.map(f => `<button class="fp" type="button" data-uid="${esc(f.user_id)}">${avatarHTML(f.user_id, 34, f.known_as)}`+
+        `<span>${esc(f.known_as)}${f.real_name ? ` <small style="font-family:Inter,sans-serif;font-weight:400;text-transform:none;color:var(--mid)">${esc(f.real_name)}</small>` : ''}</span></button>`).join('')}</div>`+
+      `<div class="modal-actions"><button class="btn-cancel" data-act="no">Cancel</button></div></div>`;
+    const done = v => { scrim.remove(); resolve(v); };
+    scrim.addEventListener('click', e => {
+      if(e.target===scrim || e.target.closest('[data-act="no"]')) return done(null);
+      if(e.target.closest('[data-group]')) return done({ group:true });
+      const b = e.target.closest('[data-uid]'); if(b) done({ uid:b.dataset.uid });
+    });
+    $('app').appendChild(scrim);
+  });
+  if(!pick) return;
+  if(pick.uid) return openThreadWith(pick.uid);
+  const g = await groupPicker(friends, 'New group', 'Create');
+  if(!g) return;
+  try{ const id = await api.groupCreate(g.name, g.ids); await loadThreads(); openThread(id); }
+  catch(err){ await confirmModal({ title:'New group', body:esc(err.message || 'Couldn’t create it.'), ok:'OK', cancel:'Close' }); }
+}
+// choose friends (and a name) for a group
+function groupPicker(friends, title, okLabel, name=''){
+  return new Promise(resolve => {
+    const scrim = document.createElement('div');
+    scrim.className = 'modal-scrim';
+    scrim.innerHTML = `<form class="modal team-pick" role="dialog" aria-modal="true"><h3>${esc(title)}</h3>`+
+      (okLabel==='Create' ? `<div class="fld"><label for="g-name">Group name</label><input id="g-name" type="text" maxlength="40" value="${esc(name)}" placeholder="e.g. Footy crew" required></div>` : '')+
+      `<div class="fp-list">${friends.map(f => `<label class="fp"><input type="checkbox" value="${esc(f.user_id)}">${avatarHTML(f.user_id, 30, f.known_as)}<span>${esc(f.known_as)}</span></label>`).join('')}</div>`+
+      `<div class="modal-actions"><button class="btn-cancel" type="button" data-act="no">Cancel</button><button class="big-btn" type="submit">${esc(okLabel)}</button></div></form>`;
+    const done = v => { scrim.remove(); resolve(v); };
+    scrim.addEventListener('click', e => { if(e.target===scrim || e.target.closest('[data-act="no"]')) done(null); });
+    scrim.querySelector('form').addEventListener('submit', e => {
+      e.preventDefault();
+      const ids = [...scrim.querySelectorAll('input[type=checkbox]:checked')].map(i => i.value);
+      if(!ids.length) return;
+      done({ name:(scrim.querySelector('#g-name') || {}).value || '', ids });
+    });
+    $('app').appendChild(scrim);
+  });
+}
+async function groupInfo(t){
+  const friends = (await myFriends()).filter(f => f.status==='accepted' && !(t.members || []).some(m => m.user_id===f.user_id));
+  const act = await new Promise(resolve => {
+    const scrim = document.createElement('div');
+    scrim.className = 'modal-scrim';
+    scrim.innerHTML = `<div class="modal team-pick" role="dialog" aria-modal="true"><h3>${esc(t.name || 'Group')}</h3>`+
+      `<div class="fp-list">${(t.members || []).map(m => `<div class="fp" style="cursor:default">${avatarHTML(m.user_id, 30, m.known_as)}<span style="flex:1;min-width:0">${esc(m.known_as)}`+
+        `${m.real_name ? ` <small style="font-family:Inter,sans-serif;font-weight:400;text-transform:none;color:var(--mid)">${esc(m.real_name)}</small>` : ''}${m.user_id===S.user.id ? ' (you)' : ''}`+
+        `${m.user_id===t.owner ? ' <span class="tag-host">Owner</span>' : ''}</span>`+
+        // the owner can remove anyone else
+        `${t.owner===S.user.id && m.user_id!==S.user.id ? `<button class="btn-sm danger" type="button" data-act="rm:${esc(m.user_id)}">Remove</button>` : ''}</div>`).join('')}</div>`+
+      `<div class="modal-actions" style="grid-template-columns:1fr 1fr">`+
+        (friends.length ? `<button class="btn-cancel" data-act="add">Add friends</button>` : '')+
+        `<button class="btn-cancel" data-act="rename">Rename</button>`+
+        `<button class="btn-cancel" data-act="leave" style="color:var(--err)">Leave group</button>`+
+        `<button class="big-btn" data-act="close" style="grid-column:1/-1">Done</button></div></div>`;
+    const done = v => { scrim.remove(); resolve(v); };
+    scrim.addEventListener('click', e => { if(e.target===scrim) return done(null); const b = e.target.closest('[data-act]'); if(b) done(b.dataset.act); });
+    $('app').appendChild(scrim);
+  });
+  try{
+    if(act && act.startsWith('rm:')){
+      const m = (t.members || []).find(x => x.user_id===act.slice(3));
+      const ok = await confirmModal({ title:`Remove ${esc((m && m.known_as) || 'them')}?`, body:'They’ll stop getting this group’s messages. You can add them back later.', ok:'Remove' });
+      if(!ok) return;
+      await api.groupRemove(t.id, act.slice(3));
+    } else if(act==='add'){
+      const g = await groupPicker(friends, 'Add to group', 'Add');
+      if(g){ for(const id of g.ids) await api.groupAdd(t.id, id); }
+    } else if(act==='rename'){
+      const v = await promptModal({ title:'Rename group', label:'Group name', value:t.name || '', ok:'Save', maxlength:40 });
+      if(v && v.trim()) await api.groupRename(t.id, v.trim());
+    } else if(act==='leave'){
+      const ok = await confirmModal({ title:'Leave this group?', body:'You’ll stop getting its messages. Someone can add you back later.'+
+        (t.owner===S.user.id && (t.members || []).length > 1 ? ' You own it, so it passes to whoever’s been in longest.' : ''), ok:'Leave' });
+      if(!ok) return;
+      await api.groupLeave(t.id); S.chat.thread = null;
+    } else return;
+    await loadThreads(); renderChat();
+  }catch(err){ await confirmModal({ title:'Group', body:esc(err.message || 'That didn’t work.'), ok:'OK', cancel:'Close' }); }
+}
+
+/* ── one chat message (rooms and friends chats): avatar + tappable name, edited / deleted, and
+   Edit / Delete when you tap your own (or, for the host, anything in the comp room) ── */
+function msgRowHTML(m, { room, showName=true, extraMeta='' }){
+  const me = m.user_id===S.user.id;
+  const canDelete = !m.deleted && (me || (room==='comp' && isHost()));
+  const canEdit = !m.deleted && me;
+  const name = me ? 'You' : esc(m.name);
+  const nameHTML = me ? `<b>You</b>` : `<b class="who-link" data-user="${esc(m.user_id || '')}" data-name="${esc(m.name)}" data-compname="${esc(m.comp_name || '')}">${name}</b>`;
+  return `<div class="msg-row${me?' me':''}" data-msg="${esc(m.id)}">`+
+    (showName || !me ? `<div class="msg-meta">${nameHTML}${extraMeta}<span>${fmtMsgTime(m.ts)}</span>${m.edited && !m.deleted ? '<span class="edited">edited</span>' : ''}</div>` : '')+
+    // name on top; then their avatar beside the message (your own sit on the right, no avatar)
+    `<div class="msg-line">${me ? '' : avatarHTML(m.user_id, 28, m.name)}`+
+      `<div class="bubble${m.deleted ? ' gone' : ''}${canDelete ? ' can-act' : ''}">${m.deleted ? 'Message deleted' : esc(m.text)}</div></div>`+
+    (canDelete ? `<div class="msg-acts">${canEdit ? `<button type="button" data-edit="${esc(m.id)}">Edit</button>` : ''}<button type="button" data-del="${esc(m.id)}" class="del">Delete</button></div>` : '')+
+  `</div>`;
+}
+function wireMsgActions(list, kind){
+  list.querySelectorAll('.bubble.can-act').forEach(b => b.addEventListener('click', () => {
+    const row = b.closest('.msg-row'), on = !row.classList.contains('acts');
+    list.querySelectorAll('.msg-row.acts').forEach(r => r.classList.remove('acts'));
+    row.classList.toggle('acts', on);
+  }));
+  list.querySelectorAll('.who-link[data-user]').forEach(n => n.addEventListener('click', () => {
+    if(n.dataset.user) openSomeone(n.dataset.user, { name:n.dataset.name, comp_name:n.dataset.compname });
+  }));
+  const find = id => kind==='thread' ? ((S.threadMsgs || {})[S.chat.thread] || []).find(m => m.id===id) : S.chat.msgs[S.chat.room].find(m => m.id===id);
+  list.querySelectorAll('[data-edit]').forEach(b => b.addEventListener('click', async () => {
+    const m = find(b.dataset.edit); if(!m) return;
+    const v = await promptModal({ title:'Edit message', label:'Message', value:m.text, ok:'Save', maxlength:kind==='thread' ? 1000 : 280, multiline:true });
+    if(v==null || !v.trim() || v.trim()===m.text) return;
+    try{ Object.assign(m, kind==='thread' ? await api.editMessage(m.id, v.trim()) : await api.editChat(m.id, v.trim())); renderChat(); }
+    catch(err){ await confirmModal({ title:'Couldn’t edit', body:esc(err.message || ''), ok:'OK', cancel:'Close' }); }
+  }));
+  list.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', async () => {
+    const m = find(b.dataset.del); if(!m) return;
+    const ok = await confirmModal({ title:'Delete this message?', body:'It’ll show as “Message deleted” for everyone.', ok:'Delete' });
+    if(!ok) return;
+    try{
+      Object.assign(m, kind==='thread' ? await api.deleteMessage(m.id) : await api.deleteChat(m.id));
+      if(kind!=='thread' && S.comp.pinned===m.id) S.comp.pinned = null;
+      renderChat();
+    }catch(err){ await confirmModal({ title:'Couldn’t delete', body:esc(err.message || ''), ok:'OK', cancel:'Close' }); }
+  }));
 }
 
 /* ════════ ACCOUNT ════════ */
@@ -3685,7 +4199,7 @@ function prefOn(kind, key){
   const p = S.prefs || {}, chat = p.chat || {};
   if(kind==='achievements') return p.achievements !== false;
   if(kind==='bet_live') return p.bet_live === true;                      // off until turned on
-  if(['results','reminders','social','joins','quiet'].includes(kind)) return p[kind] !== false;
+  if(['results','reminders','social','joins','quiet','friends','dm','friend_bets'].includes(kind)) return p[kind] !== false;
   if(kind==='digest') return ((p.digest || {})[key]) !== false;
   if(kind==='chat_all') return chat.all !== false;                       // the master switch in Account
   if(kind==='chat_global') return chat.global === true;                  // Everyone: off until turned on
@@ -3694,7 +4208,7 @@ function prefOn(kind, key){
 }
 async function setPref(kind, key, on){
   const p = S.prefs = JSON.parse(JSON.stringify(S.prefs || {}));
-  if(kind==='achievements' || ['results','reminders','social','joins','quiet','bet_live'].includes(kind)) p[kind] = on;
+  if(kind==='achievements' || ['results','reminders','social','joins','quiet','bet_live','friends','dm','friend_bets'].includes(kind)) p[kind] = on;
   else if(kind==='digest') (p.digest = p.digest || {})[key] = on;
   else {
     p.chat = p.chat || {};
@@ -3774,6 +4288,9 @@ function notificationsCard(device){
       sw('joins', null, 'New members', 'When someone joins one of your comps')+
       sw('bet_live', null, 'Your games bouncing', 'When a game you’ve got a bet on starts (off by default)')+
       sw('chat_all', null, 'Chat', 'Turn off to stop all chat notifications. Choose rooms with the bells in the chat window.')+
+      sw('dm', null, 'Direct and group messages', 'Messages from friends. Mute a single chat with its bell')+
+      sw('friends', null, 'Friend requests', 'When someone asks to be friends, or accepts your request')+
+      sw('friend_bets', null, 'Friends’ bets', 'For friends you’ve turned on “Their bets”, in comps you share')+
       `<h4 style="margin-top:14px">Quiet hours</h4>`+
       sw('quiet', null, 'Nothing between 11pm and 7am', 'Except chat. Anything else waits until 7am.')+
     `</div></div>`;
@@ -3804,10 +4321,12 @@ function rulesText(c){
 async function renderAccount(){
   const body = $('account-body');
   await swr('acct:'+S.comp.id, body, async () => {
-      const [bets, members, , unlocks, progress, , device, comps] = await Promise.all([api.myBets(S.comp.id), api.members(S.comp.id),
-        ensureProfiles([S.user.id], true), api.unlocks().catch(() => []), api.achProgress().catch(() => []), loadPrefs(), pushState(), api.myComps()]);
-      S.comps = comps;
-      return { bets, members, unlocks, progress, device };
+      const [bets, members, , unlocks, progress, , device, comps, friends, realName] = await Promise.all([api.myBets(S.comp.id), api.members(S.comp.id),
+        ensureProfiles([S.user.id], true), api.unlocks().catch(() => []), api.achProgress().catch(() => []), loadPrefs(), pushState(), api.myComps(),
+        api.friends().catch(() => []), api.myRealName().catch(() => '')]);
+      S.comps = comps; S.friendsList = friends;
+      await ensureProfiles(members.map(m => m.user_id).concat(friends.map(f => f.user_id)));
+      return { bets, members, unlocks, progress, device, friends, realName };
     },
     (d, cached) => {
       // a background refresh never wipes something you're typing
@@ -3820,7 +4339,7 @@ async function renderAccount(){
 function repaintAccount(){ const d = CACHE.get('acct:'+S.comp.id); if(d) paintAccount(d); else renderAccount(); }
 function paintAccount(d){
   const body = $('account-body'), pane = $('pane-account'), y = pane.scrollTop;
-  const { bets, members, unlocks, progress, device } = d;
+  const { bets, members, unlocks, progress, device, friends = [], realName = '' } = d;
   const start = startBal(), funded = fundedOf(S.entrant), net = S.balance - funded;
   const H = highlights(bets);
   const joined = S.entrant.joined_at ? new Date(S.entrant.joined_at).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }) : '—';
@@ -3832,7 +4351,8 @@ function paintAccount(d){
   // Edit for your username here; the host can remove anyone else.
   const memberRow = m => {
     const mine = m.user_id===S.user.id;
-    return `<div class="comp-row"><span class="w"><div class="n">${esc(mine ? S.entrant.display_name : m.display_name)}`+
+    return `<div class="comp-row mem-row" data-player="${esc(m.user_id)}" data-name="${esc(mine ? S.entrant.display_name : m.display_name)}">`+
+      `${avatarHTML(m.user_id, 30, mine ? S.entrant.display_name : m.display_name)}<span class="w"><div class="n">${esc(mine ? S.entrant.display_name : m.display_name)}`+
       `${m.user_id===S.comp.host_id?'<span class="tag-host">Host</span>':''}${mine?'<span class="tag-cur" style="margin-left:7px">You</span>':''}</div>`+
       `<div class="s">Joined ${esc(new Date(m.joined_at).toLocaleDateString('en-AU', { day:'numeric', month:'short' }))}</div></span>`+
       (mine ? `<button class="btn-sm" id="name-edit" type="button">Edit</button>`
@@ -3894,11 +4414,13 @@ function paintAccount(d){
       (isWeekly() ? `<div class="rule-list" style="margin-top:6px">The leaderboard ranks on profit: your balance minus everything you’ve been given.</div>` : '')+
     `</div>`)+
     compsCard +
+    friendsCardHTML(friends)+
     barrackingCard()+
     achievementsCard(unlocks, progress)+
     notificationsCard(device)+
     `<div class="acct"><h3>Signed in</h3>`+
       `<div class="rule-list">${esc(S.user.email || '')}</div>`+
+      signedInExtrasHTML(realName)+
       (MOCK ? '' :
         `<form id="pw-form" class="rules"><h4>Change password</h4>`+
           `<div class="fld"><label for="pw-cur">Current password</label><input id="pw-cur" type="password" autocomplete="current-password" required></div>`+
@@ -3917,6 +4439,14 @@ function paintAccount(d){
   body.querySelectorAll('[data-team-pick]').forEach(b => b.addEventListener('click', () => pickTeam(b.dataset.teamPick)));
   wireAchievements(body);
   wireNotifications(body);
+  wireFriendsCard(body);
+  wireSignedInExtras(realName);
+  // members: tap a row to open their page (the buttons in it still do their own thing)
+  body.querySelectorAll('.mem-row[data-player]').forEach(r => r.addEventListener('click', e => {
+    if(e.target.closest('button')) return;
+    openPlayer(r.dataset.player, r.dataset.name);
+  }));
+  if(S.friendsOpen){ S.friendsOpen = false; setTimeout(() => $('friends-card') && $('friends-card').scrollIntoView({ block:'start' }), 50); }
   // comp card
   $('code-copy').addEventListener('click', async e => {
     const b = e.currentTarget;
@@ -4005,12 +4535,14 @@ function paintAccount(d){
   });
 }
 // a one-line text prompt: resolves the text, or null if cancelled
-function promptModal({ title, label, value='', ok='Save', maxlength=40 }){
+function promptModal({ title, label, value='', ok='Save', maxlength=40, multiline=false }){
   return new Promise(resolve => {
     const scrim = document.createElement('div');
     scrim.className = 'modal-scrim';
     scrim.innerHTML = `<form class="modal" role="dialog" aria-modal="true"><h3>${title}</h3>`+
-      `<div class="fld"><label for="prompt-in">${label}</label><input id="prompt-in" type="text" maxlength="${maxlength}" autocomplete="off" value="${esc(value)}"></div>`+
+      `<div class="fld"><label for="prompt-in">${label}</label>`+
+        (multiline ? `<textarea id="prompt-in" rows="4" maxlength="${maxlength}">${esc(value)}</textarea>`
+                   : `<input id="prompt-in" type="text" maxlength="${maxlength}" autocomplete="off" value="${esc(value)}">`)+`</div>`+
       `<div class="modal-actions"><button class="btn-cancel" type="button" data-act="no">Cancel</button><button class="big-btn" type="submit">${esc(ok)}</button></div></form>`;
     const done = v => { document.removeEventListener('keydown', onKey); scrim.remove(); resolve(v); };
     const onKey = e => { if(e.key==='Escape') done(null); };
@@ -4036,7 +4568,8 @@ function markRead(room){
 }
 function countUnread(room){ const lr = lastRead(room); return S.chat.msgs[room].filter(m => m.ts>lr && m.user_id!==S.user.id).length; }
 async function loadChat(){
-  const [got] = await Promise.all([Promise.all(ROOMS.map(r => api.chat(r, S.comp.id))), loadPrefs()]);
+  const [got] = await Promise.all([Promise.all(ROOMS.map(r => api.chat(r, S.comp.id))), loadPrefs(),
+    api.members(S.comp.id).then(ms => { S.compMembers = new Set(ms.map(m => m.user_id)); }).catch(() => {}), loadThreads()]);
   ROOMS.forEach((r,i) => { S.chat.msgs[r] = got[i]; });
   ROOMS.forEach(r => { S.chat.unread[r] = countUnread(r); });
   $('room-sport-label').textContent = SP().label;
@@ -4044,20 +4577,22 @@ async function loadChat(){
 }
 function renderChatBadges(){
   const set = (id, n) => { const el = $(id); el.textContent = n>99 ? '99+' : n; el.classList.toggle('hidden', !n); };
-  set('chat-unread', ROOMS.reduce((a,r) => a + S.chat.unread[r], 0));
+  set('chat-unread', ROOMS.reduce((a,r) => a + S.chat.unread[r], 0) + (S.chat.unread.friends || 0));
   ROOMS.forEach(r => set('unread-'+r, S.chat.unread[r]));
+  set('unread-friends', S.chat.unread.friends || 0);
 }
 function openChat(){
   S.chat.open = true;
   $('chat-drawer').classList.add('open'); $('chat-scrim').classList.add('show');
-  markRead(S.chat.room); renderChat();
+  if(ROOMS.includes(S.chat.room)) markRead(S.chat.room);
+  renderChat();
 }
 function closeChat(){
   S.chat.open = false;
   $('chat-drawer').classList.remove('open'); $('chat-scrim').classList.remove('show');
   $('chat-input').blur();
 }
-function setRoom(room){ S.chat.room = room; markRead(room); renderChat(); }
+function setRoom(room){ S.chat.room = room; if(room!=='friends') S.chat.thread = null; if(ROOMS.includes(room)) markRead(room); renderChat(); }
 function fmtMsgTime(ts){ return new Date(ts).toLocaleTimeString('en-AU', { hour:'numeric', minute:'2-digit' }).replace(/\s/g,'').toLowerCase(); }
 function fmtMsgDay(ts){
   const d = new Date(ts), today = new Date(), y = new Date(Date.now()-864e5);
@@ -4068,6 +4603,9 @@ function fmtMsgDay(ts){
 function renderChat(){
   const room = S.chat.room, msgs = S.chat.msgs[room];
   document.querySelectorAll('#chat-drawer .type-chip').forEach(c => c.classList.toggle('active', c.dataset.room===room));
+  if(room==='friends'){ renderFriendsRoom(); return; }
+  $('chat-form').classList.remove('hidden');
+  $('chat-input').placeholder = 'Say something…';
   // the room's description, with a bell to mute its notifications
   const sub = room==='comp' ? `${S.comp.name} · members only`
     : room==='sport' ? `Everyone in an ${SP().label} comp` : 'Everyone, across every comp';
@@ -4080,7 +4618,7 @@ function renderChat(){
   const pinned = room==='comp' && S.comp.pinned ? msgs.find(m => m.id===S.comp.pinned) : null;
   pinBox.classList.toggle('hidden', !pinned);
   if(pinned){
-    pinBox.innerHTML = `<span class="ic">📌</span><span class="w"><div class="who">${esc(pinned.name)}</div><div>${esc(pinned.text)}</div></span>`+
+    pinBox.innerHTML = `<span class="ic">📌</span><span class="w"><div class="who">${esc(pinned.name)}</div><div class="pin-t">${esc(pinned.text)}</div></span>`+
       (isHost() ? `<button id="unpin">Unpin</button>` : '');
     if(isHost()) $('unpin').addEventListener('click', async () => { S.comp = await api.pin(S.comp.id, null); renderChat(); });
   }
@@ -4091,18 +4629,16 @@ function renderChat(){
   msgs.forEach(m => {
     const d = fmtMsgDay(m.ts);
     if(d!==day){ day = d; html += `<div class="chat-day">${esc(d)}</div>`; }
-    const me = m.user_id===S.user.id;
     const isHostMsg = room==='comp' && m.user_id===S.comp.host_id;
-    const who = me ? 'You' : esc(m.name);
     // where it's from: sport room shows the comp, global also shows the code
     const from = room==='sport' ? ` · ${esc(m.comp_name)}`
       : room==='global' ? ` · ${esc(SP(m.sport).label)} · ${esc(m.comp_name)}` : '';
-    const pinBtn = (room==='comp' && isHost() && S.comp.pinned!==m.id) ? `<button class="msg-pin-btn" data-pin="${esc(m.id)}">Pin</button>` : '';
-    html += `<div class="msg-row${me?' me':''}"><div class="msg-meta"><b>${who}</b>${flairHTML(m.user_id, m.sport || curSport())}<b>${from}</b>${isHostMsg?'<span class="host">HOST</span>':''}<span>${fmtMsgTime(m.ts)}</span>${pinBtn}</div>`+
-      `<div class="bubble">${esc(m.text)}</div></div>`;
+    const pinBtn = (room==='comp' && isHost() && S.comp.pinned!==m.id && !m.deleted) ? `<button class="msg-pin-btn" data-pin="${esc(m.id)}">Pin</button>` : '';
+    html += msgRowHTML(m, { room, extraMeta:`${flairHTML(m.user_id, m.sport || curSport())}<b>${from}</b>${isHostMsg?'<span class="host">HOST</span>':''}`+pinBtn });
   });
   list.innerHTML = html;
   list.querySelectorAll('[data-pin]').forEach(b => b.addEventListener('click', async () => { S.comp = await api.pin(S.comp.id, b.dataset.pin); renderChat(); }));
+  wireMsgActions(list, 'room');
   list.scrollTop = list.scrollHeight;
   // flairs for anyone we haven't looked up yet
   ensureProfiles(msgs.map(m => m.user_id)).then(got => { if(got && S.chat.open && S.chat.room===room) renderChat(); });
@@ -4206,6 +4742,16 @@ $('chat-form').addEventListener('submit', async e => {
   $('chat-input').value = ''; $('chat-send').disabled = true;
   sizeChatInput();
   const room = S.chat.room;
+  if(room==='friends'){
+    const tid = S.chat.thread; if(!tid) return;
+    try{
+      const msg = await api.sendMessage(tid, text);
+      const list = (S.threadMsgs = S.threadMsgs || {})[tid] = (S.threadMsgs[tid] || []);
+      if(!list.some(x => x.id===msg.id)) list.push(msg);
+      renderChat(); loadThreads();
+    }catch(err){ $('chat-input').value = text; await confirmModal({ title:'Couldn’t send', body:esc(err.message || ''), ok:'OK', cancel:'Close' }); }
+    return;
+  }
   const msg = await api.send(room, S.comp.id, text);
   if(!S.chat.msgs[room].some(x => x.id===msg.id)) S.chat.msgs[room].push(msg);
   markRead(room); renderChat();
@@ -4232,7 +4778,8 @@ async function liveApi(){
     history:r.history||{}, joined_at:r.joined_at, is_host:r.is_host, seen_round:r.seen_round });
   const mapBet = r => ({ ...r, stake:n(r.stake), price:n(r.price), potential_payout:n(r.potential_payout), payout:n(r.payout) });
   const mapChat = r => ({ id:r.id, comp_id:r.comp_id, room:r.room, user_id:r.user_id, name:r.username,
-    comp_name:r.comp_name||'', sport:r.sport, text:r.body, ts:Date.parse(r.created_at) });
+    comp_name:r.comp_name||'', sport:r.sport, text:r.body, ts:Date.parse(r.created_at), edited:!!r.edited_at, deleted:!!r.deleted });
+  const mapMsg = r => ({ id:r.id, thread_id:r.thread_id, user_id:r.user_id, text:r.body, ts:Date.parse(r.created_at), edited:!!r.edited_at, deleted:!!r.deleted });
   const lastKey = () => `ft-last-comp-${uid}`;
 
   return {
@@ -4314,10 +4861,61 @@ async function liveApi(){
 
     // ── who you barrack for ──
     async profiles(ids){
-      const rows = chk(await sb.from('ft_profiles').select('user_id, teams, flair').in('user_id', ids)) || [];
-      return Object.fromEntries(rows.map(r => [r.user_id, { teams:r.teams || {}, flair:r.flair || null }]));
+      const rows = chk(await sb.from('ft_profiles').select('user_id, teams, flair, avatar_url').in('user_id', ids)) || [];
+      return Object.fromEntries(rows.map(r => [r.user_id, { teams:r.teams || {}, flair:r.flair || null, avatar_url:r.avatar_url || null }]));
     },
     async setTeam(sport, team){ return chk(await sb.rpc('ft_set_team', { p_sport:sport, p_team:team, p_season:SEASON })); },
+
+    // ── chat: edit / delete ──
+    async editChat(id, body){ return mapChat(chk(await sb.rpc('ft_edit_chat', { p_id:id, p_body:body }))); },
+    async deleteChat(id){ return mapChat(chk(await sb.rpc('ft_delete_chat', { p_id:id }))); },
+
+    // ── you: avatar + real name ──
+    async setAvatar(blob){
+      const path = `${uid}/avatar-${Date.now()}.jpg`;
+      chk(await sb.storage.from('ft-avatars').upload(path, blob, { contentType:'image/jpeg', upsert:true }));
+      const url = sb.storage.from('ft-avatars').getPublicUrl(path).data.publicUrl;
+      chk(await sb.rpc('ft_set_avatar', { p_url:url }));
+      // tidy up older photos of yours
+      const old = (chk(await sb.storage.from('ft-avatars').list(uid)) || []).map(o => `${uid}/${o.name}`).filter(p => p!==path);
+      if(old.length) await sb.storage.from('ft-avatars').remove(old);
+      return url;
+    },
+    async removeAvatar(){
+      chk(await sb.rpc('ft_set_avatar', { p_url:null }));
+      const old = (chk(await sb.storage.from('ft-avatars').list(uid)) || []).map(o => `${uid}/${o.name}`);
+      if(old.length) await sb.storage.from('ft-avatars').remove(old);
+    },
+    async myRealName(){ return (chk(await sb.from('ft_people').select('real_name').eq('user_id', uid).maybeSingle()) || {}).real_name || ''; },
+    async setRealName(name){
+      chk(await sb.rpc('ft_set_real_name', { p_name:name }));
+      await sb.auth.updateUser({ data:{ display_name:name || null } });         // also the account's display name
+    },
+
+    // ── friends ──
+    async person(id){ return chk(await sb.rpc('ft_person', { p_user:id })); },
+    async friends(){ return chk(await sb.rpc('ft_my_friends')) || []; },
+    async friendRequest(id){ return chk(await sb.rpc('ft_friend_request', { p_user:id })); },
+    async friendRespond(id, accept){ chk(await sb.rpc('ft_friend_respond', { p_user:id, p_accept:accept })); },
+    async friendRemove(id){ chk(await sb.rpc('ft_friend_remove', { p_user:id })); },
+    async friendNotify(id, on){ chk(await sb.rpc('ft_friend_notify', { p_user:id, p_on:on })); },
+
+    // ── friends chats ──
+    async threads(){ return chk(await sb.rpc('ft_my_threads')) || []; },
+    async threadMessages(id){
+      return ((chk(await sb.from('ft_messages').select('*').eq('thread_id', id).order('created_at', { ascending:false }).limit(300))) || []).reverse().map(mapMsg);
+    },
+    async dmOpen(id){ return chk(await sb.rpc('ft_dm_open', { p_user:id })); },
+    async groupCreate(name, ids){ return chk(await sb.rpc('ft_group_create', { p_name:name, p_users:ids })); },
+    async groupAdd(t, id){ chk(await sb.rpc('ft_group_add', { p_thread:t, p_user:id })); },
+    async groupRename(t, name){ chk(await sb.rpc('ft_group_rename', { p_thread:t, p_name:name })); },
+    async groupLeave(t){ chk(await sb.rpc('ft_group_leave', { p_thread:t })); },
+    async groupRemove(t, id){ chk(await sb.rpc('ft_group_remove', { p_thread:t, p_user:id })); },
+    async threadMute(t, on){ chk(await sb.rpc('ft_thread_mute', { p_thread:t, p_muted:on })); },
+    async threadRead(t){ chk(await sb.rpc('ft_thread_read', { p_thread:t })); },
+    async sendMessage(t, body){ return mapMsg(chk(await sb.rpc('ft_send_message', { p_thread:t, p_body:body }))); },
+    async editMessage(id, body){ return mapMsg(chk(await sb.rpc('ft_edit_message', { p_id:id, p_body:body }))); },
+    async deleteMessage(id){ return mapMsg(chk(await sb.rpc('ft_delete_message', { p_id:id }))); },
 
     // ── achievements ──
     async unlocks(userId){
@@ -4398,7 +4996,9 @@ async function liveApi(){
     subscribe(compId, h){
       const ch = sb.channel(`ft-${compId}-${uid}`)
         .on('postgres_changes', { event:'INSERT', schema:'public', table:'ft_chats' }, p => p.new && h.chat(mapChat(p.new)))
-        .on('postgres_changes', { event:'UPDATE', schema:'public', table:'ft_chats', filter:`comp_id=eq.${compId}` }, p => p.new && h.pin(p.new))
+        .on('postgres_changes', { event:'UPDATE', schema:'public', table:'ft_chats' }, p => { if(!p.new) return; if(p.new.comp_id===compId) h.pin(p.new); h.chatUpdate(mapChat(p.new)); })
+        .on('postgres_changes', { event:'*', schema:'public', table:'ft_messages' }, p => p.new && p.new.id && h.message(mapMsg(p.new)))
+        .on('postgres_changes', { event:'*', schema:'public', table:'ft_friends' }, () => h.friends())
         .on('postgres_changes', { event:'UPDATE', schema:'public', table:'ft_members', filter:`user_id=eq.${uid}` }, p => p.new && h.member({ ...p.new, balance:n(p.new.balance), funded:n(p.new.funded), banked:n(p.new.banked) }))
         // every bet in the comp you're allowed to see (row level security drops others' hidden ones):
         // yours for My Bets, everyone's for a live player view

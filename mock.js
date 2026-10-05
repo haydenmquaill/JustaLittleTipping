@@ -25,7 +25,7 @@ window.createMockApi = function(page){
     const at = ms => new Date(Math.abs(ms)<HR ? now+ms : Math.round((now+ms)/(5*MIN))*(5*MIN)).toISOString();
     const season = { id:2027 };
     const ME = 'mock-user';
-    const STORE = 'ft-mock-v10';
+    const STORE = 'ft-mock-v12';
     // round, home, away, kick-off offset, status, venue, live: [quarter, clock secs, home g.b per qtr, away g.b per qtr]
     const FX = [
       [5,'Carlton Blues','Richmond Tigers',-26*HR,'concluded','MCG',
@@ -341,6 +341,33 @@ window.createMockApi = function(page){
       global:['Haha good luck with that','Who’s your best bet this round?','Taking the under on that one','Lions by 20','Panthers by 12'],
     };
     // which list a room's messages live in
+    // every chat message, in every room
+    function allChat(){ return [...Object.values(st.chat.comp).flat(), ...Object.values(st.chat.sport).flat(), ...st.chat.global]; }
+    // the name someone goes by (their username in a comp you can see); strict: null if no one has that id
+    function knownAs(id, strict){
+      for(const c of Object.values(st.comps)) if(c.members[id]) return c.members[id].display_name;
+      return strict ? null : 'Someone';
+    }
+    // friends, real names, avatars and friends chats (seeded on first use)
+    function social(){
+      if(st.social) return st.social;
+      const ago = ms => Date.now() - ms;
+      st.social = {
+        avatars:{}, realNames:{ 'q-gazza':'Gary Quaill', 'q-shazza':'Sharon Quaill', 'q-kev':'Kevin Quaill', 'o-priya':'Priya Shah' },
+        friends:{ 'q-gazza':{ status:'accepted', since:new Date(ago(9*864e5)).toISOString() },
+                  'q-shazza':{ status:'pending', incoming:true, since:new Date(ago(864e5)).toISOString() },
+                  'o-priya':{ status:'pending', incoming:false, since:new Date(ago(2*864e5)).toISOString() } },
+        threads:[ { id:'th-gazza', kind:'dm', members:[ME, 'q-gazza'], created_at:new Date(ago(5*864e5)).toISOString() },
+                  { id:'th-crew', kind:'group', name:'Quaill crew', owner:'q-gazza', members:['q-gazza', ME, 'q-kev'], created_at:new Date(ago(3*864e5)).toISOString() } ],
+        msgs:{ 'th-gazza':[ { id:'dm-1', user_id:'q-gazza', text:'You on the Hawks this week?', ts:ago(26*36e5) },
+                            { id:'dm-2', user_id:ME, text:'Always. Hawks by 30', ts:ago(25*36e5) },
+                            { id:'dm-3', user_id:'q-gazza', text:'Bold. Tailing it 😂', ts:ago(40*6e4) } ],
+               'th-crew':[ { id:'gc-1', user_id:'q-kev', text:'Who’s hosting the Grand Final BBQ?', ts:ago(5*36e5) },
+                           { id:'gc-2', user_id:'q-gazza', text:'Loser of the comp, obviously', ts:ago(4*36e5) } ] },
+        read:{ 'th-gazza':ago(24*36e5), 'th-crew':ago(4.5*36e5) },
+      };
+      return st.social;
+    }
     function roomList(room, compId){
       if(room==='comp') return (st.chat.comp[compId] = st.chat.comp[compId] || []);
       if(room==='sport'){ const s = st.comps[compId].sport; return (st.chat.sport[s] = st.chat.sport[s] || []); }
@@ -456,8 +483,9 @@ window.createMockApi = function(page){
       // ── who you barrack for (same rules as ft_set_team) ──
       async profiles(ids){
         st.profiles = st.profiles || {}; st.flairs = st.flairs || {};
-        return Object.fromEntries(ids.filter(id => st.profiles[id] || st.flairs[id])
-          .map(id => [id, { teams:JSON.parse(JSON.stringify(st.profiles[id] || {})), flair:st.flairs[id] || null }]));
+        const av = social().avatars;
+        return Object.fromEntries(ids.filter(id => st.profiles[id] || st.flairs[id] || av[id])
+          .map(id => [id, { teams:JSON.parse(JSON.stringify(st.profiles[id] || {})), flair:st.flairs[id] || null, avatar_url:av[id] || null }]));
       },
       // ── achievements (the real ones are worked out by the database) ──
       async unlocks(userId){ return JSON.parse(JSON.stringify(((st.unlocks || {})[userId || ME]) || [])); },
@@ -583,6 +611,119 @@ window.createMockApi = function(page){
         save();
         return me.balance;
       },
+      // ── chat: edit / delete (yours; the host can delete anything in the comp room) ──
+      async editChat(id, body){
+        const m = allChat().find(x => x.id===id);
+        if(!m || m.user_id!==ME || m.deleted) throw new Error('You can only edit your own messages.');
+        m.text = body.slice(0,280); m.edited = true; save(); return { ...m };
+      },
+      async deleteChat(id){
+        const m = allChat().find(x => x.id===id); if(!m) throw new Error('Message not found.');
+        const host = Object.values(st.comps).some(c => c.host_id===ME && (st.chat.comp[c.id]||[]).includes(m));
+        if(m.user_id!==ME && !host) throw new Error('You can’t delete that message.');
+        m.deleted = true; m.text = '·'; m.edited = false;
+        Object.values(st.comps).forEach(c => { if(c.pinned===m.id) c.pinned = null; });
+        save(); return { ...m };
+      },
+
+      // ── you: avatar + real name ──
+      async setAvatar(blob){
+        const url = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(blob); });
+        social().avatars[ME] = url; save(); return url;
+      },
+      async removeAvatar(){ delete social().avatars[ME]; save(); },
+      async myRealName(){ return social().realNames[ME] || ''; },
+      async setRealName(name){ social().realNames[ME] = name || ''; save(); },
+
+      // ── friends ──
+      async person(id){
+        const so = social(), f = so.friends[id];
+        const shared = Object.values(st.comps).filter(c => c.members[ME] && c.members[id])
+          .map(c => ({ comp_id:c.id, comp_name:c.name, sport:c.sport, username:c.members[id].display_name }));
+        return { user_id:id, known_as:knownAs(id), avatar_url:so.avatars[id] || null, shared,
+          real_name: (id===ME || (f && f.status==='accepted')) ? (so.realNames[id] || null) : null,
+          friend: !f ? 'none' : f.status==='accepted' ? 'friends' : f.incoming ? 'incoming' : 'requested',
+          notify: f && f.status==='accepted' ? !!f.notify : null };
+      },
+      async friends(){
+        const so = social();
+        return Object.entries(so.friends).map(([id, f]) => ({ user_id:id, status:f.status, incoming:!!f.incoming && f.status==='pending', notify:!!f.notify,
+          known_as:knownAs(id), real_name:f.status==='accepted' ? (so.realNames[id] || null) : null, avatar_url:so.avatars[id] || null, since:f.since }));
+      },
+      async friendRequest(id){
+        if(id===ME) throw new Error('That’s you!');
+        if(!knownAs(id, true)) throw new Error('No one has that user ID. Check it and try again.');
+        const so = social(), f = so.friends[id];
+        if(f && f.status==='pending' && f.incoming){ f.status = 'accepted'; f.incoming = false; save(); return 'accepted'; }
+        if(f) return f.status;
+        so.friends[id] = { status:'pending', incoming:false, since:new Date().toISOString() }; save(); return 'pending';
+      },
+      async friendRespond(id, accept){
+        const so = social(), f = so.friends[id]; if(!f || !f.incoming) return;
+        if(accept){ f.status = 'accepted'; f.incoming = false; } else delete so.friends[id];
+        save();
+      },
+      async friendRemove(id){ delete social().friends[id]; save(); },
+      async friendNotify(id, on){ const f = social().friends[id]; if(f) f.notify = !!on; save(); },
+
+      // ── friends chats ──
+      async threads(){
+        const so = social();
+        return so.threads.filter(t => t.members.includes(ME)).map(t => {
+          const msgs = so.msgs[t.id] || [], last = msgs[msgs.length-1];
+          const read = so.read[t.id] || 0;
+          return { id:t.id, kind:t.kind, name:t.name, owner:t.owner || null, muted:!!t.muted, created_at:t.created_at,
+            members:t.members.map(id => ({ user_id:id, known_as:knownAs(id), avatar_url:so.avatars[id] || null,
+              real_name:(id===ME || (so.friends[id] && so.friends[id].status==='accepted')) ? (so.realNames[id] || null) : null })),
+            last_body:last && last.text, last_user:last && last.user_id, last_at:last && new Date(last.ts).toISOString(), last_deleted:!!(last && last.deleted),
+            unread:msgs.filter(m => m.ts > read && m.user_id!==ME).length };
+        }).sort((a, b) => new Date(b.last_at || b.created_at) - new Date(a.last_at || a.created_at));
+      },
+      async threadMessages(id){ return (social().msgs[id] || []).map(m => ({ ...m, thread_id:id })); },
+      async dmOpen(id){
+        const so = social();
+        if(!(so.friends[id] && so.friends[id].status==='accepted')) throw new Error('You can only message friends.');
+        let t = so.threads.find(x => x.kind==='dm' && x.members.includes(id) && x.members.includes(ME));
+        if(!t){ t = { id:'th-'+uid().slice(0,8), kind:'dm', members:[ME, id], created_at:new Date().toISOString() }; so.threads.push(t); save(); }
+        return t.id;
+      },
+      async groupCreate(name, ids){
+        const t = { id:'th-'+uid().slice(0,8), kind:'group', name, members:[ME, ...ids], owner:ME, created_at:new Date().toISOString() };
+        social().threads.push(t); save(); return t.id;
+      },
+      async groupAdd(tid, id){ const t = social().threads.find(x => x.id===tid); if(t && !t.members.includes(id)) t.members.push(id); save(); },
+      async groupRename(tid, name){ const t = social().threads.find(x => x.id===tid); if(t) t.name = name; save(); },
+      async groupLeave(tid){
+        const so = social(), t = so.threads.find(x => x.id===tid); if(!t) return;
+        t.members = t.members.filter(x => x!==ME);
+        if(t.owner===ME) t.owner = t.members[0] || null;            // passes to whoever's been in longest
+        save();
+      },
+      async groupRemove(tid, id){
+        const t = social().threads.find(x => x.id===tid);
+        if(!t || t.owner!==ME) throw new Error('Only the group’s owner can remove people.');
+        t.members = t.members.filter(x => x!==id); save();
+      },
+      async threadMute(tid, on){ const t = social().threads.find(x => x.id===tid); if(t) t.muted = !!on; save(); },
+      async threadRead(tid){ social().read[tid] = Date.now(); save(); },
+      async sendMessage(tid, body){
+        const so = social(), t = so.threads.find(x => x.id===tid);
+        if(t && t.kind==='dm'){ const o = t.members.find(x => x!==ME); if(!(so.friends[o] && so.friends[o].status==='accepted')) throw new Error('You’re no longer friends.'); }
+        const m = { id:uid(), user_id:ME, text:body.slice(0,1000), ts:Date.now() };
+        (so.msgs[tid] = so.msgs[tid] || []).push(m); so.read[tid] = Date.now(); save();
+        return { ...m, thread_id:tid };
+      },
+      async editMessage(id, body){
+        const m = Object.values(social().msgs).flat().find(x => x.id===id);
+        if(!m || m.user_id!==ME) throw new Error('You can only edit your own messages.');
+        m.text = body.slice(0,1000); m.edited = true; save(); return { ...m };
+      },
+      async deleteMessage(id){
+        const m = Object.values(social().msgs).flat().find(x => x.id===id);
+        if(!m || m.user_id!==ME) throw new Error('You can only delete your own messages.');
+        m.deleted = true; m.text = '·'; m.edited = false; save(); return { ...m };
+      },
+
       // ── chat ──
       async chat(room, compId){ return roomList(room, compId).slice(); },
       async send(room, compId, text){
@@ -595,7 +736,7 @@ window.createMockApi = function(page){
       },
       reset(){
         try{
-          ['ft-mock-v1','ft-mock-v2','ft-mock-v3','ft-mock-v4','ft-mock-v5','ft-mock-v6','ft-mock-v7','ft-mock-v8','ft-mock-v9', STORE].forEach(k => localStorage.removeItem(k));
+          ['ft-mock-v1','ft-mock-v2','ft-mock-v3','ft-mock-v4','ft-mock-v5','ft-mock-v6','ft-mock-v7','ft-mock-v8','ft-mock-v9','ft-mock-v10','ft-mock-v11', STORE].forEach(k => localStorage.removeItem(k));
           Object.keys(localStorage).filter(k => k.startsWith('ft-slip-') || k.startsWith('ft-chat-read-')).forEach(k => localStorage.removeItem(k));
         }catch(e){}
       },
