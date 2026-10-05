@@ -25,7 +25,7 @@ window.createMockApi = function(page){
     const at = ms => new Date(Math.abs(ms)<HR ? now+ms : Math.round((now+ms)/(5*MIN))*(5*MIN)).toISOString();
     const season = { id:2027 };
     const ME = 'mock-user';
-    const STORE = 'ft-mock-v7';
+    const STORE = 'ft-mock-v9';
     // round, home, away, kick-off offset, status, venue, live: [quarter, clock secs, home g.b per qtr, away g.b per qtr]
     const FX = [
       [5,'Carlton Blues','Richmond Tigers',-26*HR,'concluded','MCG',
@@ -245,6 +245,19 @@ window.createMockApi = function(page){
           ],
         },
         mine:{ 'c-office':[], 'c-famnrl':[] },        // compId → my bets
+        // unlocks: a few of yours (two you haven't seen yet, so the pop-ups show), and some for others
+        unlocks:(() => {
+          const u = (ach, daysAgo, seen=true, scope='', meta={}) => ({ ach, scope, meta, unlocked_at:at(-daysAgo*DAY), seen });
+          return {
+            [ME]:     [u('first_blood',30), u('early_bird',24), u('leg_day',20), u('payday',9), u('banker',6), u('big_fish',4),
+                       u('champion',15, true, 'c-boys-2026', { comp_name:'The Boys', season:2026 }), u('hot_hand',0, false), u('lucky_phil',0, false)],
+            'q-gazza':[u('first_blood',35), u('round_winner',14), u('top_dog',7), u('quadzilla',3), u('flair_supporter',40, true, 'afl:HAW:2027', { season:2027 }),
+                       u('flair_streak',40, true, 'afl:HAW:5', { streak:5 })],
+            'q-shazza':[u('first_blood',33), u('nostradamus',8), u('flair_supporter',40, true, 'afl:GEE:2027', { season:2027 })],
+            'q-kev':  [u('mug_punter',21), u('donation_box',12), u('first_blood',5)],
+          };
+        })(),
+        flairs:{ [ME]:{ ach:'champion', scope:'c-boys-2026' }, 'q-gazza':{ ach:'flair_streak', scope:'afl:HAW:5' }, 'q-shazza':{ ach:'nostradamus', scope:'' }, 'q-kev':{ ach:'mug_punter', scope:'' } },
         // who barracks for whom (you haven't picked yet, so the picker can be tested)
         profiles:Object.fromEntries([
           ['q-gazza',{ afl:'HAW', nrl:'MEL' }], ['q-shazza',{ afl:'GEE' }], ['q-kev',{ afl:'RIC', nrl:'PEN' }], ['q-tones',{ afl:'COL' }],
@@ -396,13 +409,60 @@ window.createMockApi = function(page){
       },
       // ── leaderboard ──
       async standings(id){
-        return Object.entries(comp(id).members).map(([user_id,m]) => ({ user_id, display_name:m.display_name, balance:m.balance, funded:m.funded, history:m.history||{} }));
+        return Object.entries(comp(id).members).map(([user_id,m]) => ({ user_id, display_name:m.display_name, balance:m.balance, funded:m.funded,
+          history:m.history||{}, joined_at:m.joined_at }));
+      },
+      // someone else's bets as you'd see them: settled ones, plus pending ones that aren't hidden.
+      // Every other member also gets a live multi on the next open games, so Tail can be tried.
+      async playerBets(id, userId){
+        const c = comp(id), mine = userId===ME;
+        if(mine) return (st.mine[id]||[]).slice();
+        const settled = (c.bets||[]).filter(b => b.user_id===userId);
+        const open = matches.filter(m => m.sport===c.sport && isOpen(m));
+        const ids = Object.keys(c.members), i = ids.indexOf(userId);
+        const pending = [];
+        if(open.length && i % 2 === 0){
+          const pickM = open.slice(i % Math.max(1, open.length-1), (i % Math.max(1, open.length-1)) + 2);
+          const legs = pickM.map(m => { const o = odds[m.id].markets.h2h[(i/2) % 2];
+            return { match_id:m.id, sport:m.sport, round:m.round, market:'h2h', name:o.name, description:null, point:null, price:o.price }; });
+          const price = comboPrice(legs), stake = 20 + i*5;
+          pending.push({ id:`pend-${id}-${userId}`, user_id:userId, round:Math.max(...legs.map(l => l.round)), kind:legs.length>1 ? 'multi' : 'single',
+            legs, stake, price, status:'pending', potential_payout:Math.round(stake*price*100)/100, payout:null, hidden:false, placed_at:new Date().toISOString() });
+        }
+        return [...pending, ...settled];
+      },
+      async hideBet(betId, hidden){
+        const b = Object.values(st.mine).flat().find(x => x.id===betId);
+        if(!b || b.status!=='pending') throw new Error('Only your own pending bets can be hidden.');
+        b.hidden = !!hidden; save();
+        return { ...b };
       },
       // ── who you barrack for (same rules as ft_set_team) ──
       async profiles(ids){
-        st.profiles = st.profiles || {};
-        return Object.fromEntries(ids.filter(id => st.profiles[id]).map(id => [id, JSON.parse(JSON.stringify(st.profiles[id]))]));
+        st.profiles = st.profiles || {}; st.flairs = st.flairs || {};
+        return Object.fromEntries(ids.filter(id => st.profiles[id] || st.flairs[id])
+          .map(id => [id, { teams:JSON.parse(JSON.stringify(st.profiles[id] || {})), flair:st.flairs[id] || null }]));
       },
+      // ── achievements (the real ones are worked out by the database) ──
+      async unlocks(userId){ return JSON.parse(JSON.stringify(((st.unlocks || {})[userId || ME]) || [])); },
+      async achProgress(){
+        const mine = Object.values(st.mine).flat();
+        const chats = [...Object.values(st.chat.comp).flat(), ...Object.values(st.chat.sport).flat(), ...st.chat.global].filter(m => m.user_id===ME).length;
+        return [{ key:'centurion', have:mine.length, need:100 }, { key:'chatterbox', have:chats, need:100 },
+                { key:'odds_on_bore', have:mine.filter(b => b.status==='won' && b.price < 1.5).length, need:10 }, { key:'tipster', have:1, need:5 }];
+      },
+      async seenUnlocks(){ ((st.unlocks || {})[ME] || []).forEach(u => { u.seen = true; }); save(); },
+      async setFlair(ach, scope){
+        st.flairs = st.flairs || {};
+        if(ach && !((st.unlocks || {})[ME] || []).some(u => u.ach===ach && (u.scope||'')===(scope||''))) throw new Error('You haven’t unlocked that one yet.');
+        st.flairs[ME] = ach ? { ach, scope:scope || '' } : null; save();
+        return st.flairs[ME];
+      },
+      async seenRound(id, round){ const m = comp(id).members[ME]; if(m){ m.seen_round = Math.max(m.seen_round || 0, round); save(); } },
+      // ── notifications: settings are kept, nothing is sent ──
+      async myPrefs(){ return JSON.parse(JSON.stringify(st.prefs || {})); },
+      async setPrefs(p){ st.prefs = JSON.parse(JSON.stringify(p)); save(); },
+      async pushSubscribe(){}, async pushUnsubscribe(){},
       async setTeam(sport, team){
         st.profiles = st.profiles || {};
         const p = st.profiles[ME] = st.profiles[ME] || {}, cur = p[sport];
@@ -413,6 +473,12 @@ window.createMockApi = function(page){
           changes = (cur.changes||0) + 1;
         }
         p[sport] = { team, season:season.id, since_round:CUR[sport], changes };
+        // that season's supporter flair (a change replaces it)
+        st.unlocks = st.unlocks || {}; const ul = st.unlocks[ME] = st.unlocks[ME] || [];
+        const pre = `${sport}:`, suf = `:${season.id}`;
+        st.unlocks[ME] = ul.filter(u => !(u.ach==='flair_supporter' && u.scope.startsWith(pre) && u.scope.endsWith(suf)));
+        st.unlocks[ME].push({ ach:'flair_supporter', scope:`${sport}:${team}:${season.id}`, meta:{ sport, team, season:season.id }, unlocked_at:new Date().toISOString(), seen:false });
+        if(st.flairs && st.flairs[ME] && st.flairs[ME].ach==='flair_supporter' && st.flairs[ME].scope.startsWith(pre)) st.flairs[ME] = null;
         save();
         return JSON.parse(JSON.stringify(p));
       },
@@ -494,7 +560,8 @@ window.createMockApi = function(page){
           // a bet belongs to the round it settles in — a multi's last leg
           const round = Math.max(...legs.map(l => l.round));
           (st.mine[id] = st.mine[id]||[]).unshift({ id:uid(), sport:'afl', round, kind:b.kind, status:'pending', stake:b.stake,
-            price:b.price, potential_payout:Math.round(b.stake*b.price*100)/100, payout:null, placed_at:new Date().toISOString(), legs });
+            price:b.price, potential_payout:Math.round(b.stake*b.price*100)/100, payout:null, placed_at:new Date().toISOString(), legs,
+            hidden:!!b.hidden, tail_of:b.tail_of || null });
         });
         me.balance = Math.round((me.balance - total)*100)/100;
         save();
@@ -512,7 +579,7 @@ window.createMockApi = function(page){
       },
       reset(){
         try{
-          ['ft-mock-v1','ft-mock-v2','ft-mock-v3','ft-mock-v4','ft-mock-v5','ft-mock-v6', STORE].forEach(k => localStorage.removeItem(k));
+          ['ft-mock-v1','ft-mock-v2','ft-mock-v3','ft-mock-v4','ft-mock-v5','ft-mock-v6','ft-mock-v7','ft-mock-v8', STORE].forEach(k => localStorage.removeItem(k));
           Object.keys(localStorage).filter(k => k.startsWith('ft-slip-') || k.startsWith('ft-chat-read-')).forEach(k => localStorage.removeItem(k));
         }catch(e){}
       },

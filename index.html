@@ -301,6 +301,14 @@
   .co-btn{flex-basis:100%;margin-top:9px;padding:10px;border:none;border-radius:7px;cursor:pointer;background:var(--gold);color:#fff;
     font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:17px;letter-spacing:.04em;text-transform:uppercase}
   .co-btn b{font-weight:800}
+  /* Tail: copy someone's bet into your slip */
+  .tail-btn{flex-basis:100%;margin-top:9px;padding:9px;border:2px solid var(--blue);border-radius:7px;cursor:pointer;background:#fff;color:var(--blue);
+    font-family:"Barlow Condensed",sans-serif;font-weight:800;font-size:16px;letter-spacing:.04em;text-transform:uppercase}
+  .tail-btn:active{background:var(--offwhite)}
+  /* hide-until-settled toggle on your pending bets */
+  .hide-btn{border:1px solid var(--line);background:#fff;color:var(--ink-soft);border-radius:10px;padding:2px 8px;font-size:10px;
+    font-weight:700;cursor:pointer;white-space:nowrap}
+  .hide-btn.on{background:var(--blue);border-color:var(--blue);color:#fff}
   .co-btn:active{filter:brightness(.92)}
   .bet .b-main{flex:1;min-width:0}
   .bet .b-eye{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;text-transform:uppercase;color:var(--ink);
@@ -380,14 +388,125 @@
   .lb .bl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;color:var(--blue);
     font-variant-numeric:tabular-nums}
   .lb .bl.up{color:var(--ok)}.lb .bl.down{color:var(--err)}
+  .lb{cursor:pointer}
+  .lb .lb-chev{color:var(--mid);font-size:18px;margin-left:-4px}
+  /* player view header */
+  .pv-head{display:flex;align-items:center;gap:12px}
+  .pv-head .pv-flair{width:48px;height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+    background:var(--offwhite);border-radius:50%;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:22px;color:var(--blue)}
+  .pv-head .pv-flair img{width:36px;height:36px;object-fit:contain}
+  .pv-head .pv-w{flex:1;min-width:0}
+  .pv-head .pv-n{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:24px;line-height:1;text-transform:uppercase;color:var(--ink);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pv-head .pv-s{font-size:11px;color:var(--mid);margin-top:3px}
+  .pv-head .pv-p{text-align:right;flex-shrink:0}
+  .pv-head .pv-p .v{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:24px;line-height:1;color:var(--blue)}
+  .pv-head .pv-p .v.up{color:var(--ok)}.pv-head .pv-p .v.down{color:var(--err)}
+  .pv-head .pv-p .s{font-size:10px;color:var(--mid);margin-top:2px}
   .lb .bl-w{display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0}
   .lb .bl-s{font-size:10px;color:var(--mid);font-variant-numeric:tabular-nums}
   .lb .nm{display:flex;align-items:center;gap:5px}
   .lb .nm .nm-t{overflow:hidden;text-overflow:ellipsis;min-width:0}
-  /* flair: the badge someone shows next to their name (for now, their team) */
-  .flair{display:inline-flex;flex-shrink:0;width:16px;height:16px}
-  .flair img{width:100%;height:100%;object-fit:contain}
-  .msg-meta .flair{width:13px;height:13px}
+  /* achievement medal: an emoji (or club logo) in a ring coloured by rarity */
+  .ach-ic{flex-shrink:0;width:38px;height:38px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:19px;
+    background:radial-gradient(circle at 35% 30%,#fff 0,#eef1f6 60%,#dfe4ec 100%);box-shadow:inset 0 0 0 3px var(--ring,#cd7f32),0 1px 3px rgba(0,0,0,.25)}
+  .ach-ic img{width:70%;height:70%;object-fit:contain}
+  .ach-ic.r-bronze{--ring:#c07a3a}.ach-ic.r-silver{--ring:#aab3c0}.ach-ic.r-gold{--ring:#e2ad1e}.ach-ic.r-legendary{--ring:#9b4fd6}
+  /* ── flair badge: a rounded rectangle outlined in the rarity colour, icon left, name right ── */
+  .fb{--rc:#c07a3a;--rt:rgba(192,122,58,.10);position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:4px;
+    flex-shrink:1;min-width:0;max-width:100%;vertical-align:middle;border:1.5px solid var(--rc);background:var(--rt);border-radius:5px;
+    font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.02em;color:var(--ink);line-height:1;
+    -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  .fb.r-silver{--rc:#9aa5b4;--rt:rgba(154,165,180,.13)}
+  .fb.r-gold{--rc:#d9a514;--rt:rgba(226,173,30,.14)}
+  .fb.r-legendary{--rc:#9b4fd6;--rt:rgba(155,79,214,.12);border-color:transparent;
+    background:linear-gradient(var(--rt),var(--rt)) padding-box,linear-gradient(120deg,#9b4fd6,#e2ad1e,#2fa6d8,#9b4fd6) border-box;
+    background-size:100% 100%,300% 300%;animation:fbHue 6s linear infinite}
+  .fb-i{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center}
+  .fb-i img{width:100%;height:100%;object-fit:contain}
+  .fb-n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .fb-sm{height:17px;padding:0 5px 0 3px;font-size:11px;border-radius:4px}
+  .fb-sm .fb-i{width:12px;height:12px;font-size:10px}
+  .fb-md{height:26px;padding:0 8px 0 5px;gap:5px;font-size:14px}
+  .fb-md .fb-i{width:18px;height:18px;font-size:15px}
+  .fb-lg{height:36px;padding:0 12px 0 7px;gap:7px;font-size:19px;border-width:2px;border-radius:7px}
+  .fb-lg .fb-i{width:26px;height:26px;font-size:21px}
+  .fb.locked{--rc:#c9ced8;--rt:#f4f6fa;border-style:dashed;color:var(--mid)}
+  .fb.locked .fb-i{filter:grayscale(1);opacity:.5}
+  .fb.locked.r-legendary{background:var(--rt);border-color:var(--rc);animation:none}
+  .fb.cur{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--gold)}
+  .fb[data-bi]{cursor:pointer}
+  /* effects (from the JSON's "effect", or legendary): a passing shine, glitter, a glowing outline */
+  .fb.fx-shine::after{content:'';position:absolute;top:-20%;bottom:-20%;width:35%;left:-50%;transform:skewX(-20deg);pointer-events:none;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);animation:fbShine 4.5s ease-in-out infinite}
+  @keyframes fbShine{0%,62%{left:-50%}100%{left:130%}}
+  .fb.fx-pulse{animation:fbPulse 2.4s ease-in-out infinite}
+  @keyframes fbPulse{50%{box-shadow:0 0 7px 1px var(--rc)}}
+  .fb .sp{position:absolute;width:5px;height:5px;pointer-events:none;opacity:0;animation:fbTwinkle 2.6s ease-in-out infinite;
+    background:radial-gradient(circle,#fff 0 30%,rgba(255,255,255,0) 70%);
+    clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%)}
+  .fb .sp.s1{left:18%;top:15%}.fb .sp.s2{left:52%;top:55%;animation-delay:.7s}.fb .sp.s3{left:78%;top:12%;animation-delay:1.4s}
+  .fb .sp.s4{left:35%;top:62%;animation-delay:2s}
+  .fb-md .sp,.fb-lg .sp{width:8px;height:8px}
+  .fb.fx-glitter .sp{background:radial-gradient(circle,#fff 0 25%,#ffe69a 45%,rgba(255,255,255,0) 70%)}
+  @keyframes fbTwinkle{0%,100%{opacity:0;transform:scale(.3) rotate(0)}45%{opacity:1;transform:scale(1) rotate(45deg)}60%{opacity:0}}
+  @keyframes fbHue{to{background-position:0 0,300% 0}}
+  @media (prefers-reduced-motion:reduce){.fb,.fb::after,.fb .sp,.bi-pop{animation:none!important}.fb .sp{display:none}}
+  /* names in chat and the leaderboard keep the badge small and quiet: no glitter in a busy chat */
+  .msg-meta{flex-wrap:wrap;row-gap:2px}.msg-meta .fb{flex-shrink:0;max-width:none}.msg-meta .fb .fb-n{overflow:visible}.msg-meta .fb .sp{display:none}
+  .lb .nm .fb{max-width:48%;margin-left:2px}
+  /* a grid of badges (Account achievements, player trophy cabinet) */
+  .fb-grid{display:flex;flex-wrap:wrap;gap:6px;padding:4px 0}
+  .fb-grid .fb{max-width:100%}
+  .ach-hint{font-size:11px;color:var(--mid);margin:-2px 0 8px}
+  /* collection tiles: 4 to a row (3 on very narrow phones), same rarity borders and effects as the badge */
+  .at-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;padding:4px 0}
+  @media (max-width:360px){.at-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  .at.fb{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:6px;height:auto;min-height:98px;
+    width:auto;max-width:none;padding:11px 4px 10px;border-width:2px;border-radius:10px;cursor:pointer}
+  .at .ach-ic.big{width:44px;height:44px;font-size:22px}
+  .at-n{font-size:12.5px;line-height:1.08;text-align:center;letter-spacing:.01em;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+  .at.locked .at-n{color:var(--mid)}
+  .at-bar{position:absolute;left:7px;right:7px;bottom:5px;height:3px;background:#e3e7ef;border-radius:2px;overflow:hidden}
+  .at-bar i{display:block;height:100%;background:var(--blue)}
+  .at-cur{position:absolute;top:4px;right:4px;width:16px;height:16px;border-radius:50%;background:var(--gold);color:#fff;
+    font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .at .sp{width:10px;height:10px}
+  .at.fx-shine::after{width:45%}
+  .modal-badge{display:flex;justify-content:center;margin:4px 0 12px}
+  /* badge details (hover / hold) */
+  .bi-pop{position:fixed;z-index:250;width:260px;max-width:calc(100vw - 16px);background:#fff;color:var(--ink);border-radius:10px;padding:10px 12px;
+    box-shadow:0 8px 28px rgba(0,0,0,.35);pointer-events:auto;animation:fadein .12s ease}
+  .bi-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+  .bi-top .fb{min-width:0}
+  .bi-d{font-size:12px;line-height:1.4;color:var(--ink-soft)}
+  .bi-w{font-size:11px;color:var(--mid);margin-top:5px}
+  .bi-w.cur{color:var(--gold);font-weight:700}
+  .rar.r-legendary{background:#efe2fa;color:#6b2ea3}
+  .ach-ic.r-gold{box-shadow:inset 0 0 0 3px var(--ring),0 0 0 2px rgba(226,173,30,.25),0 1px 4px rgba(0,0,0,.3)}
+  .ach-ic.big{width:48px;height:48px;font-size:24px}
+  .ach-ic.locked{filter:grayscale(1);opacity:.45}
+  /* the unlock pop-up: slides in top-right (top-centre on phones), a shine sweeps across, then it fades */
+  .ach-toasts{position:fixed;top:12px;right:12px;z-index:300;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+  @media (max-width:600px){.ach-toasts{left:12px;right:12px;align-items:center}}
+  .ach-toast{pointer-events:auto;cursor:pointer;position:relative;overflow:hidden;display:flex;align-items:center;gap:12px;width:330px;max-width:100%;
+    background:linear-gradient(135deg,#0d1c3a 0%,#1a2e5a 100%);color:#fff;border:2px solid var(--gold);border-radius:12px;padding:10px 14px;
+    box-shadow:0 10px 30px rgba(0,0,0,.45);animation:achIn .5s cubic-bezier(.2,.9,.3,1.25) both}
+  .ach-toast.out{animation:achOut .5s ease forwards}
+  .ach-toast::after{content:'';position:absolute;top:-10%;bottom:-10%;width:45%;left:-60%;transform:skewX(-20deg);
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);animation:achShine 1s .5s ease-out both}
+  .ach-toast.r-gold::after{animation:achShine 1s .5s ease-out both,achShine 1s 1.9s ease-out both}
+  .ach-toast.r-gold .ach-ic{animation:achGlow 1.4s ease-in-out .4s 2}
+  .ach-toast .tw{min-width:0}
+  .ach-toast .t1{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.14em;color:var(--gold);text-transform:uppercase}
+  .ach-toast .t2{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:21px;line-height:1.05;text-transform:uppercase}
+  .ach-toast .t3{font-size:11px;opacity:.8;line-height:1.3;margin-top:1px}
+  @keyframes achIn{from{transform:translateY(-30px) scale(.9);opacity:0}to{transform:none;opacity:1}}
+  @keyframes achOut{to{transform:translateY(-14px);opacity:0}}
+  @keyframes achShine{to{left:130%}}
+  @keyframes achGlow{50%{box-shadow:inset 0 0 0 3px #e2ad1e,0 0 18px 6px rgba(226,173,30,.75)}}
+  @media (prefers-reduced-motion:reduce){.ach-toast,.ach-toast.out,.ach-toast::after,.ach-toast .ach-ic{animation:none}.ach-toast::after{display:none}}
 
   /* ── ladder ── */
   .ld{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.25)}
@@ -438,7 +557,7 @@
   .hl .l{font-size:11px;color:var(--ink-soft)}
   .hl .v{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:24px;line-height:1.1;color:var(--ink);
     font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .hl .v.up{color:var(--ok)}
+  .hl .v.up{color:var(--ok)}.hl .v.down{color:var(--err)}
   .hl .s{font-size:10px;color:var(--mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .btn-sec{width:100%;margin-top:4px;font-family:'Oswald',sans-serif;font-weight:600;font-size:12px;letter-spacing:.08em;
     text-transform:uppercase;padding:11px;border-radius:8px;cursor:pointer;background:transparent;
@@ -489,6 +608,8 @@
   .slip-list .empty{color:var(--mid)}
   .slip-foot{flex-shrink:0;padding:12px 16px calc(14px + env(safe-area-inset-bottom));border-top:1.5px solid var(--line)}
   .slip-line{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+  .slip-hide{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-soft);margin:6px 0 8px;cursor:pointer}
+  .slip-hide input{width:16px;height:16px;accent-color:var(--blue)}
   .slip-line .l{font-family:'Oswald',sans-serif;font-weight:600;font-size:12px;letter-spacing:.06em;
     text-transform:uppercase;color:var(--ink-soft)}
   .slip-line .v{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;color:var(--blue)}
@@ -554,6 +675,41 @@
   .tp:hover{border-color:var(--line)}
   .tp.cur{border-color:var(--gold);background:#fff7e0}
   .modal.team-pick .modal-actions{grid-template-columns:1fr}
+  /* achievements card */
+  .flair-pick{display:flex;align-items:center;gap:9px;padding:8px 10px;background:var(--offwhite);border-radius:8px;margin-bottom:10px}
+  .flair-pick .l{font-size:10px;color:var(--mid);text-transform:uppercase;letter-spacing:.06em;width:62px;flex-shrink:0;line-height:1.2}
+  .flair-pick .v{flex:1;min-width:0;display:flex}
+  .flair-pick .v.none{font-family:inherit;font-weight:400;font-size:12px;text-transform:none;color:var(--mid);white-space:normal}
+  .ach-ctl{display:grid;grid-template-columns:1fr 1.4fr auto;gap:6px;margin-bottom:6px}
+  .ach-ctl select{padding:7px 8px;font-size:13px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);min-width:0}
+  .ach-ctl .btn-sm{min-width:36px;font-size:15px}
+  .ach-cat{font-family:'Oswald',sans-serif;font-weight:700;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);
+    margin:12px 0 2px;padding-bottom:3px;border-bottom:2px solid var(--line)}
+  .rar{font-family:'Oswald',sans-serif;font-weight:700;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:1px 6px;border-radius:8px}
+  .rar.r-bronze{background:#f6e6d8;color:#8a4f1c}.rar.r-silver{background:#eceff3;color:#5b6478}.rar.r-gold{background:#fbefc9;color:#8a6500}
+  .ach-bar{position:relative;height:14px;background:#eef0f4;border-radius:7px;margin-top:5px;overflow:hidden}
+  .ach-bar i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--blue-lt),var(--blue))}
+  .ach-bar span{position:relative;font-size:9px;font-weight:700;color:#fff;padding-left:6px;line-height:14px;mix-blend-mode:difference}
+  /* player view: flair title, trophy cabinet */
+  .pv-head .pv-t{margin:3px 0 1px;display:flex}
+  /* round overview */
+  .modal.overview{max-width:400px;max-height:calc(100vh - 48px);display:flex;flex-direction:column}
+  .modal.overview h3{margin-bottom:0}
+  .ov-sub{font-size:12px;color:var(--mid);margin-bottom:10px}
+  .ov-body{overflow-y:auto}
+  .ov-body h4{font-family:'Oswald',sans-serif;font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin:12px 0 4px}
+  .ov-line,.ov-top,.ov-next{display:flex;align-items:center;gap:7px;padding:5px 0;border-top:1px solid #eef0f4;font-size:13px;color:var(--ink-soft)}
+  .ov-line span,.ov-top .n{flex:1;min-width:0}
+  .ov-line b,.ov-top b{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:17px;color:var(--ink)}
+  .ov-top .n{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;text-transform:uppercase;color:var(--ink)}
+  .ov-body b.up{color:var(--ok)}.ov-body b.down{color:var(--err)}
+  .ov-next{justify-content:space-between;font-weight:600;color:var(--ink)}
+  .ov-next span{font-weight:400;font-size:11px;color:var(--mid);white-space:nowrap}
+  .ov-next.more{color:var(--mid);font-weight:400}
+  .modal.overview .modal-actions{grid-template-columns:1fr}
+  /* notification bells (comp tiles, chat window) */
+  .bell{border:none;background:none;font-size:16px;cursor:pointer;padding:4px;line-height:1;opacity:.9}
+  .bell.off{opacity:.55}
   .modal-actions .big-btn{margin-top:0;font-size:18px;padding:11px}
   .modal-actions .btn-cancel{font-family:'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
     font-size:18px;border-radius:8px;padding:11px;cursor:pointer;background:#fff;color:var(--ink-soft);border:2px solid var(--line)}
@@ -656,8 +812,9 @@
   .chat-head .type-chip .unread{min-width:16px;height:16px;border-radius:8px;background:var(--err);color:#fff;font-family:'Barlow Condensed',sans-serif;
     font-weight:800;font-size:11px;line-height:16px;padding:0 4px}
   .chat-x{flex-shrink:0;width:46px;border:none;background:rgba(0,0,0,.18);color:#fff;font-size:20px;cursor:pointer}
-  .chat-sub{flex-shrink:0;padding:7px 12px;font-size:11px;color:var(--ink-soft);background:#fff;border-bottom:1px solid var(--line);
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .chat-sub{flex-shrink:0;padding:3px 6px 3px 12px;font-size:11px;color:var(--ink-soft);background:#fff;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:6px;min-height:30px}
+  .chat-sub > span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .chat-pin{flex-shrink:0;display:flex;align-items:flex-start;gap:8px;padding:9px 12px;background:#fff7e0;border-bottom:1px solid #f0dfae;font-size:13px}
   .chat-pin .ic{flex-shrink:0;color:#9a6b00}
   .chat-pin .w{flex:1;min-width:0}
@@ -827,6 +984,7 @@
       <div class="scroll hidden" id="pane-ladder"><div id="ladder-list"></div></div>
       <div class="scroll hidden" id="pane-board"><div id="board-list"></div></div>
       <div class="scroll hidden" id="pane-account"><div id="account-body"></div></div>
+      <div class="scroll hidden" id="pane-player"><div id="player-body"></div></div>
 
       <div class="sgm-pad hidden" id="sgm-pad">
         <div class="sg-kind" id="sg-kind">Multi</div>
@@ -906,6 +1064,7 @@
       <div class="slip-foot">
         <div class="slip-line"><span class="l">Total stake</span><span class="v" id="slip-total">$0</span></div>
         <div class="slip-line"><span class="l">Potential return</span><span class="v ret" id="slip-return">$0</span></div>
+        <label class="slip-hide"><input type="checkbox" id="slip-hide"><span>Hide from others until they settle</span></label>
         <button class="big-btn" id="slip-confirm" disabled>Confirm bets</button>
         <p class="msg" id="slip-msg"></p>
       </div>
@@ -1007,6 +1166,7 @@ const S = {
   membersAll:false,                 // Account host tools: show every member, not just the top 10
   tlView:'worm',                    // Match Stats timeline: worm | table
   board:{ round:null, tab:'standings', scope:'round' },
+  player:{ id:null, name:'' },      // whose page is open in the player view
   profiles:{},                      // user id → who they barrack for: { afl:{ team, season, since_round, changes }, nrl:{…} } (null = none)
   slip:[],                          // [{ id, kind:'single'|'multi'|'sgm', match_id?, legs, stake }] — local until confirmed
   editing:null,                     // slip item id the stake pad is editing
@@ -1090,10 +1250,10 @@ function compLabel(c){ return `${String(c.sport||SPORT).toUpperCase()} · ${c.na
 function isCollapsed(key){ return DEFAULT_OPEN.has(key) ? S.toggled.has(key) : !S.toggled.has(key); }
 
 /* ════════ teams (badge colours + short names) ════════ */
-// teams.json: { afl:[…], nrl:[…] }, each { abbr, name, match:[names it goes by], colours:[c1, c2], joins? }.
+// data/teams.json: { afl:[…], nrl:[…] }, each { abbr, name, match:[names it goes by], colours:[c1, c2], joins? }.
 // Looked up in the current comp's sport, so "Brisbane" means the Lions in AFL and the Broncos in NRL.
 // If it can't load, every team just gets a plain tile.
-const TEAMS = await fetch('./teams.json').then(r => r.json()).catch(() => ({ afl:[], nrl:[] }));
+const TEAMS = await fetch('./data/teams.json').then(r => r.json()).catch(() => ({ afl:[], nrl:[] }));
 function teamInfo(name){
   const n = String(name||'').toLowerCase();
   // the longest matching name wins, so "port adelaide" beats "adelaide" and "wests tigers" beats "tigers"
@@ -1124,15 +1284,116 @@ function teamByAbbr(sport, abbr){ return (TEAMS[sport] || []).find(t => t.abbr==
 // clubs you can pick this season (new clubs show up from the season they join)
 function pickableTeams(sport){ return (TEAMS[sport] || []).filter(t => !t.joins || t.joins <= Number(S.season && S.season.id)); }
 
-/* ════════ flair ════════
-   The badge shown next to someone's name in the leaderboard and chat. For now it's the club
-   they barrack for in that code; achievements will add more to choose from. */
-function flairHTML(userId, sport=curSport()){
-  const p = S.profiles[userId], pick = p && p[sport];
-  const t = pick && teamByAbbr(sport, pick.team);
-  if(!t) return '';
-  return `<span class="flair" title="${esc(t.name)} supporter"><img src="assets/teams/${sport}/${t.abbr}.svg" alt="" onerror="this.parentNode.remove()"></span>`;
+/* ════════ achievements + flair ════════
+   data/achievements.json: the achievements (key, name, desc, icon, rarity, hidden, category, rule)
+   and the team flair templates. An unlock is { ach, scope, meta, unlocked_at }: ach is an
+   achievement key or flair_<kind>; team flairs have scope "code:CLUB:season" (streaks "code:CLUB:N").
+   Your flair — shown next to your name — is the unlock you picked, or by default this season's
+   supporter flair for the comp's code. */
+const ACH = await fetch('./data/achievements.json').then(r => r.json()).catch(() => ({ flairs:{}, categories:{}, achievements:[] }));
+const ACH_BY = Object.fromEntries((ACH.achievements || []).map(a => [a.key, a]));
+const RARITY = { bronze:1, silver:2, gold:3, legendary:4 };
+const EFFECTS = ['shine','glitter','pulse'];
+function isFlairKey(ach){ return String(ach).startsWith('flair_'); }
+// what an unlock is called / looks like. effect: 'shine' | 'glitter' | 'pulse' from the JSON
+// (legendary glitters unless told otherwise)
+function unlockInfo(ach, scope, meta={}){
+  const fx = d => EFFECTS.includes(d.effect) ? d.effect : (d.rarity==='legendary' ? 'glitter' : null);
+  if(!isFlairKey(ach)){
+    const a = ACH_BY[ach] || { name:ach, icon:'🏅', rarity:'bronze', desc:'' };
+    const comp = meta.comp_name ? ` · ${meta.comp_name}${meta.season ? ' '+meta.season : ''}` : '';
+    return { name:a.name, label:a.name + comp, desc:a.desc || '', icon:a.icon || '🏅', rarity:a.rarity || 'bronze', effect:fx(a), team:null };
+  }
+  const kind = ach.slice(6), f = (ACH.flairs || {})[kind] || { name:'Flair', desc:'' };
+  const [sport, abbr, third] = String(scope).split(':');
+  const t = teamByAbbr(sport, abbr) || { name:abbr, nick:abbr, abbr };
+  const season = String(meta.season || (kind==='streak' ? '' : third) || ''), streak = String(meta.streak || (kind==='streak' ? third : '') || '');
+  const fill = s => String(s || '').replace(/\{team\}/g, t.name).replace(/\{nick\}/g, t.nick || t.name).replace(/\{abbr\}/g, t.abbr)
+    .replace(/\{season\}/g, season).replace(/\{yy\}/g, season.slice(-2)).replace(/\{streak\}/g, streak);
+  return { name:fill(f.name), label:fill(f.name), desc:fill(f.desc), icon:null, rarity:f.rarity || 'bronze', effect:fx(f), team:{ sport, abbr } };
 }
+function unlockIcon(info, cls=''){
+  return info.team
+    ? `<span class="ach-ic ${cls} r-${info.rarity}"><img src="assets/teams/${info.team.sport}/${info.team.abbr}.svg" alt="" onerror="this.remove()"></span>`
+    : `<span class="ach-ic ${cls} r-${info.rarity}">${info.icon}</span>`;
+}
+/* the flair badge: a rounded rectangle outlined in the rarity colour, icon (emoji or club logo)
+   on the left, name on the right. size 'sm' (names in chat / leaderboard), 'md' (grids), 'lg'.
+   opts: { locked, secret, cur, attrs } — locked is greyed and dashed; secret hides the name. */
+function badgeHTML(info, size='sm', opts={}){
+  const icon = opts.secret ? '❔' : info.team
+    ? `<img src="assets/teams/${info.team.sport}/${info.team.abbr}.svg" alt="" onerror="this.replaceWith('🏉')">` : info.icon;
+  const fx = !opts.locked && info.effect ? ` fx-${info.effect}` : '';
+  const sparkles = fx===' fx-glitter' ? '<i class="sp s1"></i><i class="sp s2"></i><i class="sp s3"></i><i class="sp s4"></i>' : '';
+  return `<span class="fb fb-${size} r-${info.rarity}${fx}${opts.locked ? ' locked' : ''}${opts.cur ? ' cur' : ''}" ${opts.attrs || ''}>`+
+    `<span class="fb-i">${icon}</span><span class="fb-n">${esc(opts.secret ? '???' : info.label)}</span>${sparkles}</span>`;
+}
+/* the collection tile (Account achievements, player trophy cabinet): big medal icon, name under it,
+   border in the rarity colour, effects across the whole tile. opts: { locked, secret, cur, prog, attrs } —
+   prog { have, need } draws a bar along the bottom of a locked tile. */
+function tileHTML(info, opts={}){
+  const fx = !opts.locked && info.effect ? ` fx-${info.effect}` : '';
+  const icon = opts.secret ? `<span class="ach-ic big locked r-${info.rarity}">❔</span>` : unlockIcon(info, 'big' + (opts.locked ? ' locked' : ''));
+  const bar = opts.prog ? `<span class="at-bar" title="${opts.prog.have} / ${opts.prog.need}"><i style="width:${Math.min(100, Math.round(opts.prog.have / Math.max(1, opts.prog.need) * 100))}%"></i></span>` : '';
+  const sparkles = fx===' fx-glitter' ? '<i class="sp s1"></i><i class="sp s2"></i><i class="sp s3"></i><i class="sp s4"></i>' : '';
+  return `<div class="at fb r-${info.rarity}${fx}${opts.locked ? ' locked' : ''}${opts.cur ? ' cur' : ''}" ${opts.attrs || ''}>`+
+    `${icon}<span class="at-n">${esc(opts.secret ? '???' : info.label)}</span>${bar}${opts.cur ? '<span class="at-cur">✓</span>' : ''}${sparkles}</div>`;
+}
+// someone's flair in a code: the one they picked, else this season's supporter flair
+function flairOf(userId, sport=curSport()){
+  const p = S.profiles[userId];
+  if(!p) return null;
+  if(p.flair && p.flair.ach) return unlockInfo(p.flair.ach, p.flair.scope, p.flair.meta || {});
+  const pick = (p.teams || {})[sport];
+  if(!pick || Number(pick.season)!==Number(S.season && S.season.id)) return null;
+  return unlockInfo('flair_supporter', `${sport}:${pick.team}:${pick.season}`);
+}
+function flairHTML(userId, sport=curSport(), size='sm'){
+  const f = flairOf(userId, sport);
+  return f ? badgeHTML(f, size, { attrs:`title="${esc(f.label)}"` }) : '';
+}
+
+/* unlock pop-ups, one after another. New ones arrive live (realtime); ones you missed while
+   away show the next time you open the app. Either way they're marked seen afterwards. */
+const _toastQ = [];
+let _toastBusy = false, _seenTimer = null;
+function queueUnlock(u){
+  _toastQ.push(u);
+  clearTimeout(_seenTimer); _seenTimer = setTimeout(() => api.seenUnlocks().catch(() => {}), 2000);
+  if(!_toastBusy) nextToast();
+}
+function nextToast(){
+  const u = _toastQ.shift();
+  if(!u){ _toastBusy = false; return; }
+  _toastBusy = true;
+  let box = document.querySelector('.ach-toasts');
+  if(!box){ box = document.createElement('div'); box.className = 'ach-toasts'; document.body.appendChild(box); }
+  const el = document.createElement('div');
+  if(u.more){
+    el.className = 'ach-toast r-silver';
+    el.innerHTML = `<span class="ach-ic big r-silver">🏅</span><span class="tw"><div class="t1">And more</div><div class="t2">${u.more} more unlocked</div><div class="t3">See them all in Account</div></span>`;
+  } else {
+    const info = unlockInfo(u.ach, u.scope, u.meta || {});
+    el.className = `ach-toast r-${info.rarity}`;
+    el.innerHTML = unlockIcon(info, 'big')+
+      `<span class="tw"><div class="t1">${isFlairKey(u.ach) ? 'New flair unlocked' : 'Achievement unlocked'}</div>`+
+      `<div class="t2">${esc(info.label)}</div><div class="t3">${esc(info.desc)}</div></span>`;
+  }
+  el.addEventListener('click', () => { S.achOpen = true; setView('account'); });
+  box.appendChild(el);
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => { el.remove(); nextToast(); }, 500); }, 4300);
+}
+// anything unlocked while you were away (once per visit)
+async function showMissedUnlocks(){
+  if(S._missedChecked) return;
+  S._missedChecked = true;
+  try{
+    const fresh = (await api.unlocks()).filter(u => !u.seen);
+    fresh.slice(0, 5).forEach(queueUnlock);
+    if(fresh.length > 5) queueUnlock({ more:fresh.length - 5 });
+  }catch(e){ console.warn(e); }
+}
+function teamsOf(userId){ return (S.profiles[userId] || {}).teams || {}; }
 // fetch profiles we haven't seen yet; resolves true if anything new came in
 async function ensureProfiles(ids, force=false){
   const need = [...new Set(ids.filter(id => id && (force || !(id in S.profiles))))];
@@ -1378,16 +1639,24 @@ async function boot(){
     if(api.recovering){ api.recovering = false; showAuth('reset'); return; }   // arrived from a password-reset email
     S.season = await api.season();
     S.comps = await api.myComps();
+    // links from notifications: ?comp=<id>&chat=<room> / &overview=1, or ?achievements=1
+    const q = new URLSearchParams(location.search);
+    const link = { comp:q.get('comp'), chat:q.get('chat'), overview:q.has('overview'), achievements:q.has('achievements') };
+    if(link.comp || link.chat || link.overview || link.achievements){
+      ['comp','chat','overview','achievements'].forEach(k => q.delete(k));
+      history.replaceState(null, '', location.pathname + (q.toString() ? '?'+q : '') + location.hash);
+    }
     const last = api.lastComp();
-    const id = S.comps.some(c => c.id===last) ? last : (S.comps[0] && S.comps[0].id);
-    if(id) await openComp(id); else startFlow();
+    const id = S.comps.some(c => c.id===link.comp) ? link.comp : S.comps.some(c => c.id===last) ? last : (S.comps[0] && S.comps[0].id);
+    if(id) await openComp(id, link); else startFlow();
   }catch(err){
     console.error(err);
     showError('Couldn’t load the comp', err.message || 'Please refresh and try again.');
   }
 }
 // switch into a comp: balance, slip, leaderboard and chat are all per comp
-async function openComp(id){
+// opts (from a notification link): { chat:room, overview:true, achievements:true }
+async function openComp(id, opts={}){
   showGate('gate-loading');
   closeChat(); closeSlip();
   S.comp = await api.comp(id);
@@ -1408,6 +1677,12 @@ async function openComp(id){
   placeChatTab();                   // needs the page laid out to know where the header and footer are
   startTicker();
   listenLive();
+  // afterwards: pop-ups for anything unlocked while away, the round wrap if there's a new one,
+  // then wherever a notification was pointing
+  showMissedUnlocks();
+  if(opts.achievements){ S.achOpen = true; setView('account'); return; }
+  await maybeRoundOverview(opts.overview).catch(e => console.warn(e));
+  if(opts.chat && ROOMS.includes(opts.chat)){ openChat(); setRoom(opts.chat); }
 }
 
 /* live updates for the open comp: chat, pins, your balance, your bets settling, scores */
@@ -1422,6 +1697,7 @@ function listenLive(){
       else if(S.comp.pinned===row.id) S.comp.pinned = null;
       if(S.chat.open) renderChat();
     },
+    unlock: row => queueUnlock(row),
     // your balance moving: bets, payouts, cash outs, and the weekly allowance landing
     member: row => {
       if(row.comp_id!==compId) return;
@@ -1429,7 +1705,14 @@ function listenLive(){
       S.entrant.balance = row.balance;
       setBalance(row.balance);
     },
-    bets: () => { if(S.view==='mybets') renderMyBets(); else animateBtn('btn-mybets','pulse'); },
+    bets: userId => {
+      // the open player view follows that person's bets live (a burst of changes renders once)
+      if(S.view==='player' && userId && userId===S.player.id){
+        clearTimeout(S._pvTimer); S._pvTimer = setTimeout(() => { if(S.view==='player') renderPlayer(true); }, 800);
+      }
+      if(userId && userId!==S.user.id) return;
+      if(S.view==='mybets') renderMyBets(); else animateBtn('btn-mybets','pulse');
+    },
     match: row => {
       const m = S.matchIdx[row.id]; if(!m) return;
       Object.assign(m, row);
@@ -1437,6 +1720,7 @@ function listenLive(){
       if(S.view==='match' && S.matchId===row.id){ renderNav2(); renderMatch(); }
       // cash out offers move with the score — refresh My Bets, at most every few seconds
       if(S.view==='mybets' && !S._coTimer) S._coTimer = setTimeout(() => { S._coTimer = null; if(S.view==='mybets') renderMyBets(); }, 3000);
+      if(S.view==='player' && !S._coTimer) S._coTimer = setTimeout(() => { S._coTimer = null; if(S.view==='player') renderPlayer(true); }, 3000);
     },
   });
 }
@@ -1479,8 +1763,8 @@ function setView(v){
   $('mode-strip').classList.toggle('hidden', v!=='round');
   $('mkt-strip').classList.toggle('hidden', v!=='match');
   $('board-strip').classList.toggle('hidden', v!=='board');
-  ['round','match','mybets','ladder','board','account'].forEach(p => $('pane-'+p).classList.toggle('hidden', v!==p));
-  const tab = ['ladder','board','account'].includes(v) ? v : 'sports';
+  ['round','match','mybets','ladder','board','account','player'].forEach(p => $('pane-'+p).classList.toggle('hidden', v!==p));
+  const tab = v==='player' ? 'board' : ['ladder','board','account'].includes(v) ? v : 'sports';
   document.querySelectorAll('#footer .ft-btn').forEach(b => b.classList.toggle('active', b.dataset.tab===tab));
   syncChips();
   renderNavCtrl();
@@ -1491,6 +1775,7 @@ function setView(v){
   if(v==='ladder') renderLadder();
   if(v==='board') renderBoard();
   if(v==='account') renderAccount();
+  if(v==='player') renderPlayer();
   renderBuilder();
   // the header height changes between pages (tab strips come and go) — keep the chat tab in range
   if(!$('home').classList.contains('hidden')) placeChatTab();
@@ -1579,6 +1864,10 @@ function renderNav2(){
   } else if(S.view==='account'){
     row.classList.add('centred');
     row.innerHTML = title('Account', esc(S.entrant.display_name));
+  } else if(S.view==='player'){
+    row.innerHTML = `<button class="r-arrow" id="nav-back" aria-label="Back to the leaderboard">‹</button>`+
+      title(esc(S.player.name || 'Player'), esc(S.comp.name));
+    $('nav-back').addEventListener('click', () => setView('board'));
   } else {
     picker(S.round, rounds(), roundInfo(S.round), r => { S.round = r; renderNav2(); renderRound(); });
   }
@@ -2341,7 +2630,7 @@ function renderSlip(){
 
   const tile = b => {
     const stake = Number(b.stake)||0, price = itemPrice(b);
-    return `<div class="bet ${b.kind==='single'?'active':'multi'} slip-item"><div class="si-top">${betRowInner(b)}`+
+    return `<div class="bet ${b.kind==='single'?'active':'multi'} slip-item"><div class="si-top">${betRowInner(b, b.tail_of ? { eyebrow:`Tailing ${esc(b.tail_who || 'a mate')}` } : undefined)}`+
       `<button class="b-rm" data-rm="${esc(b.id)}" title="Remove">✕</button></div>`+
       `<div class="si-stake">`+
         `<button class="stake-field${S.editing===b.id?' editing':''}" data-stake="${esc(b.id)}">`+
@@ -2389,13 +2678,15 @@ $('slip-confirm').addEventListener('click', async () => {
     title:`Place ${bets.length} bet${bets.length>1?'s':''}?`,
     body:`<b>${cur(total)}</b> staked for a potential return of <b>${cur(ret)}</b>. Your balance drops to <b>${cur(S.balance-total)}</b>. `+
       `Bets can’t be changed once they’re placed.`+
+      ($('slip-hide').checked ? `<br><br>🙈 Hidden from everyone else until they settle.` : '')+
       (left ? `<br><br>${left} bet${left>1?'s':''} without a stake will stay in your slip.` : ''),
     ok:'Place bets',
   });
   if(!ok) return;
   $('slip-confirm').disabled = true;
+  const hidden = $('slip-hide').checked;
   const payload = bets.map(b => ({
-    kind:b.kind, stake:b.stake, price:b.price,
+    kind:b.kind, stake:b.stake, price:b.price, hidden, tail_of:b.tail_of || null,
     legs:b.legs.map(l => ({ match_id:l.match_id, market:l.market, name:l.name, description:l.description, point:l.point })),
   }));
   try{
@@ -2404,6 +2695,7 @@ $('slip-confirm').addEventListener('click', async () => {
     // placed bets leave the slip; anything left without a stake stays for later
     const placed = new Set(bets.map(b => b.id));
     S.slip = S.slip.filter(b => !placed.has(b.id)); saveSlip();
+    $('slip-hide').checked = false;
     closeSlip(); renderNavCtrl(); animateBtn('btn-mybets','pulse');
     rerender();
   }catch(err){
@@ -2497,14 +2789,22 @@ async function renderMyBets(){
   const bets = await api.myBets(S.comp.id);
   if(S.view!=='mybets') return;
   if(!bets.length){ list.innerHTML = '<div class="empty">No bets yet. Tap a price on a match to get started.</div>'; return; }
-  // cash out offers need the live state of any game a pending bet is riding on
+  await ensureLiveFor(bets);
+  if(S.view!=='mybets') return;
+  renderBetGroups(list, bets, 'mine');
+}
+// cash out offers and leg marks need the live state of any game a pending bet is riding on
+async function ensureLiveFor(bets){
   const need = new Set();
   bets.filter(b => b.status==='pending').forEach(b => b.legs.forEach(l => {
     const m = S.matchIdx[l.match_id]; if(m && !isOpen(m) && m.live===undefined) need.add(m);
   }));
   await Promise.all([...need].map(ensureLive));
-  if(S.view!=='mybets') return;
-  // group by the round each bet settles in (a multi's last leg), newest round first
+}
+/* bets grouped by the round they settle in (a multi's last leg), newest round first.
+   mode 'mine': cash out offers and a hide toggle on pending bets. mode 'player': someone else's
+   bets, with Tail on pending ones that still have legs open. */
+function renderBetGroups(list, bets, mode){
   const groups = new Map();
   bets.slice().sort((a,b) => b.round-a.round).forEach(b => { if(!groups.has(b.round)) groups.set(b.round, []); groups.get(b.round).push(b); });
   list.innerHTML = '';
@@ -2516,13 +2816,61 @@ async function renderMyBets(){
     const grp = document.createElement('div'); grp.className = 'grp';
     grp.innerHTML = `<div class="grp-head"><span class="gt">Round ${esc(r)}</span><span class="gn ${netCls}">${esc(netTxt)}</span></div>`;
     const body = document.createElement('div'); body.className = 'grp-body';
-    rows.forEach(b => body.appendChild(settledBetRow(b, null, cashOutQuote(b))));
+    rows.forEach(b => {
+      const el = settledBetRow(b, null, mode==='mine' ? cashOutQuote(b) : null);
+      if(b.status==='pending' && mode==='mine'){
+        el.querySelector('.b-type').insertAdjacentHTML('afterend',
+          `<button class="hide-btn${b.hidden?' on':''}" data-hide="${esc(b.id)}" type="button" title="Hide from others until it settles">${b.hidden ? '🙈 Hidden' : '👁 Visible'}</button>`);
+      }
+      if(b.status==='pending' && mode==='player' && tailLegs(b).length){
+        el.classList.add('has-co');
+        el.insertAdjacentHTML('beforeend', `<button class="tail-btn" data-tail="${esc(b.id)}" type="button">Tail this bet</button>`);
+      }
+      body.appendChild(el);
+    });
     grp.appendChild(body);
     list.appendChild(grp);
   });
   list.querySelectorAll('[data-co]').forEach(btn => btn.addEventListener('click', () => {
     const b = bets.find(x => x.id===btn.dataset.co); if(b) cashOut(b);
   }));
+  list.querySelectorAll('[data-hide]').forEach(btn => btn.addEventListener('click', async () => {
+    const b = bets.find(x => x.id===btn.dataset.hide); if(!b) return;
+    btn.disabled = true;
+    try{ Object.assign(b, await api.hideBet(b.id, !b.hidden)); }
+    catch(err){ await confirmModal({ title:'Couldn’t change that', body:esc(err.message || 'Please try again.'), ok:'OK', cancel:'Close' }); }
+    renderBetGroups(list, bets, mode);
+  }));
+  list.querySelectorAll('[data-tail]').forEach(btn => btn.addEventListener('click', () => {
+    const b = bets.find(x => x.id===btn.dataset.tail); if(b) tailBet(b);
+  }));
+}
+
+/* ════════ TAIL ════════
+   Copy someone's pending bet into your slip: only the legs whose match hasn't started, at
+   today's prices. Down to one leg, it becomes a single. The slip item remembers who you tailed. */
+function tailLegs(b){ return b.legs.filter(l => isOpen(S.matchIdx[l.match_id])); }
+async function tailBet(b){
+  const open = tailLegs(b);
+  if(S.slip.some(x => x.tail_of===b.id)){ openSlip(); $('slip-msg').textContent = 'That bet is already in your slip.'; return; }
+  await Promise.all([...new Set(open.map(l => l.match_id))].map(ensureMarkets));
+  const legs = [];
+  open.forEach(l => {
+    const mk = S.markets[l.match_id], m = S.matchIdx[l.match_id];
+    const o = mk && mk.markets && (mk.markets[l.market] || []).find(o => o.name===l.name
+      && (o.description ?? null)===(l.description ?? null) && numPoint(o)===(l.point==null ? null : Number(l.point)));
+    if(o) legs.push(makeLeg(m, l.market, o));
+  });
+  const gone = b.legs.length - legs.length;
+  if(!legs.length){
+    await confirmModal({ title:'Nothing left to tail', body:'Every leg of that bet has started or is no longer on offer.', ok:'OK', cancel:'Close' });
+    return;
+  }
+  const kind = legs.length===1 ? 'single' : b.kind;
+  S.slip.push({ id:uid(), kind, legs, stake:0, tail_of:b.id, tail_who:b.who || '' });
+  saveSlip(); renderNavCtrl(); rerender();
+  openSlip();
+  $('slip-msg').textContent = gone ? `${gone} leg${gone>1?'s':''} had already started or closed, so ${gone>1?'they were':'it was'} left off.` : '';
 }
 // confirm, then let the server re-price it — if a score has moved the value, show the new offer
 async function cashOut(b, quote){
@@ -2773,13 +3121,18 @@ async function renderBoard(){
   list.innerHTML = standingsFor(entrants, r, cr).map((p,i) => {
     const me = p.user_id===S.user.id;
     const mv = p.move>0 ? `<span class="mv up">▲${p.move}</span>` : p.move<0 ? `<span class="mv down">▼${-p.move}</span>` : `<span class="mv">–</span>`;
-    return `<div class="lb${i===0?' gold':''}${me?' me':''}">`+
+    return `<div class="lb${i===0?' gold':''}${me?' me':''}" data-player="${esc(p.user_id)}" data-name="${esc(p.display_name)}" role="button" tabindex="0">`+
       `<span class="rk">${p.rank}</span>${mv}`+
-      `<span class="who"><div class="nm">${flairHTML(p.user_id)}<span class="nm-t">${esc(p.display_name)}</span>${i<3?`<span class="md">${MEDALS[i]}</span>`:''}${me?'<span class="tag">YOU</span>':''}</div>`+
+      `<span class="who"><div class="nm"><span class="nm-t">${esc(p.display_name)}</span>${i<3?`<span class="md">${MEDALS[i]}</span>`:''}${me?'<span class="tag">YOU</span>':''}${flairHTML(p.user_id)}</div>`+
         `<div class="pl ${p.roundNet>0?'up':p.roundNet<0?'down':''}">${p.roundNet===0 ? 'Even' : signed(p.roundNet)} in round ${r}${r===cr?' so far':''}</div></span>`+
       `<span class="bl-w"><span class="bl ${p.profit>0?'up':p.profit<0?'down':''}">${p.profit===0 ? '$0' : signed(p.profit)}</span>`+
-        `<span class="bl-s">${cur(p.bal)} bal</span></span></div>`;
+        `<span class="bl-s">${cur(p.bal)} bal</span></span><span class="lb-chev">›</span></div>`;
   }).join('');
+  list.querySelectorAll('[data-player]').forEach(el => {
+    const go = () => openPlayer(el.dataset.player, el.dataset.name);
+    el.addEventListener('click', go);
+    el.addEventListener('keydown', e => { if(e.key==='Enter') go(); });
+  });
 }
 // biggest wins and losses settled in the round (or across the season)
 async function renderMoments(r){
@@ -2805,6 +3158,134 @@ async function renderMoments(r){
   if(longest) fill('long', [longest]);
   fill('win', wins); fill('loss', losses);
   list.querySelectorAll('.rib[data-scope]').forEach(b => b.addEventListener('click', () => { S.board.scope = b.dataset.scope; renderMoments(r); }));
+}
+
+/* ════════ PLAYER VIEW ════════
+   Tap someone on the leaderboard: their flair, rank and profit, a season summary, then their
+   bets like My Bets. Others' pending bets show unless they've hidden them; Tail copies one. */
+function openPlayer(id, name){
+  S.player = { id, name:name || '' };
+  S.pvCabAll = false;
+  $('pane-player').scrollTop = 0;
+  setView('player');
+}
+// quiet: a live refresh — keep what's on screen (and the scroll position) until the new data is in
+async function renderPlayer(quiet){
+  const body = $('player-body'), id = S.player.id, me = id===S.user.id;
+  const pane = $('pane-player'), scroll = pane.scrollTop;
+  if(!quiet) body.innerHTML = '<div class="empty">Loading…</div>';
+  const [entrants, bets, unlocks] = await Promise.all([api.standings(S.comp.id), me ? api.myBets(S.comp.id) : api.playerBets(S.comp.id, id),
+    api.unlocks(id).catch(() => [])]);
+  await Promise.all([ensureProfiles([id]), ensureLiveFor(bets)]);
+  if(S.view!=='player' || S.player.id!==id) return;
+  const cr = currentRound();
+  const p = standingsFor(entrants, cr, cr).find(e => e.user_id===id);
+  if(!p){ body.innerHTML = '<div class="empty">They’re no longer in this comp.</div>'; return; }
+  S.player.name = p.display_name; renderNav2();
+  bets.forEach(b => { b.who = p.display_name; });
+
+  const H = highlights(bets);
+  const lost = bets.filter(b => b.status==='lost').sort((a,b) => b.stake-a.stake)[0];
+  const pick = teamsOf(id)[curSport()], team = pick && teamByAbbr(curSport(), pick.team);
+  const flair = team ? `<img src="assets/teams/${curSport()}/${team.abbr}.svg" alt="" title="${esc(team.name)} supporter">`
+                     : esc((p.display_name[0] || '?').toUpperCase());
+  const tile = (l, v, s, cls='') => `<div class="hl"><div class="l">${l}</div><div class="v ${cls}">${v}</div><div class="s">${s||'&nbsp;'}</div></div>`;
+  const joined = p.joined_at ? new Date(p.joined_at).toLocaleDateString('en-AU', { day:'numeric', month:'short' }) : '';
+
+  body.innerHTML =
+    `<div class="acct"><div class="pv-head"><span class="pv-flair">${flair}</span>`+
+      `<span class="pv-w"><div class="pv-n">${esc(p.display_name)}</div>`+
+        (flairOf(id) ? `<div class="pv-t">${flairHTML(id, curSport(), 'md')}</div>` : '')+
+        `<div class="pv-s">#${p.rank} of ${entrants.length}${team ? ` · ${esc(team.name)} supporter` : ''}${joined ? ` · joined ${esc(joined)}` : ''}</div></span>`+
+      `<span class="pv-p"><div class="v ${p.profit>0?'up':p.profit<0?'down':''}">${p.profit===0 ? '$0' : signed(p.profit)}</div>`+
+        `<div class="s">${cur(p.bal)} balance</div></span></div></div>`+
+    trophyCabinet(unlocks)+
+    `<div class="acct"><h3>Season ${esc(S.season.id)}</h3><div class="hl-grid">`+
+      tile('Strike rate', H.strike!=null ? H.strike+'%' : '—', H.settledN ? `${H.wonN} of ${H.settledN} bets won` : 'Nothing settled yet')+
+      tile('Turnover', cur(H.turnover), `${bets.length} bet${bets.length===1?'':'s'}${me ? '' : ' you can see'}`)+
+      tile('Biggest win', H.best ? signed(betNet(H.best)) : '—', H.best ? `${kindLabel(H.best)} @ ${fmtPx(H.best.price)}` : '', H.best?'up':'')+
+      tile('Biggest loss', lost ? '−'+cur(lost.stake) : '—', lost ? `${kindLabel(lost)} · Round ${lost.round}` : '', lost?'down':'')+
+      tile('Longest odds landed', H.longest ? fmtPx(H.longest.price) : '—', H.longest ? `${kindLabel(H.longest)} · Round ${H.longest.round}` : '')+
+      tile('Best round', H.bestRound ? signed(H.bestRound[1]) : '—', H.bestRound ? `Round ${H.bestRound[0]}` : '', H.bestRound && H.bestRound[1]>0?'up':'')+
+    `</div>`+
+    (me ? '' : `<div class="rule-list" style="margin-top:8px">Bets they’ve hidden show up here once they settle.</div>`)+
+    `</div>`+
+    `<div id="player-bets"></div>`;
+  badgeInfo($('pv-cab'), i => S._pvShown[i]);            // their badges: details on hold / hover / tap
+  if($('pv-cab-more')) $('pv-cab-more').addEventListener('click', () => { S.pvCabAll = !S.pvCabAll; renderPlayer(true); });
+  const list = $('player-bets');
+  if(!bets.length){ list.innerHTML = `<div class="empty">${me ? 'No bets yet.' : 'No bets to show yet.'}</div>`; return; }
+  renderBetGroups(list, bets, me ? 'mine' : 'player');
+  if(quiet) pane.scrollTop = scroll;
+}
+
+// their unlocks as badges, rarest first; hold (or hover over, or tap) one for its details
+function trophyCabinet(unlocks){
+  const total = (ACH.achievements || []).length;
+  const ach = unlocks.filter(u => !isFlairKey(u.ach)), fl = unlocks.filter(u => isFlairKey(u.ach));
+  if(!unlocks.length) return `<div class="acct"><h3>Trophy cabinet</h3><div class="rule-list">Nothing unlocked yet.</div></div>`;
+  // one badge per achievement (Champion twice shows once, ×2), one per flair
+  const by = {};
+  unlocks.forEach(u => {
+    const k = isFlairKey(u.ach) ? u.ach+'|'+u.scope : u.ach;
+    const g = by[k] || (by[k] = { info:unlockInfo(u.ach, u.scope, u.meta || {}), got:{ n:0, first:u.unlocked_at, units:[] }, a:ACH_BY[u.ach], other:true });
+    g.got.n++; g.got.units.push(u); if(u.unlocked_at < g.got.first) g.got.first = u.unlocked_at;
+  });
+  S._pvShown = Object.values(by).sort((a, b) => RARITY[b.info.rarity] - RARITY[a.info.rarity] || new Date(b.got.first) - new Date(a.got.first));
+  return `<div class="acct" id="pv-cab"><h3>Trophy cabinet · ${new Set(ach.map(u => u.ach)).size} / ${total}${fl.length ? ` · ${fl.length} flair${fl.length>1?'s':''}` : ''}</h3>`+
+    `<div class="at-grid">${(S.pvCabAll ? S._pvShown : S._pvShown.slice(0, 4)).map((it, i) => tileHTML(it.info, { attrs:`data-bi="${i}" role="button" tabindex="0"` })).join('')}</div>`+
+    (S._pvShown.length > 4 ? `<button class="mk-more" id="pv-cab-more" type="button">${S.pvCabAll ? 'Show fewer' : `Show all ${S._pvShown.length}`}</button>` : '')+`</div>`;
+}
+
+/* ════════ ROUND OVERVIEW ════════
+   The first time you open a comp after a round has closed: how your round went, the allowance
+   landing, the top 3, the round's big moments, and what's on next. Seen once per round (saved). */
+function lastClosedRound(){
+  const rs = rounds().filter(r => r >= (S.comp.start_round || 1) && S.matches.filter(m => m.round===r).every(m => m.status==='concluded'));
+  return rs.length ? rs[rs.length-1] : null;
+}
+async function maybeRoundOverview(force){
+  const r = lastClosedRound();
+  if(r==null) return;
+  const seen = S.entrant.seen_round;
+  if(!force && (seen==null || seen >= r)) return;
+  const [entrants, moments] = await Promise.all([api.standings(S.comp.id), api.moments(S.comp.id, r)]);
+  await ensureProfiles(entrants.map(e => e.user_id));
+  const cr = currentRound();
+  const table = standingsFor(entrants, r, cr===r ? cr : -1);          // past round → its end-of-round snapshot
+  const me = table.find(e => e.user_id===S.user.id);
+  const settled = moments.filter(b => b.status==='won' || b.status==='lost');
+  const win = settled.filter(b => b.status==='won').sort((a, b) => betNet(b) - betNet(a))[0];
+  const loss = settled.filter(b => b.status==='lost').sort((a, b) => b.stake - a.stake)[0];
+  const longest = settled.filter(b => b.status==='won').sort((a, b) => b.price - a.price)[0];
+  const next = S.matches.filter(m => m.round===r+1);
+  const MEDALS = ['🥇','🥈','🥉'];
+  const line = (l, v, cls='') => `<div class="ov-line"><span>${l}</span><b class="${cls}">${v}</b></div>`;
+  const body =
+    (me ? line('Your round', me.roundNet===0 ? 'Even' : signed(me.roundNet), me.roundNet>0?'up':me.roundNet<0?'down':'')+
+          line('Where you sit', `#${me.rank} of ${table.length}`) : '')+
+    (isWeekly() && next.length ? line('Allowance', `+${cur(startBal())} for round ${r+1}`, 'up') : '')+
+    `<h4>Top 3</h4>`+
+    table.slice(0, 3).map((p, i) => `<div class="ov-top">${MEDALS[i]} ${flairHTML(p.user_id)}<span class="n">${esc(p.display_name)}</span>`+
+      `<b class="${p.profit>0?'up':p.profit<0?'down':''}">${p.profit===0 ? '$0' : signed(p.profit)}</b></div>`).join('')+
+    (settled.length ? `<h4>Round ${r} moments</h4>`+
+      (win ? line(`Biggest win · ${esc(win.who)}`, signed(betNet(win)), 'up') : '')+
+      (loss ? line(`Biggest loss · ${esc(loss.who)}`, '−'+cur(loss.stake), 'down') : '')+
+      (longest ? line(`Longest odds · ${esc(longest.who)}`, '@ '+fmtPx(longest.price)) : '') : '')+
+    (next.length ? `<h4>Up next · round ${r+1}</h4>`+
+      next.slice(0, 5).map(m => `<div class="ov-next">${esc(teamName(m.home_team))} v ${esc(teamName(m.away_team))}<span>${esc(fmtWhen(m.commence_time))}</span></div>`).join('')+
+      (next.length > 5 ? `<div class="ov-next more">and ${next.length - 5} more</div>` : '') : '');
+  await new Promise(resolve => {
+    const scrim = document.createElement('div');
+    scrim.className = 'modal-scrim';
+    scrim.innerHTML = `<div class="modal overview" role="dialog" aria-modal="true"><h3>Round ${r} wrap</h3><div class="ov-sub">${esc(S.comp.name)}</div>`+
+      `<div class="ov-body">${body}</div><div class="modal-actions"><button class="big-btn" data-act="yes">Let’s go</button></div></div>`;
+    const done = () => { scrim.remove(); resolve(); };
+    scrim.addEventListener('click', e => { if(e.target===scrim || e.target.closest('[data-act]')) done(); });
+    $('app').appendChild(scrim);
+  });
+  S.entrant.seen_round = Math.max(seen || 0, r);
+  api.seenRound(S.comp.id, r).catch(() => {});
 }
 
 /* ════════ ACCOUNT ════════ */
@@ -2852,7 +3333,7 @@ function confirmModal({ title, body, ok='Confirm', cancel='Cancel' }){
    One club per code. Pick any time while it's empty; after that, one change a season,
    then it's locked until next season (stops people hopping onto the underdog each week). */
 function teamPickState(sport){
-  const pick = (S.profiles[S.user.id] || {})[sport];
+  const pick = teamsOf(S.user.id)[sport];
   const season = Number(S.season.id);
   if(!pick || Number(pick.season)!==season) return { pick:pick || null, canChange:true, first:true,
     note: pick ? `From ${pick.season}. Pick again for ${season}.` : 'Not picked yet. Your club shows next to your name.' };
@@ -2905,9 +3386,269 @@ async function pickTeam(sport){
   });
   if(!ok) return;
   try{
-    S.profiles[S.user.id] = await api.setTeam(sport, abbr);
+    await api.setTeam(sport, abbr);
+    await ensureProfiles([S.user.id], true);          // your team and (if it changed) your flair
     renderAccount();
   }catch(err){ await confirmModal({ title:'Couldn’t change team', body:esc(err.message || 'Please try again.'), ok:'OK', cancel:'Close' }); }
+}
+
+/* ── achievements card ──
+   Your achievements and flairs as rows of badges. Hover (or tap and hold) a badge for its
+   details; tap one you've unlocked to show it next to your name. Filter (all / unlocked / locked),
+   sort (unlocked date, rarity, closest to unlocking, name, category) with ↑↓, top 10 / all.
+   Hidden ones you haven't got show as ??? at the end. */
+const ACH_SORTS = [['date','Unlocked date'],['rarity','Rarity'],['progress','Closest to unlocking'],['name','Name'],['category','Category']];
+function achItems(unlocks, progress){
+  const got = {};
+  unlocks.filter(u => !isFlairKey(u.ach)).forEach(u => {
+    const g = got[u.ach] || (got[u.ach] = { n:0, first:u.unlocked_at, units:[] });
+    g.n++; if(u.unlocked_at < g.first) g.first = u.unlocked_at; g.units.push(u);
+  });
+  const prog = Object.fromEntries((progress || []).map(p => [p.key, p]));
+  const items = (ACH.achievements || []).map(a => ({ key:a.key, a, got:got[a.key] || null, prog:prog[a.key] || null,
+    info:unlockInfo(a.key, ''), cat:a.category || 'other', pick:got[a.key] ? got[a.key].units[0] : null }));
+  unlocks.filter(u => isFlairKey(u.ach)).forEach(u => items.push({ key:u.ach+'|'+u.scope, flair:u, got:{ n:1, first:u.unlocked_at },
+    info:unlockInfo(u.ach, u.scope, u.meta || {}), cat:'flairs', pick:u }));
+  return items;
+}
+function achSorted(items){
+  const st = S.achView, dir = st.dir==='asc' ? 1 : -1;
+  const locked = it => !it.got, secret = it => !it.got && it.a && it.a.hidden;
+  let list = items.filter(it => st.filter==='all' || (st.filter==='unlocked' ? !locked(it) : locked(it)));
+  const byName = (x, y) => x.info.name.localeCompare(y.info.name);
+  const cmp = {
+    date: (x, y) => (locked(x) - locked(y)) || (locked(x) ? byName(x, y) : dir * (new Date(x.got.first) - new Date(y.got.first))),
+    rarity: (x, y) => dir * (RARITY[x.info.rarity] - RARITY[y.info.rarity]) || byName(x, y),
+    progress: (x, y) => {
+      const p = it => it.got ? -1 : it.prog ? it.prog.have / Math.max(1, it.prog.need) : 0;
+      return (locked(y) - locked(x)) || dir * (p(x) - p(y)) || byName(x, y);
+    },
+    name: (x, y) => dir * byName(x, y),
+    category: (x, y) => { const o = Object.keys(ACH.categories || {}).concat(['flairs']);
+      return dir * (o.indexOf(x.cat) - o.indexOf(y.cat)) || byName(x, y); },
+  }[st.sort];
+  list.sort((x, y) => (secret(x) - secret(y)) || cmp(x, y));      // ??? always last
+  return list;
+}
+// is this unlock the flair you're showing?
+function isMyFlair(u){
+  const f = (S.profiles[S.user.id] || {}).flair;
+  return !!(u && f && f.ach===u.ach && (f.scope || '')===(u.scope || ''));
+}
+function achievementsCard(unlocks, progress){
+  S.achView = S.achView || { filter:'all', sort:'date', dir:'desc', all:false };
+  const st = S.achView, items = achItems(unlocks, progress);
+  const total = (ACH.achievements || []).length, have = items.filter(it => it.got && it.a).length;
+  const list = achSorted(items), shown = st.all ? list : list.slice(0, TOP_N);
+  S._achShown = shown;                                             // for the details pop-over and taps
+  const badge = (it, i) => tileHTML(it.info, { locked:!it.got, secret:!it.got && it.a && it.a.hidden, cur:it.got && isMyFlair(it.pick),
+    prog:!it.got && it.prog, attrs:`data-bi="${i}" role="button" tabindex="0"` });
+  let rows = '';
+  if(st.sort==='category'){
+    let cat = null, open = false;
+    shown.forEach((it, i) => {
+      if(it.cat!==cat){
+        if(open) rows += '</div>';
+        cat = it.cat; open = true;
+        rows += `<div class="ach-cat">${esc(cat==='flairs' ? 'Flairs' : (ACH.categories || {})[cat] || cat)}</div><div class="at-grid">`;
+      }
+      rows += badge(it, i);
+    });
+    if(open) rows += '</div>';
+  } else rows = `<div class="at-grid">${shown.map(badge).join('')}</div>`;
+  const me = flairOf(S.user.id), picked = (S.profiles[S.user.id] || {}).flair;
+  return `<div class="acct" id="ach-card"><h3>Achievements · ${have} / ${total}</h3>`+
+    `<div class="flair-pick"><span class="l">Shown next to your name</span>`+
+      (me ? `<span class="v">${badgeHTML(me, 'md')}</span>` : `<span class="v none">Nothing yet. Pick a team or unlock something.</span>`)+
+      (picked ? `<button class="btn-sm" id="flair-default" type="button" title="Go back to your team’s flair">Default</button>` : '')+`</div>`+
+    `<div class="ach-hint">Hold (or hover over) one for details. Tap one you’ve unlocked to wear it as your flair.</div>`+
+    `<div class="ach-ctl">`+
+      `<select id="ach-filter" aria-label="Show">${[['all','All'],['unlocked','Unlocked'],['locked','Locked']].map(([v,l]) => `<option value="${v}"${st.filter===v?' selected':''}>${l}</option>`).join('')}</select>`+
+      `<select id="ach-sort" aria-label="Sort by">${ACH_SORTS.map(([v,l]) => `<option value="${v}"${st.sort===v?' selected':''}>${l}</option>`).join('')}</select>`+
+      `<button class="btn-sm" id="ach-dir" type="button" aria-label="Sort direction">${st.dir==='asc' ? '↑' : '↓'}</button>`+
+    `</div>`+
+    (shown.length ? rows : `<div class="empty" style="color:var(--mid);padding:8px">Nothing here yet.</div>`)+
+    (list.length > TOP_N ? `<button class="mk-more" id="ach-more" type="button">${st.all ? `Show top ${TOP_N} achievements` : `Show all ${list.length} achievements`}</button>` : '')+
+  `</div>`;
+}
+function wireAchievements(body){
+  const re = () => { const y = $('pane-account').scrollTop; renderAccount().then(() => { $('pane-account').scrollTop = y; }); };
+  const st = S.achView;
+  $('ach-filter').addEventListener('change', e => { st.filter = e.target.value; re(); });
+  $('ach-sort').addEventListener('change', e => { st.sort = e.target.value; re(); });
+  $('ach-dir').addEventListener('click', () => { st.dir = st.dir==='asc' ? 'desc' : 'asc'; re(); });
+  if($('ach-more')) $('ach-more').addEventListener('click', () => { st.all = !st.all; re(); });
+  const setFlair = async u => {
+    try{ await api.setFlair(u && u.ach, u && (u.scope || '')); await ensureProfiles([S.user.id], true); re(); }
+    catch(err){ await confirmModal({ title:'Couldn’t change your flair', body:esc(err.message || 'Please try again.'), ok:'OK', cancel:'Close' }); }
+  };
+  if($('flair-default')) $('flair-default').addEventListener('click', async () => {
+    const ok = await confirmModal({ title:'Back to your team flair?', body:'Your club for each code shows next to your name again.', ok:'Switch back' });
+    if(ok) setFlair(null);
+  });
+  // hold / hover for details; tap an unlocked one to wear it
+  badgeInfo($('ach-card'), i => S._achShown[i], async it => {
+    if(!it.got || isMyFlair(it.pick)) return 'info';               // locked, or already showing: just the details
+    hideBadgeInfo();
+    const ok = await confirmModal({ title:'Show this flair?',
+      body:`<span class="modal-badge">${badgeHTML(it.info, 'lg')}</span>It’ll show next to your name in chat, on the leaderboard and on your player page.`, ok:'Show it' });
+    if(ok) setFlair(it.pick);
+  });
+  // arrived from an achievement notification or pop-up: jump to the card
+  if(S.achOpen){ S.achOpen = false; setTimeout(() => $('ach-card') && $('ach-card').scrollIntoView({ block:'start' }), 50); }
+}
+
+/* hover (mouse) or tap and hold (touch) a badge to see what it is. get(i) → item; onTap(item)
+   runs on a normal tap and can return 'info' to show the details instead. */
+let _bi = null;
+function badgeInfoHTML(it){
+  const secret = !it.got && it.a && it.a.hidden;
+  const when = it.got ? new Date(it.got.first).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }) : '';
+  const comps = it.got && it.got.units ? it.got.units.map(u => u.meta && u.meta.comp_name).filter(Boolean) : [];
+  const bar = !it.got && it.prog ? `<div class="ach-bar"><i style="width:${Math.min(100, Math.round(it.prog.have / Math.max(1, it.prog.need) * 100))}%"></i>`+
+    `<span>${Math.min(it.prog.have, it.prog.need)} / ${it.prog.need}</span></div>` : '';
+  return `<div class="bi-top">${badgeHTML(it.info, 'md', { locked:!it.got, secret })}<span class="rar r-${it.info.rarity}">${esc(it.info.rarity)}</span></div>`+
+    `<div class="bi-d">${esc(secret ? 'Hidden achievement. Keep playing to find it.' : it.info.desc)}</div>`+
+    (it.got ? `<div class="bi-w">Unlocked ${esc(when)}${it.got.n > 1 ? ` · ${it.got.n} times` : ''}${comps.length ? ` · ${esc([...new Set(comps)].join(', '))}` : ''}</div>`
+            : `<div class="bi-w">Locked</div>`)+bar+
+    (it.got && !it.other && isMyFlair(it.pick) ? `<div class="bi-w cur">Showing next to your name</div>` : '');
+}
+function hideBadgeInfo(){ if(_bi){ _bi.remove(); _bi = null; } }
+function showBadgeInfo(el, it){
+  hideBadgeInfo();
+  _bi = document.createElement('div');
+  _bi.className = 'bi-pop';
+  _bi.innerHTML = badgeInfoHTML(it);
+  document.body.appendChild(_bi);
+  const r = el.getBoundingClientRect(), w = _bi.offsetWidth, h = _bi.offsetHeight;
+  _bi.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width/2 - w/2)) + 'px';
+  _bi.style.top = (r.top - h - 8 > 8 ? r.top - h - 8 : r.bottom + 8) + 'px';       // above if there's room
+}
+function badgeInfo(root, get, onTap){
+  if(!root) return;
+  root.querySelectorAll('[data-bi]').forEach(el => {
+    const it = () => get(Number(el.dataset.bi));
+    let timer = null, held = false;
+    el.addEventListener('pointerenter', e => { if(e.pointerType==='mouse') showBadgeInfo(el, it()); });
+    el.addEventListener('pointerleave', e => { if(e.pointerType==='mouse') hideBadgeInfo(); });
+    el.addEventListener('pointerdown', e => {
+      if(e.pointerType==='mouse') return;
+      held = false;
+      timer = setTimeout(() => { held = true; showBadgeInfo(el, it()); if(navigator.vibrate) navigator.vibrate(10); }, 450);
+    });
+    ['pointerup','pointercancel'].forEach(t => el.addEventListener(t, () => clearTimeout(timer)));
+    el.addEventListener('contextmenu', e => e.preventDefault());       // no long-press menu on phones
+    el.addEventListener('click', async e => {
+      if(held){ held = false; e.preventDefault(); return; }            // that was a hold, not a tap
+      const r = onTap ? await onTap(it()) : 'info';
+      if(r==='info') showBadgeInfo(el, it());
+    });
+    el.addEventListener('keydown', e => { if(e.key==='Enter') el.click(); });
+  });
+}
+// a tap anywhere else, or a scroll, closes the details
+document.addEventListener('pointerdown', e => { if(_bi && !e.target.closest('[data-bi]') && !e.target.closest('.bi-pop')) hideBadgeInfo(); }, true);
+document.addEventListener('scroll', hideBadgeInfo, true);
+
+/* ── notifications ──
+   This device on/off (a push subscription saved to the database), plus what you want:
+   prefs = { achievements:bool, digest:{ compId:bool }, chat:{ comp:{ compId:bool }, sport:{ afl:bool }, global:bool } }.
+   Everything defaults on except the global chat room. */
+const VAPID_PUBLIC = 'BIVvqBfWx1QUNCqQrChDRh8FT-EFYCj0APz-dPH5-khZLbg8Vwt4re4zwtVxJ6qmVDozrgze-D7UYIQbvYX5-7w';
+async function loadPrefs(){ if(!S.prefs) S.prefs = await api.myPrefs().catch(() => ({})); return S.prefs; }
+function prefOn(kind, key){
+  const p = S.prefs || {};
+  if(kind==='achievements') return p.achievements !== false;
+  if(kind==='digest') return ((p.digest || {})[key]) !== false;
+  if(kind==='chat_global') return (p.chat || {}).global === true;
+  const room = kind==='chat_comp' ? 'comp' : 'sport';
+  return (((p.chat || {})[room] || {})[key]) !== false;
+}
+async function setPref(kind, key, on){
+  const p = S.prefs = JSON.parse(JSON.stringify(S.prefs || {}));
+  if(kind==='achievements') p.achievements = on;
+  else if(kind==='digest') (p.digest = p.digest || {})[key] = on;
+  else {
+    p.chat = p.chat || {};
+    if(kind==='chat_global') p.chat.global = on;
+    else { const room = kind==='chat_comp' ? 'comp' : 'sport'; (p.chat[room] = p.chat[room] || {})[key] = on; }
+  }
+  try{ await api.setPrefs(p); }catch(e){ console.warn(e); }
+}
+function bellBtn(kind, key, label){
+  const on = prefOn(kind, key);
+  return `<button class="bell${on ? '' : ' off'}" type="button" data-bell="${kind}" data-key="${esc(key || '')}" title="${esc(label)}" aria-label="${esc(label)}" aria-pressed="${on}">${on ? '🔔' : '🔕'}</button>`;
+}
+function wireBells(root, after){
+  root.querySelectorAll('[data-bell]').forEach(b => b.addEventListener('click', async () => {
+    const kind = b.dataset.bell, key = b.dataset.key || null, on = !prefOn(kind, key);
+    b.classList.toggle('off', !on); b.textContent = on ? '🔔' : '🔕'; b.setAttribute('aria-pressed', on);
+    await setPref(kind, key, on);
+    if(after) after();
+  }));
+}
+function pushSupported(){ return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
+async function pushState(){
+  if(MOCK) return { supported:true, on:!!(S.prefs && S.prefs._mockDevice), perm:'default' };
+  if(!pushSupported()) return { supported:false };
+  try{
+    const reg = await navigator.serviceWorker.getRegistration();
+    const sub = reg && await reg.pushManager.getSubscription();
+    return { supported:true, on:!!sub && Notification.permission==='granted', perm:Notification.permission };
+  }catch(e){ return { supported:false }; }
+}
+function b64uBytes(s){
+  const b = atob((s + '='.repeat((4 - s.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/'));
+  return Uint8Array.from(b, c => c.charCodeAt(0));
+}
+async function pushOn(){
+  if(MOCK){ S.prefs._mockDevice = true; return; }
+  const reg = await navigator.serviceWorker.register('./sw.js');
+  await navigator.serviceWorker.ready;
+  const perm = await Notification.requestPermission();
+  if(perm!=='granted') throw new Error(perm==='denied' ? 'Notifications are blocked for this site. Allow them in your browser’s site settings, then try again.' : 'Notifications weren’t allowed.');
+  const sub = await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:b64uBytes(VAPID_PUBLIC) });
+  await api.pushSubscribe(sub);
+}
+async function pushOff(){
+  if(MOCK){ S.prefs._mockDevice = false; return; }
+  const reg = await navigator.serviceWorker.getRegistration();
+  const sub = reg && await reg.pushManager.getSubscription();
+  if(sub){ await api.pushUnsubscribe(sub.endpoint).catch(() => {}); await sub.unsubscribe(); }
+}
+function notificationsCard(device){
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent), standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  let status, btn = '';
+  if(!device.supported) status = ios && !standalone
+    ? 'On iPhone, add this app to your Home Screen first (Share → Add to Home Screen), then turn notifications on from there.'
+    : 'This browser doesn’t support notifications.';
+  else if(device.perm==='denied') status = 'Notifications are blocked for this site. Allow them in your browser’s site settings.';
+  else if(device.on){ status = 'On for this device.'; btn = `<button class="btn-sm danger" id="push-off" type="button">Turn off here</button>`; }
+  else { status = 'Off for this device.'; btn = `<button class="btn-sm" id="push-on" type="button">Turn on</button>`; }
+  const sw = (kind, key, label, sub='') => { const on = prefOn(kind, key);
+    return `<div class="switch-row"><span class="t">${esc(label)}${sub ? `<small>${esc(sub)}</small>` : ''}</span>`+
+      `<label class="switch"><input type="checkbox" data-pref="${kind}" data-key="${esc(key || '')}"${on ? ' checked' : ''}><i></i></label></div>`; };
+  const codes = [...new Set(S.comps.map(c => c.sport))];
+  return `<div class="acct"><h3>Notifications</h3>`+
+    `<div class="comp-row"><span class="w"><div class="s" style="font-size:12px">${esc(status)}</div></span>${btn}</div>`+
+    `<div class="rules"><h4>Send me</h4>`+
+      sw('achievements', null, 'Achievements and flairs', 'When you unlock one while you’re away')+
+      S.comps.map(c => sw('digest', c.id, `Round wrap · ${c.name}`, 'Top 3, where you sit and the biggest win, after each round')).join('')+
+      S.comps.map(c => sw('chat_comp', c.id, `Chat · ${c.name}`)).join('')+
+      codes.map(s => sw('chat_sport', s, `Chat · ${SP(s).label} room`)).join('')+
+      sw('chat_global', null, 'Chat · Everyone room', 'Off unless you turn it on')+
+    `</div><div class="rule-list" style="margin-top:8px">You can also mute a chat room with the bell in the chat window, and a comp’s round wrap with the bell under My competitions.</div></div>`;
+}
+function wireNotifications(body){
+  body.querySelectorAll('[data-pref]').forEach(i => i.addEventListener('change', () => setPref(i.dataset.pref, i.dataset.key || null, i.checked)));
+  wireBells(body);
+  const go = async (fn, b) => {
+    b.disabled = true;
+    try{ await fn(); renderAccount(); }
+    catch(err){ b.disabled = false; await confirmModal({ title:'Notifications', body:esc(err.message || 'That didn’t work. Please try again.'), ok:'OK', cancel:'Close' }); }
+  };
+  if($('push-on')) $('push-on').addEventListener('click', () => go(pushOn, $('push-on')));
+  if($('push-off')) $('push-off').addEventListener('click', () => go(pushOff, $('push-off')));
 }
 
 function rulesText(c){
@@ -2919,7 +3660,8 @@ function rulesText(c){
 }
 async function renderAccount(){
   const body = $('account-body');
-  const [bets, members] = await Promise.all([api.myBets(S.comp.id), api.members(S.comp.id), ensureProfiles([S.user.id], true)]);
+  const [bets, members, , unlocks, progress, prefs, device] = await Promise.all([api.myBets(S.comp.id), api.members(S.comp.id),
+    ensureProfiles([S.user.id], true), api.unlocks().catch(() => []), api.achProgress().catch(() => []), loadPrefs(), pushState()]);
   S.comps = await api.myComps();
   if(S.view!=='account') return;
   const start = startBal(), funded = fundedOf(S.entrant), net = S.balance - funded;
@@ -2955,6 +3697,7 @@ async function renderAccount(){
     `<div class="acct"><h3>My competitions</h3>`+
       S.comps.map(c => `<div class="comp-row"><span class="w"><div class="n">${esc(compLabel(c))}${c.host_id===S.user.id?'<span class="tag-host">Host</span>':''}</div>`+
         `<div class="s">As ${esc(c.display_name)} · ${c.members} member${c.members===1?'':'s'}</div></span>`+
+        bellBtn('digest', c.id, `Round wrap notifications for ${c.name}`)+
         (c.id===S.comp.id ? `<span class="tag-cur">Current</span>` : `<button class="btn-sm" data-switch="${esc(c.id)}" type="button">Switch</button>`)+`</div>`).join('')+
       `<div class="btn-pair"><button class="big-btn" id="acct-host" type="button">Host a comp</button><button class="big-btn" id="acct-join" type="button">Join a comp</button></div>`+
     `</div>`;
@@ -2981,6 +3724,8 @@ async function renderAccount(){
       (isWeekly() ? `<div class="rule-list" style="margin-top:6px">The leaderboard ranks on profit: your balance minus everything you’ve been given.</div>` : '')+
     `</div>`+
     barrackingCard()+
+    achievementsCard(unlocks, progress)+
+    notificationsCard(device)+
     `<form class="acct" id="acct-form">`+
       `<h3>Username</h3>`+
       `<label for="acct-name">Your name in ${esc(S.comp.name)}</label>`+
@@ -3006,6 +3751,8 @@ async function renderAccount(){
     `</div>` : '');
 
   body.querySelectorAll('[data-team-pick]').forEach(b => b.addEventListener('click', () => pickTeam(b.dataset.teamPick)));
+  wireAchievements(body, unlocks);
+  wireNotifications(body);
   // comp card
   $('code-copy').addEventListener('click', async e => {
     const b = e.currentTarget;
@@ -3119,7 +3866,7 @@ function markRead(room){
 }
 function countUnread(room){ const lr = lastRead(room); return S.chat.msgs[room].filter(m => m.ts>lr && m.user_id!==S.user.id).length; }
 async function loadChat(){
-  const got = await Promise.all(ROOMS.map(r => api.chat(r, S.comp.id)));
+  const [got] = await Promise.all([Promise.all(ROOMS.map(r => api.chat(r, S.comp.id))), loadPrefs()]);
   ROOMS.forEach((r,i) => { S.chat.msgs[r] = got[i]; });
   ROOMS.forEach(r => { S.chat.unread[r] = countUnread(r); });
   $('room-sport-label').textContent = SP().label;
@@ -3151,8 +3898,13 @@ function fmtMsgDay(ts){
 function renderChat(){
   const room = S.chat.room, msgs = S.chat.msgs[room];
   document.querySelectorAll('#chat-drawer .type-chip').forEach(c => c.classList.toggle('active', c.dataset.room===room));
-  $('chat-sub').textContent = room==='comp' ? `${S.comp.name} · members only`
+  // the room's description, with a bell to mute its notifications
+  const sub = room==='comp' ? `${S.comp.name} · members only`
     : room==='sport' ? `Everyone in an ${SP().label} comp` : 'Everyone, across every comp';
+  const bell = room==='comp' ? bellBtn('chat_comp', S.comp.id, 'Notifications for this room')
+    : room==='sport' ? bellBtn('chat_sport', curSport(), 'Notifications for this room') : bellBtn('chat_global', null, 'Notifications for this room');
+  $('chat-sub').innerHTML = `<span>${esc(sub)}</span>${bell}`;
+  wireBells($('chat-sub'));
   // pinned announcement (comp room)
   const pinBox = $('chat-pin');
   const pinned = room==='comp' && S.comp.pinned ? msgs.find(m => m.id===S.comp.pinned) : null;
@@ -3176,7 +3928,7 @@ function renderChat(){
     const from = room==='sport' ? ` · ${esc(m.comp_name)}`
       : room==='global' ? ` · ${esc(SP(m.sport).label)} · ${esc(m.comp_name)}` : '';
     const pinBtn = (room==='comp' && isHost() && S.comp.pinned!==m.id) ? `<button class="msg-pin-btn" data-pin="${esc(m.id)}">Pin</button>` : '';
-    html += `<div class="msg-row${me?' me':''}"><div class="msg-meta">${flairHTML(m.user_id, m.sport || curSport())}<b>${who}${from}</b>${isHostMsg?'<span class="host">HOST</span>':''}<span>${fmtMsgTime(m.ts)}</span>${pinBtn}</div>`+
+    html += `<div class="msg-row${me?' me':''}"><div class="msg-meta"><b>${who}</b>${flairHTML(m.user_id, m.sport || curSport())}<b>${from}</b>${isHostMsg?'<span class="host">HOST</span>':''}<span>${fmtMsgTime(m.ts)}</span>${pinBtn}</div>`+
       `<div class="bubble">${esc(m.text)}</div></div>`;
   });
   list.innerHTML = html;
@@ -3307,7 +4059,7 @@ async function liveApi(){
   sb.auth.onAuthStateChange(event => { if(event==='PASSWORD_RECOVERY') setTimeout(() => showAuth('reset'), 0); });
 
   const mapMember = r => r && ({ user_id:r.user_id, display_name:r.username, balance:n(r.balance), funded:n(r.funded),
-    history:r.history||{}, joined_at:r.joined_at, is_host:r.is_host });
+    history:r.history||{}, joined_at:r.joined_at, is_host:r.is_host, seen_round:r.seen_round });
   const mapBet = r => ({ ...r, stake:n(r.stake), price:n(r.price), potential_payout:n(r.potential_payout), payout:n(r.payout) });
   const mapChat = r => ({ id:r.id, comp_id:r.comp_id, room:r.room, user_id:r.user_id, name:r.username,
     comp_name:r.comp_name||'', sport:r.sport, text:r.body, ts:Date.parse(r.created_at) });
@@ -3393,10 +4145,28 @@ async function liveApi(){
 
     // ── who you barrack for ──
     async profiles(ids){
-      const rows = chk(await sb.from('ft_profiles').select('user_id, teams').in('user_id', ids)) || [];
-      return Object.fromEntries(rows.map(r => [r.user_id, r.teams || {}]));
+      const rows = chk(await sb.from('ft_profiles').select('user_id, teams, flair').in('user_id', ids)) || [];
+      return Object.fromEntries(rows.map(r => [r.user_id, { teams:r.teams || {}, flair:r.flair || null }]));
     },
     async setTeam(sport, team){ return chk(await sb.rpc('ft_set_team', { p_sport:sport, p_team:team, p_season:SEASON })); },
+
+    // ── achievements ──
+    async unlocks(userId){
+      return chk(await sb.from('ft_unlocks').select('ach, scope, meta, unlocked_at, seen').eq('user_id', userId || uid).order('unlocked_at')) || [];
+    },
+    async achProgress(){ return chk(await sb.rpc('ft_ach_progress')) || []; },
+    async seenUnlocks(){ chk(await sb.rpc('ft_seen_unlocks')); },
+    async setFlair(ach, scope){ return chk(await sb.rpc('ft_set_flair', { p_ach:ach, p_scope:scope ?? '' })); },
+    async seenRound(compId, round){ chk(await sb.rpc('ft_seen_round', { p_comp:compId, p_round:round })); },
+
+    // ── notifications ──
+    async myPrefs(){ return (chk(await sb.from('ft_profiles').select('prefs').eq('user_id', uid).maybeSingle()) || {}).prefs || {}; },
+    async setPrefs(prefs){ chk(await sb.rpc('ft_set_prefs', { p_prefs:prefs })); },
+    async pushSubscribe(sub){
+      const j = sub.toJSON();
+      chk(await sb.rpc('ft_push_subscribe', { p_endpoint:j.endpoint, p_p256dh:j.keys.p256dh, p_auth:j.keys.auth }));
+    },
+    async pushUnsubscribe(endpoint){ chk(await sb.rpc('ft_push_unsubscribe', { p_endpoint:endpoint })); },
     // settled bets in the comp (plus your own pending ones) — row level security hides others' pending bets
     async moments(id, round){
       let q = sb.from('ft_bets').select('*').eq('comp_id', id);
@@ -3435,6 +4205,11 @@ async function liveApi(){
       return (chk(await sb.from('ft_bets').select('*').eq('comp_id', id).eq('user_id', uid).order('placed_at', { ascending:false })) || []).map(mapBet);
     },
     async placeBets(id, bets){ return n(chk(await sb.rpc('ft_place_bets', { p_comp:id, p_bets:bets }))); },
+    async hideBet(betId, hidden){ return mapBet(chk(await sb.rpc('ft_hide_bet', { p_bet:betId, p_hidden:hidden }))); },
+    // someone's bets as you're allowed to see them: everything settled, plus pending ones they haven't hidden
+    async playerBets(id, userId){
+      return (chk(await sb.from('ft_bets').select('*').eq('comp_id', id).eq('user_id', userId).order('placed_at', { ascending:false })) || []).map(mapBet);
+    },
     // the server re-prices it; if it moved, the error says "value changed: <new value>"
     async cashOut(betId, quote){
       const r = chk(await sb.rpc('ft_cash_out', { p_bet:betId, p_quote:quote }));
@@ -3456,14 +4231,25 @@ async function liveApi(){
         .on('postgres_changes', { event:'INSERT', schema:'public', table:'ft_chats' }, p => p.new && h.chat(mapChat(p.new)))
         .on('postgres_changes', { event:'UPDATE', schema:'public', table:'ft_chats', filter:`comp_id=eq.${compId}` }, p => p.new && h.pin(p.new))
         .on('postgres_changes', { event:'UPDATE', schema:'public', table:'ft_members', filter:`user_id=eq.${uid}` }, p => p.new && h.member({ ...p.new, balance:n(p.new.balance), funded:n(p.new.funded) }))
-        .on('postgres_changes', { event:'*', schema:'public', table:'ft_bets', filter:`user_id=eq.${uid}` }, () => h.bets())
+        // every bet in the comp you're allowed to see (row level security drops others' hidden ones):
+        // yours for My Bets, everyone's for a live player view
+        .on('postgres_changes', { event:'*', schema:'public', table:'ft_bets', filter:`comp_id=eq.${compId}` },
+            p => { const r = (p.new && p.new.user_id) ? p.new : (p.old || {}); h.bets(r.user_id); })
         .on('postgres_changes', { event:'UPDATE', schema:'public', table:'ft_matches' }, p => p.new && h.match(p.new))
+        .on('postgres_changes', { event:'INSERT', schema:'public', table:'ft_unlocks', filter:`user_id=eq.${uid}` }, p => p.new && h.unlock(p.new))
         .subscribe();
       return () => { sb.removeChannel(ch); };
     },
   };
 }
 
+// the service worker shows push notifications; tapping one while the app is open sends us its link
+if('serviceWorker' in navigator && !MOCK){
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+  navigator.serviceWorker.addEventListener('message', e => {
+    if(e.data && e.data.type==='open' && e.data.url) location.href = e.data.url;
+  });
+}
 boot();
 </script>
 </body>
