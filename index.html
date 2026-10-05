@@ -376,7 +376,7 @@
   .lb.me{border-left:5px solid var(--gold)}
   .lb.gold{background:linear-gradient(100deg,#fff 0%,#fff7e0 100%);box-shadow:0 0 0 2px var(--gold),0 1px 4px rgba(0,0,0,.25)}
   .lb .rk{min-width:18px;text-align:right;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:19px;color:var(--blue)}
-  .lb .rk-w{width:46px;flex-shrink:0;display:flex;align-items:baseline;gap:4px;line-height:1}
+  .lb .rk-w{width:54px;flex-shrink:0;display:flex;align-items:baseline;gap:4px;line-height:1}
   .lb .mv{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;color:var(--mid)}
   .lb .mv.up{color:var(--ok)}.lb .mv.down{color:var(--err)}
   .lb .who{flex:1;min-width:0}
@@ -706,9 +706,11 @@
     margin:12px 0 2px;padding-bottom:3px;border-bottom:2px solid var(--line)}
   .rar{font-family:'Oswald',sans-serif;font-weight:700;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:1px 6px;border-radius:8px}
   .rar.r-bronze{background:#f6e6d8;color:#8a4f1c}.rar.r-silver{background:#eceff3;color:#5b6478}.rar.r-gold{background:#fbefc9;color:#8a6500}
-  .ach-bar{position:relative;height:14px;background:#eef0f4;border-radius:7px;margin-top:5px;overflow:hidden}
-  .ach-bar i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--blue-lt),var(--blue))}
-  .ach-bar span{position:relative;font-size:9px;font-weight:700;color:#fff;padding-left:6px;line-height:14px;mix-blend-mode:difference}
+  .ach-bar{position:relative;height:18px;background:#e3e7ef;border-radius:9px;margin-top:8px;overflow:hidden}
+  .ach-bar i{position:absolute;left:0;top:0;bottom:0;overflow:hidden;border-radius:9px;background:linear-gradient(90deg,var(--blue-lt),var(--blue))}
+  .ach-bar .t{position:absolute;left:0;top:0;bottom:0;width:100%;display:flex;align-items:center;justify-content:center;
+    font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.03em;color:var(--ink);white-space:nowrap}
+  .ach-bar i .t{color:#fff}
   /* player view: flair title, trophy cabinet */
   .pv-head .pv-t{margin:3px 0 1px;display:flex}
   /* round overview */
@@ -1674,9 +1676,9 @@ async function boot(){
     S.comps = await api.myComps();
     // links from notifications: ?comp=<id>&chat=<room> / &overview=1, or ?achievements=1
     const q = new URLSearchParams(location.search);
-    const link = { comp:q.get('comp'), chat:q.get('chat'), overview:q.has('overview'), achievements:q.has('achievements') };
-    if(link.comp || link.chat || link.overview || link.achievements){
-      ['comp','chat','overview','achievements'].forEach(k => q.delete(k));
+    const link = { comp:q.get('comp'), chat:q.get('chat'), overview:q.has('overview'), achievements:q.has('achievements'), view:q.get('view') };
+    if(link.comp || link.chat || link.overview || link.achievements || link.view){
+      ['comp','chat','overview','achievements','view'].forEach(k => q.delete(k));
       history.replaceState(null, '', location.pathname + (q.toString() ? '?'+q : '') + location.hash);
     }
     const last = api.lastComp();
@@ -1720,6 +1722,7 @@ async function openComp(id, opts={}){
   if(opts.achievements){ S.achOpen = true; setView('account'); return; }
   await maybeRoundOverview(opts.overview).catch(e => console.warn(e));
   if(opts.chat && ROOMS.includes(opts.chat)){ openChat(); setRoom(opts.chat); }
+  if(opts.view==='mybets') setView('mybets');
 }
 
 /* live updates for the open comp: chat, pins, your balance, your bets settling, scores */
@@ -3201,13 +3204,14 @@ function standingsFor(entrants, r, cr){
     return { bal:Number(h.b)||0, profit:(Number(h.b)||0)-(Number(h.f)||0) };
   };
   const rankAt = rr => {
-    const order = entrants.slice().sort((a,b) => at(b,rr).profit-at(a,rr).profit || at(b,rr).bal-at(a,rr).bal);
-    const map = {}; order.forEach((e,i) => { map[e.user_id] = i+1; }); return map;
+    // ties share a place and the next place skips ahead: three tied 1st, then 4th (to the cent)
+    const cents = e => Math.round(at(e,rr).profit*100);
+    const map = {}; entrants.forEach(e => { map[e.user_id] = 1 + entrants.filter(o => cents(o) > cents(e)).length; }); return map;
   };
   const now = rankAt(r), prev = r>(S.comp.start_round||1) ? rankAt(r-1) : null;
   return entrants.map(e => { const a = at(e,r);
     return { ...e, bal:a.bal, profit:a.profit, roundNet:a.profit-at(e,r-1).profit, rank:now[e.user_id],
-      move: prev ? prev[e.user_id]-now[e.user_id] : 0 }; }).sort((a,b) => a.rank-b.rank);
+      move: prev ? prev[e.user_id]-now[e.user_id] : 0 }; }).sort((a,b) => a.rank-b.rank || b.bal-a.bal || a.display_name.localeCompare(b.display_name));
 }
 async function renderBoard(){
   const list = $('board-list');
@@ -3221,15 +3225,17 @@ async function renderBoard(){
 function paintStandings(list, entrants, r, cr){
   if(!entrants.length){ list.innerHTML = '<div class="empty">Nobody has joined yet.</div>'; return; }
   const MEDALS = ['🥇','🥈','🥉'];
-  list.innerHTML = standingsFor(entrants, r, cr).map((p,i) => {
+  const table = standingsFor(entrants, r, cr);
+  const tied = rk => table.filter(x => x.rank===rk).length > 1;
+  list.innerHTML = table.map((p,i) => {
     const me = p.user_id===S.user.id;
     // rank with its movement underneath (nothing when it hasn't moved); name, then their flair under it;
     // this round's change stacked over their balance, then total profit at the far right
     const mv = p.move>0 ? `<span class="mv up">▲${p.move}</span>` : p.move<0 ? `<span class="mv down">▼${-p.move}</span>` : '';
     const fl = flairHTML(p.user_id);
-    return `<div class="lb${i===0?' gold':''}${me?' me':''}" data-player="${esc(p.user_id)}" data-name="${esc(p.display_name)}" role="button" tabindex="0">`+
-      `<span class="rk-w"><span class="rk">${p.rank}</span>${mv}</span>`+
-      `<span class="who"><div class="nm"><span class="nm-t">${esc(p.display_name)}</span>${i<3?`<span class="md">${MEDALS[i]}</span>`:''}${me?'<span class="tag">YOU</span>':''}</div>`+
+    return `<div class="lb${p.rank===1?' gold':''}${me?' me':''}" data-player="${esc(p.user_id)}" data-name="${esc(p.display_name)}" role="button" tabindex="0">`+
+      `<span class="rk-w"><span class="rk">${tied(p.rank) ? '=' : ''}${p.rank}</span>${mv}</span>`+
+      `<span class="who"><div class="nm"><span class="nm-t">${esc(p.display_name)}</span>${p.rank<=3?`<span class="md">${MEDALS[p.rank-1]}</span>`:''}${me?'<span class="tag">YOU</span>':''}</div>`+
         (fl ? `<div class="fl">${fl}</div>` : '')+`</span>`+
       `<span class="bl-w"><span class="pl ${p.roundNet>0?'up':p.roundNet<0?'down':''}" title="Round ${r}${r===cr?' so far':''}">${p.roundNet===0 ? 'Even' : signed(p.roundNet)} rd ${r}</span>`+
         `<span class="bl-s">${cur(p.bal)} ${isSpend() ? 'left' : 'bal'}</span></span>`+
@@ -3382,7 +3388,7 @@ async function maybeRoundOverview(force){
     (isWeekly() && next.length ? line('Allowance', `+${cur(startBal())} for round ${r+1}`, 'up') : '')+
     (isSpend() && next.length ? line('Next round', `Back to ${cur(startBal())} to spend`) : '')+
     `<h4>Top 3</h4>`+
-    table.slice(0, 3).map((p, i) => `<div class="ov-top">${MEDALS[i]} ${flairHTML(p.user_id)}<span class="n">${esc(p.display_name)}</span>`+
+    table.filter(p => p.rank<=3).map(p => `<div class="ov-top">${MEDALS[p.rank-1]} ${flairHTML(p.user_id)}<span class="n">${esc(p.display_name)}</span>`+
       `<b class="${p.profit>0?'up':p.profit<0?'down':''}">${p.profit===0 ? '$0' : signed(p.profit)}</b></div>`).join('')+
     (settled.length ? `<h4>Round ${r} moments</h4>`+
       (win ? line(`Biggest win · ${esc(win.who)}`, signed(betNet(win)), 'up') : '')+
@@ -3529,7 +3535,7 @@ function achItems(unlocks, progress){
 }
 function achSorted(items){
   const st = S.achView, dir = st.dir==='asc' ? 1 : -1;
-  const locked = it => !it.got, secret = it => !it.got && it.a && it.a.hidden;
+  const locked = it => !it.got, secret = it => !!(!it.got && it.a && it.a.hidden);       // true/false, never undefined (keeps the sort sane)
   let list = items.filter(it => st.filter==='all' || (st.filter==='unlocked' ? !locked(it) : locked(it)));
   const byName = (x, y) => x.info.name.localeCompare(y.info.name);
   const cmp = {
@@ -3621,8 +3627,11 @@ function badgeInfoHTML(it){
   const secret = !it.got && it.a && it.a.hidden;
   const when = it.got ? new Date(it.got.first).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }) : '';
   const comps = it.got && it.got.units ? it.got.units.map(u => u.meta && u.meta.comp_name).filter(Boolean) : [];
-  const bar = !it.got && it.prog ? `<div class="ach-bar"><i style="width:${Math.min(100, Math.round(it.prog.have / Math.max(1, it.prog.need) * 100))}%"></i>`+
-    `<span>${Math.min(it.prog.have, it.prog.need)} / ${it.prog.need}</span></div>` : '';
+  // progress bar with the count inside: dark text over the track, white over the fill (a clipped copy)
+  const pct = it.prog ? Math.min(100, Math.round(it.prog.have / Math.max(1, it.prog.need) * 100)) : 0;
+  const txt = it.prog ? `${Math.min(it.prog.have, it.prog.need)} / ${it.prog.need}` : '';
+  const bar = !it.got && it.prog ? `<div class="ach-bar"><span class="t">${txt}</span>`+
+    `<i style="width:${pct}%"><span class="t" style="width:${pct ? 10000 / pct : 0}%">${txt}</span></i></div>` : '';
   return `<div class="bi-top">${badgeHTML(it.info, 'md', { locked:!it.got, secret })}<span class="rar r-${it.info.rarity}">${esc(it.info.rarity)}</span></div>`+
     `<div class="bi-d">${esc(secret ? 'Hidden achievement. Keep playing to find it.' : it.info.desc)}</div>`+
     (it.got ? `<div class="bi-w">Unlocked ${esc(when)}${it.got.n > 1 ? ` · ${it.got.n} times` : ''}${comps.length ? ` · ${esc([...new Set(comps)].join(', '))}` : ''}</div>`
@@ -3675,6 +3684,8 @@ async function loadPrefs(){ if(!S.prefs) S.prefs = await api.myPrefs().catch(() 
 function prefOn(kind, key){
   const p = S.prefs || {}, chat = p.chat || {};
   if(kind==='achievements') return p.achievements !== false;
+  if(kind==='bet_live') return p.bet_live === true;                      // off until turned on
+  if(['results','reminders','social','joins','quiet'].includes(kind)) return p[kind] !== false;
   if(kind==='digest') return ((p.digest || {})[key]) !== false;
   if(kind==='chat_all') return chat.all !== false;                       // the master switch in Account
   if(kind==='chat_global') return chat.global === true;                  // Everyone: off until turned on
@@ -3683,7 +3694,7 @@ function prefOn(kind, key){
 }
 async function setPref(kind, key, on){
   const p = S.prefs = JSON.parse(JSON.stringify(S.prefs || {}));
-  if(kind==='achievements') p.achievements = on;
+  if(kind==='achievements' || ['results','reminders','social','joins','quiet','bet_live'].includes(kind)) p[kind] = on;
   else if(kind==='digest') (p.digest = p.digest || {})[key] = on;
   else {
     p.chat = p.chat || {};
@@ -3755,9 +3766,16 @@ function notificationsCard(device){
   return `<div class="acct" id="notif-card"><h3>Notifications</h3>`+
     `<div class="comp-row"><span class="w"><div class="s" style="font-size:12px">${esc(status)}</div></span>${btn}</div>`+
     `<div class="rules"><h4>Send me</h4>`+
+      sw('results', null, 'Your bets', 'Every leg that lands, one leg to go, and when a bet lands or goes down')+
+      sw('digest', S.comp.id, 'Round wrap', `After each round of ${S.comp.name}: the top 3, where you sit, the biggest win, and your money for next round`)+
+      sw('reminders', null, 'Reminders', 'The round starting in 2 hours, and (weekly spend) money left an hour before the last game')+
       sw('achievements', null, 'Achievements and flairs', 'When you unlock one while you’re away')+
-      sw('digest', S.comp.id, 'Round wrap', `After each round of ${S.comp.name}: the top 3, where you sit and the biggest win`)+
+      sw('social', null, 'Tails', 'When someone tails one of your bets')+
+      sw('joins', null, 'New members', 'When someone joins one of your comps')+
+      sw('bet_live', null, 'Your games bouncing', 'When a game you’ve got a bet on starts (off by default)')+
       sw('chat_all', null, 'Chat', 'Turn off to stop all chat notifications. Choose rooms with the bells in the chat window.')+
+      `<h4 style="margin-top:14px">Quiet hours</h4>`+
+      sw('quiet', null, 'Nothing between 11pm and 7am', 'Except chat. Anything else waits until 7am.')+
     `</div></div>`;
 }
 function wireNotifications(body){
