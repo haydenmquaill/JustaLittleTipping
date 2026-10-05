@@ -532,8 +532,8 @@
   .msg-acts button{border:1px solid var(--line);background:#fff;border-radius:12px;padding:3px 11px;font-size:12px;font-weight:600;color:var(--blue);cursor:pointer}
   .msg-acts button.del{color:var(--err)}
   .msg-meta .edited{font-style:italic}
-  .who-link{cursor:pointer}
-  .who-link:hover{text-decoration:underline}
+  .who-link{cursor:pointer;display:inline-flex;border-radius:50%}
+  .who-link:hover .av{box-shadow:0 0 0 2px var(--green-acc)}
   .chat-pin .pin-t{white-space:pre-wrap;overflow-wrap:anywhere}
   /* loading: the view area dims, dots in the middle, and can't be tapped until the new view is in */
   .busy-ov{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;
@@ -1828,7 +1828,11 @@ function listenLive(){
       if(viewing){ renderChat(); api.threadRead(msg.thread_id).catch(() => {}); }
       loadThreads();
     },
-    friends: () => { S.friendsList = null; if(S.view==='person') { CACHE.delete('person:'+S.person.id); renderPerson(); } },
+    friends: () => {
+      S.friendsList = null;
+      if(S.view==='person') { CACHE.delete('person:'+S.person.id); renderPerson(); }
+      if(S.view==='account') refreshFriendsCard();
+    },
     // your balance moving: bets, payouts, cash outs, and the weekly allowance landing
     member: row => {
       if(row.comp_id!==compId) return;
@@ -3654,18 +3658,27 @@ function friendsCardHTML(list){
   const row = (f, actions, note) => `<div class="comp-row fr-row" data-person="${esc(f.user_id)}" data-name="${esc(f.known_as)}">${avatarHTML(f.user_id, 34, f.known_as)}`+
     `<span class="w"><div class="n">${esc(f.known_as)}</div><div class="s">${esc(note || f.real_name || '')}</div></span>${actions}</div>`;
   const b = (act, uid, label, cls='btn-sm') => `<button class="${cls}" type="button" data-fa="${act}" data-uid="${esc(uid)}">${label}</button>`;
-  return `<div class="acct" id="friends-card"><h3>Friends${friends.length ? ` · ${friends.length}` : ''}</h3>`+
-    // your friends, then requests (ones you've received, then ones you've sent)
-    (friends.length ? friends.map(f => row(f, b('message', f.user_id, '💬'))).join('')
-                    : `<div class="rule-list">No friends yet. Add people from their page, from chat, or with their user ID below.</div>`)+
+  return `<div class="acct" id="friends-card"><h3>Friends</h3>`+
+    // swapping IDs first (yours to share, theirs to paste), then requests waiting on you, then your friends
+    `<h4 class="fr-h">Your user ID</h4><div class="code-box id-box"><span class="c">${esc(S.user.id)}</span><button class="btn-sm" id="id-copy" type="button">Copy</button></div>`+
+    `<div class="rule-list">Send it to a mate (text it, whatever) so they can add you. All it lets them do is send you a friend request.</div>`+
+    `<h4 class="fr-h">Add by user ID</h4>`+
+    `<form id="fr-add" class="rn-row"><input id="fr-id" type="text" autocomplete="off" placeholder="Paste a mate’s user ID"><button class="btn-sm prim" type="submit">Send</button></form>`+
     (incoming.length || sent.length ? `<h4 class="fr-h">Requests · ${incoming.length + sent.length}</h4>`+
       incoming.map(f => row(f, b('accept', f.user_id, 'Accept', 'btn-sm prim')+b('decline', f.user_id, 'Decline', 'btn-sm danger'), 'Wants to be friends')).join('')+
       sent.map(f => row(f, b('cancel', f.user_id, 'Cancel'), 'Request sent')).join('') : '')+
-    `<h4 class="fr-h">Add by user ID</h4>`+
-    `<form id="fr-add" class="rn-row"><input id="fr-id" type="text" autocomplete="off" placeholder="Paste a mate’s user ID"><button class="btn-sm prim" type="submit">Send</button></form>`+
-    `<h4 class="fr-h">Your user ID</h4><div class="code-box id-box"><span class="c">${esc(S.user.id)}</span><button class="btn-sm" id="id-copy" type="button">Copy</button></div>`+
-    `<div class="rule-list">Send it to a mate (text it, whatever) so they can add you. All it lets them do is send you a friend request.</div>`+
+    `<h4 class="fr-h">Your friends${friends.length ? ` · ${friends.length}` : ''}</h4>`+
+    (friends.length ? friends.map(f => row(f, b('message', f.user_id, '💬'))).join('')
+                    : `<div class="rule-list">No friends yet. Add people from their page, their photo in chat, or with their user ID above.</div>`)+
   `</div>`;
+}
+// a request, accept, decline or unfriend arrived live: swap just this card (keeps your scroll and anything typed)
+async function refreshFriendsCard(){
+  const list = await myFriends(), old = $('friends-card'); if(!old) return;
+  const typed = $('fr-id')?.value || '';
+  old.outerHTML = friendsCardHTML(list);
+  if(typed) $('fr-id').value = typed;
+  wireFriendsCard();
 }
 function wireFriendsCard(body){
   const card = $('friends-card'); if(!card) return;
@@ -3879,18 +3892,18 @@ async function groupInfo(t){
   }catch(err){ await confirmModal({ title:'Group', body:esc(err.message || 'That didn’t work.'), ok:'OK', cancel:'Close' }); }
 }
 
-/* ── one chat message (rooms and friends chats): avatar + tappable name, edited / deleted, and
+/* ── one chat message (rooms and friends chats): name, tappable avatar, edited / deleted, and
    Edit / Delete when you tap your own (or, for the host, anything in the comp room) ── */
 function msgRowHTML(m, { room, showName=true, extraMeta='' }){
   const me = m.user_id===S.user.id;
   const canDelete = !m.deleted && (me || (room==='comp' && isHost()));
   const canEdit = !m.deleted && me;
   const name = me ? 'You' : esc(m.name);
-  const nameHTML = me ? `<b>You</b>` : `<b class="who-link" data-user="${esc(m.user_id || '')}" data-name="${esc(m.name)}" data-compname="${esc(m.comp_name || '')}">${name}</b>`;
+  const who = me ? '' : `<span class="who-link" role="button" title="View ${esc(m.name)}" data-user="${esc(m.user_id || '')}" data-name="${esc(m.name)}" data-compname="${esc(m.comp_name || '')}">${avatarHTML(m.user_id, 28, m.name)}</span>`;
   return `<div class="msg-row${me?' me':''}" data-msg="${esc(m.id)}">`+
-    (showName || !me ? `<div class="msg-meta">${nameHTML}${extraMeta}<span>${fmtMsgTime(m.ts)}</span>${m.edited && !m.deleted ? '<span class="edited">edited</span>' : ''}</div>` : '')+
-    // name on top; then their avatar beside the message (your own sit on the right, no avatar)
-    `<div class="msg-line">${me ? '' : avatarHTML(m.user_id, 28, m.name)}`+
+    (showName || !me ? `<div class="msg-meta"><b>${name}</b>${extraMeta}<span>${fmtMsgTime(m.ts)}</span>${m.edited && !m.deleted ? '<span class="edited">edited</span>' : ''}</div>` : '')+
+    // name on top; then their avatar beside the message (tap it for their page; your own sit on the right, no avatar)
+    `<div class="msg-line">${who}`+
       `<div class="bubble${m.deleted ? ' gone' : ''}${canDelete ? ' can-act' : ''}">${m.deleted ? 'Message deleted' : esc(m.text)}</div></div>`+
     (canDelete ? `<div class="msg-acts">${canEdit ? `<button type="button" data-edit="${esc(m.id)}">Edit</button>` : ''}<button type="button" data-del="${esc(m.id)}" class="del">Delete</button></div>` : '')+
   `</div>`;
