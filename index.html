@@ -371,12 +371,13 @@
   .empty{color:rgba(255,255,255,.5);font-size:13px;text-align:center;padding:24px 12px}
 
   /* ── leaderboard ── */
-  .lb{display:flex;align-items:center;gap:10px;background:#fff;color:var(--ink);padding:10px 13px;
+  .lb{display:flex;align-items:center;gap:9px;background:#fff;color:var(--ink);padding:9px 12px 9px 9px;
     margin-bottom:6px;box-shadow:0 1px 4px rgba(0,0,0,.25)}
   .lb.me{border-left:5px solid var(--gold)}
   .lb.gold{background:linear-gradient(100deg,#fff 0%,#fff7e0 100%);box-shadow:0 0 0 2px var(--gold),0 1px 4px rgba(0,0,0,.25)}
-  .lb .rk{width:22px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:19px;color:var(--blue)}
-  .lb .mv{width:28px;flex-shrink:0;text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;color:var(--mid)}
+  .lb .rk{min-width:18px;text-align:right;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:19px;color:var(--blue)}
+  .lb .rk-w{width:46px;flex-shrink:0;display:flex;align-items:baseline;gap:4px;line-height:1}
+  .lb .mv{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;color:var(--mid)}
   .lb .mv.up{color:var(--ok)}.lb .mv.down{color:var(--err)}
   .lb .who{flex:1;min-width:0}
   .lb .nm{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;line-height:1.05;
@@ -389,7 +390,11 @@
     font-variant-numeric:tabular-nums}
   .lb .bl.up{color:var(--ok)}.lb .bl.down{color:var(--err)}
   .lb{cursor:pointer}
-  .lb .lb-chev{color:var(--mid);font-size:18px;margin-left:-4px}
+  .lb .lb-chev{color:var(--mid);font-size:15px;margin:0 -4px 0 -3px;flex-shrink:0}
+  .lb .fl{display:flex;min-width:0;margin-top:4px}
+  .lb .bl-w .pl{white-space:nowrap}
+  .lb .bl-w{gap:2px}
+  .lb > .bl{flex-shrink:0;width:84px;text-align:right;font-size:19px}   /* fixed, so the round / balance column lines up */
   /* player view header */
   .pv-head{display:flex;align-items:center;gap:12px}
   .pv-head .pv-flair{width:48px;height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
@@ -454,7 +459,7 @@
   @media (prefers-reduced-motion:reduce){.fb,.fb::after,.fb .sp,.bi-pop{animation:none!important}.fb .sp{display:none}}
   /* names in chat and the leaderboard keep the badge small and quiet: no glitter in a busy chat */
   .msg-meta{flex-wrap:wrap;row-gap:2px}.msg-meta .fb{flex-shrink:0;max-width:none}.msg-meta .fb .fb-n{overflow:visible}.msg-meta .fb .sp{display:none}
-  .lb .nm .fb{max-width:48%;margin-left:2px}
+  .lb .fl .fb{max-width:100%}
   /* a grid of badges (Account achievements, player trophy cabinet) */
   .fb-grid{display:flex;flex-wrap:wrap;gap:6px;padding:4px 0}
   .fb-grid .fb{max-width:100%}
@@ -465,12 +470,13 @@
   .busy-ov.on{opacity:1;pointer-events:auto}
   .busy-card{display:flex;flex-direction:column;align-items:center;gap:11px;padding:18px 26px;background:#fff;border-radius:12px;
     box-shadow:0 10px 30px rgba(0,0,0,.4)}
-  .busy-card .dots{display:flex;gap:7px}
-  .busy-card .dots i{width:10px;height:10px;border-radius:50%;background:var(--blue);animation:dotJump 1.1s ease-in-out infinite}
-  .busy-card .dots i:nth-child(2){animation-delay:.15s}.busy-card .dots i:nth-child(3){animation-delay:.3s}
+  .dots{display:flex;gap:7px}
+  .dots i{width:10px;height:10px;border-radius:50%;background:var(--blue);animation:dotJump 1.1s ease-in-out infinite}
+  .dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+  .gate-dots{justify-content:center;margin:2px 0 12px}
   .busy-card .t{font-family:'Oswald',sans-serif;font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mid)}
   @keyframes dotJump{0%,60%,100%{transform:translateY(0);opacity:.55}30%{transform:translateY(-9px);opacity:1}}
-  @media (prefers-reduced-motion:reduce){.busy-ov{transition:none}.busy-card .dots i{animation:dotFade 1.1s ease-in-out infinite}}
+  @media (prefers-reduced-motion:reduce){.busy-ov{transition:none}.dots i{animation:dotFade 1.1s ease-in-out infinite}}
   @keyframes dotFade{50%{opacity:.25}}
   /* collection tiles: 4 to a row (3 on very narrow phones), same rarity borders and effects as the badge */
   .at-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;padding:4px 0}
@@ -879,7 +885,7 @@
   </section>
 
   <section id="gate-loading" class="gate">
-    <div class="card"><img class="gate-logo" src="./assets/jalf_logo.png" alt="Just a Little Fun" onerror="this.remove()"><h2>Loading the round…</h2><p>One moment while we pull up the fixture.</p></div>
+    <div class="card"><img class="gate-logo" src="./assets/jalf_logo.png" alt="Just a Little Fun" onerror="this.remove()"><h2>Loading the round…</h2><span class="dots gate-dots"><i></i><i></i><i></i></span><p>One moment while we pull up the fixture.</p></div>
   </section>
 
   <!-- host or join: first visit, or from Account → Competitions -->
@@ -911,9 +917,10 @@
         <input id="host-user" type="text" maxlength="24" autocomplete="nickname" placeholder="Shown on the leaderboard" required></div>
       <div class="fld-row">
         <div class="fld"><label for="host-bankroll">Bankroll</label>
-          <select id="host-bankroll"><option value="weekly" selected>Weekly allowance</option><option value="once">One-off</option></select></div>
+          <select id="host-bankroll"><option value="weekly" selected>Weekly allowance</option><option value="spend">Weekly spend</option><option value="once">One-off</option></select></div>
         <div class="fld"><label for="host-bank" id="host-bank-l">Each round</label>
-          <select id="host-bank"><option value="500">$500</option><option value="1000" selected>$1,000</option>
+          <select id="host-bank"><option value="50">$50</option><option value="100">$100</option><option value="250">$250</option>
+            <option value="500">$500</option><option value="1000" selected>$1,000</option>
             <option value="2000">$2,000</option><option value="5000">$5,000</option><option value="10000">$10,000</option></select></div>
       </div>
       <div class="hint" id="host-bank-hint" style="margin:-6px 0 12px"></div>
@@ -1254,9 +1261,15 @@ function propsOn(){ return !(S.comp && S.comp.rules && S.comp.rules.props===fals
 function startBal(){ return Number(S.comp && S.comp.starting_balance) || 0; }
 // bankroll: 'weekly' adds starting_balance every round; 'once' (and older comps) is one balance for the season
 function isWeekly(c=S.comp){ return !!(c && c.rules && c.rules.bankroll==='weekly'); }
+// weekly spend: the amount to bet each round; anything above it is banked when the round closes
+function isSpend(c=S.comp){ return !!(c && c.rules && c.rules.bankroll==='spend'); }
 // everything a member has been given; profit is balance minus that, and the leaderboard ranks on it
 function fundedOf(e){ return e && e.funded!=null ? Number(e.funded) : startBal(); }
-function profitOf(e){ return (Number(e.balance)||0) - fundedOf(e); }
+// weekly spend: banked + anything above the amount right now (never negative); otherwise balance − given
+function profitOf(e){
+  if(isSpend()) return (Number(e.banked)||0) + Math.max(0, (Number(e.balance)||0) - startBal());
+  return (Number(e.balance)||0) - fundedOf(e);
+}
 function isHost(){ return !!S.comp && S.comp.host_id===S.user.id; }
 // one sport per comp — it's shown in front of the comp name and nowhere else, e.g. "AFL · Office Tipping"
 function compLabel(c){ return `${String(c.sport||SPORT).toUpperCase()} · ${c.name}`; }
@@ -1590,13 +1603,19 @@ document.querySelectorAll('[data-cancel]').forEach(b => b.addEventListener('clic
 
 // bankroll: the amount's label and hint follow the choice
 function hostBankHint(){
-  const weekly = $('host-bankroll').value==='weekly', amt = cur(Number($('host-bank').value));
-  $('host-bank-l').textContent = weekly ? 'Each round' : 'Starting balance';
-  $('host-bank-hint').textContent = weekly
-    ? `Everyone gets ${amt} at the start of every round, on top of what they have left. The leaderboard ranks on profit, so late joiners start level.`
-    : `Everyone starts with ${amt}, and it has to last the whole season.`;
+  const mode = $('host-bankroll').value, amt = cur(Number($('host-bank').value));
+  $('host-bank-l').textContent = mode==='once' ? 'Starting balance' : 'Each round';
+  $('host-bank-hint').textContent =
+      mode==='weekly' ? `Everyone gets ${amt} at the start of every round, on top of what they have left. The leaderboard ranks on profit, so late joiners start level.`
+    : mode==='spend'  ? `Everyone gets ${amt} to bet each round, plus any winnings that land that round. Nothing carries over: anything above ${amt} at the end of a round is banked, and the leaderboard ranks on banked.`
+    :                   `Everyone starts with ${amt}, and it has to last the whole season.`;
 }
-['host-bankroll','host-bank'].forEach(id => $(id).addEventListener('change', hostBankHint));
+// the amount follows the bankroll: $100 for weekly spend, $1,000 otherwise (until the host picks one)
+$('host-bankroll').addEventListener('change', () => {
+  if(!$('host-bank').dataset.picked) $('host-bank').value = $('host-bankroll').value==='spend' ? '100' : '1000';
+  hostBankHint();
+});
+$('host-bank').addEventListener('change', () => { $('host-bank').dataset.picked = '1'; hostBankHint(); });
 hostBankHint();
 
 // hosting always asks for a username — it's your name in the new comp
@@ -1631,7 +1650,7 @@ $('join-form').addEventListener('submit', async e => {
       if(!found){ msg.textContent = 'No comp with that code. Check it and try again.'; return; }
       if(found.member){ await openComp(found.id); return; }
       _joinFound = found;
-      $('join-found').innerHTML = `Joining <b>${esc(compLabel(found))}</b> · ${found.members} member${found.members===1?'':'s'} · ${found.bankroll==='weekly' ? `${cur(found.starting_balance)} every round` : `everyone starts with ${cur(found.starting_balance)}`}`;
+      $('join-found').innerHTML = `Joining <b>${esc(compLabel(found))}</b> · ${found.members} member${found.members===1?'':'s'} · ${found.bankroll==='weekly' ? `${cur(found.starting_balance)} every round` : found.bankroll==='spend' ? `${cur(found.starting_balance)} to spend every round` : `everyone starts with ${cur(found.starting_balance)}`}`;
       $('join-step2').classList.remove('hidden');
       $('join-btn').textContent = 'Join comp';
       $('join-name').focus();
@@ -1673,6 +1692,10 @@ async function boot(){
 async function openComp(id, opts={}){
   showGate('gate-loading');
   closeChat(); closeSlip();
+  // a different comp: forget every saved view and clear every page, so nothing from the last comp shows
+  CACHE.clear();
+  ['round-list','match-list','mybets-list','ladder-list','board-list','account-body','player-body'].forEach(p => { $(p).innerHTML = ''; delete $(p).dataset.k; });
+  S.player = { id:null, name:'' };
   S.comp = await api.comp(id);
   await loadMatches(S.comp.sport);             // each comp is one code — load that fixture
   S.entrant = await api.entrant(id);
@@ -1716,6 +1739,7 @@ function listenLive(){
     member: row => {
       if(row.comp_id!==compId) return;
       if(row.funded!=null) S.entrant.funded = row.funded;
+      if(row.banked!=null) S.entrant.banked = row.banked;
       S.entrant.balance = row.balance;
       setBalance(row.balance);
     },
@@ -1951,7 +1975,11 @@ function renderNavCtrl(){
   $('btn-slip').addEventListener('click', openSlip);
 }
 function animateBtn(id, cls){ const b=$(id); if(!b) return; b.classList.remove(cls); void b.offsetWidth; b.classList.add(cls); }
-function setBalance(v){ S.balance = Number(v)||0; $('nav-balance').textContent = cur(S.balance); }
+function setBalance(v){
+  S.balance = Number(v)||0;
+  $('nav-balance').textContent = cur(S.balance);
+  document.querySelector('.nav-bal .lab').textContent = isSpend() ? 'Left this round' : 'Balance';
+}
 
 /* ════════ countdown badges ════════ */
 function cdInfo(m){
@@ -2064,10 +2092,12 @@ async function renderRound(){
   const ms = roundMatches();
   if(!ms.length){ list.innerHTML = `<div class="empty">No matches loaded for this round yet.</div>`; return; }
   const tok = ++_roundToken;
-  if(!list.querySelector('.grp')) setBusy(list, true, 'Loading the round');
+  const rkey = S.comp.id + ':' + S.round;
+  if(list.dataset.k!==rkey) setBusy(list, true, 'Loading the round');   // a different round (or comp) than what's showing
   await ensureH2H(ms.map(m => m.id));
+  if(tok !== _roundToken) return;           // a newer render won the race (and owns the loading overlay)
   setBusy(list, false);
-  if(tok !== _roundToken) return;           // a newer render won the race
+  list.dataset.k = rkey;
   const note = S.mode==='multi'
     ? `<p class="mk-note"><b>Multi mode.</b> Tap prices across any games and rounds to build a multi. One leg per match, up to ${maxLegs()} legs. Open a match to add player markets.</p>` : '';
   list.innerHTML = note + BUCKETS.map(([b, label]) => {
@@ -3167,6 +3197,7 @@ function standingsFor(entrants, r, cr){
     const h = rr<(S.comp.start_round||1) ? null : (e.history||{})[rr];
     if(h==null) return { bal:start, profit:0 };                       // before the comp started, or before they joined
     if(typeof h==='number') return { bal:h, profit:h-start };
+    if(h.k!=null) return { bal:Number(h.b)||0, profit:(Number(h.k)||0) + Math.max(0, (Number(h.b)||0) - start) };
     return { bal:Number(h.b)||0, profit:(Number(h.b)||0)-(Number(h.f)||0) };
   };
   const rankAt = rr => {
@@ -3192,13 +3223,18 @@ function paintStandings(list, entrants, r, cr){
   const MEDALS = ['🥇','🥈','🥉'];
   list.innerHTML = standingsFor(entrants, r, cr).map((p,i) => {
     const me = p.user_id===S.user.id;
-    const mv = p.move>0 ? `<span class="mv up">▲${p.move}</span>` : p.move<0 ? `<span class="mv down">▼${-p.move}</span>` : `<span class="mv">–</span>`;
+    // rank with its movement underneath (nothing when it hasn't moved); name, then their flair under it;
+    // this round's change stacked over their balance, then total profit at the far right
+    const mv = p.move>0 ? `<span class="mv up">▲${p.move}</span>` : p.move<0 ? `<span class="mv down">▼${-p.move}</span>` : '';
+    const fl = flairHTML(p.user_id);
     return `<div class="lb${i===0?' gold':''}${me?' me':''}" data-player="${esc(p.user_id)}" data-name="${esc(p.display_name)}" role="button" tabindex="0">`+
-      `<span class="rk">${p.rank}</span>${mv}`+
-      `<span class="who"><div class="nm"><span class="nm-t">${esc(p.display_name)}</span>${i<3?`<span class="md">${MEDALS[i]}</span>`:''}${me?'<span class="tag">YOU</span>':''}${flairHTML(p.user_id)}</div>`+
-        `<div class="pl ${p.roundNet>0?'up':p.roundNet<0?'down':''}">${p.roundNet===0 ? 'Even' : signed(p.roundNet)} in round ${r}${r===cr?' so far':''}</div></span>`+
-      `<span class="bl-w"><span class="bl ${p.profit>0?'up':p.profit<0?'down':''}">${p.profit===0 ? '$0' : signed(p.profit)}</span>`+
-        `<span class="bl-s">${cur(p.bal)} bal</span></span><span class="lb-chev">›</span></div>`;
+      `<span class="rk-w"><span class="rk">${p.rank}</span>${mv}</span>`+
+      `<span class="who"><div class="nm"><span class="nm-t">${esc(p.display_name)}</span>${i<3?`<span class="md">${MEDALS[i]}</span>`:''}${me?'<span class="tag">YOU</span>':''}</div>`+
+        (fl ? `<div class="fl">${fl}</div>` : '')+`</span>`+
+      `<span class="bl-w"><span class="pl ${p.roundNet>0?'up':p.roundNet<0?'down':''}" title="Round ${r}${r===cr?' so far':''}">${p.roundNet===0 ? 'Even' : signed(p.roundNet)} rd ${r}</span>`+
+        `<span class="bl-s">${cur(p.bal)} ${isSpend() ? 'left' : 'bal'}</span></span>`+
+      `<span class="bl ${p.profit>0?'up':p.profit<0?'down':''}" ${isSpend() ? 'title="Banked"' : ''}>${p.profit===0 ? '$0' : isSpend() ? cur(p.profit) : signed(p.profit)}</span>`+
+      `<span class="lb-chev">›</span></div>`;
   }).join('');
   list.querySelectorAll('[data-player]').forEach(el => {
     const go = () => openPlayer(el.dataset.player, el.dataset.name);
@@ -3344,6 +3380,7 @@ async function maybeRoundOverview(force){
     (me ? line('Your round', me.roundNet===0 ? 'Even' : signed(me.roundNet), me.roundNet>0?'up':me.roundNet<0?'down':'')+
           line('Where you sit', `#${me.rank} of ${table.length}`) : '')+
     (isWeekly() && next.length ? line('Allowance', `+${cur(startBal())} for round ${r+1}`, 'up') : '')+
+    (isSpend() && next.length ? line('Next round', `Back to ${cur(startBal())} to spend`) : '')+
     `<h4>Top 3</h4>`+
     table.slice(0, 3).map((p, i) => `<div class="ov-top">${MEDALS[i]} ${flairHTML(p.user_id)}<span class="n">${esc(p.display_name)}</span>`+
       `<b class="${p.profit>0?'up':p.profit<0?'down':''}">${p.profit===0 ? '$0' : signed(p.profit)}</b></div>`).join('')+
@@ -3738,7 +3775,7 @@ function wireNotifications(body){
 
 function rulesText(c){
   const r = c.rules || {};
-  return (isWeekly(c) ? `Weekly allowance <b>${cur(c.starting_balance)}</b> every round` : `Starting balance <b>${cur(c.starting_balance)}</b>`)+
+  return (isWeekly(c) ? `Weekly allowance <b>${cur(c.starting_balance)}</b> every round` : isSpend(c) ? `Weekly spend <b>${cur(c.starting_balance)}</b> every round, nothing carries over` : `Starting balance <b>${cur(c.starting_balance)}</b>`)+
     ` · Max multi legs <b>${Math.min(LEG_CAP, r.max_legs||LEG_CAP)}</b> · `+
     `Max stake <b>${r.max_stake ? cur(r.max_stake) : 'no limit'}</b> · Player markets <b>${r.props===false ? 'off' : 'on'}</b> · `+
     `Cash out <b>${r.cashout!=null && r.cashout<0 ? 'off' : (r.cashout==null ? 5 : r.cashout)+'% cut per open leg'}</b>`;
@@ -3821,6 +3858,14 @@ function paintAccount(d){
         tile('Turnover', cur(H.turnover), `${bets.length} bet${bets.length===1?'':'s'} placed`)+
       `</div>` : `<div class="empty" style="color:var(--mid);padding:8px">Your highlights fill in once your first bets settle.</div>`)+
     `</div>`+
+    (isSpend() ?
+    `<div class="acct"><h3>Balance</h3>`+
+      row('Joined', esc(joined))+
+      row('Weekly spend', `${cur(start)} every round`)+
+      row('Left this round', cur(S.balance))+
+      row('Banked', cur(profitOf({ balance:S.balance, banked:S.entrant.banked })), profitOf({ balance:S.balance, banked:S.entrant.banked })>0 ? 'up' : '')+
+      `<div class="rule-list" style="margin-top:6px">At the end of each round, anything above ${cur(start)} is banked and you start the next round on ${cur(start)} again. Winnings that land during a round can be bet that round. The leaderboard ranks on banked.</div>`+
+    `</div>` :
     `<div class="acct"><h3>Balance</h3>`+
       row('Joined', esc(joined))+
       (isWeekly()
@@ -3829,7 +3874,7 @@ function paintAccount(d){
       row('Current balance', cur(S.balance))+
       row('Profit / loss', net===0 ? '$0' : signed(net), net>0?'up':net<0?'down':'')+
       (isWeekly() ? `<div class="rule-list" style="margin-top:6px">The leaderboard ranks on profit: your balance minus everything you’ve been given.</div>` : '')+
-    `</div>`+
+    `</div>`)+
     compsCard +
     barrackingCard()+
     achievementsCard(unlocks, progress)+
@@ -4165,7 +4210,7 @@ async function liveApi(){
   // backup for the reset-link case; deferred so the page has finished setting up first
   sb.auth.onAuthStateChange(event => { if(event==='PASSWORD_RECOVERY') setTimeout(() => showAuth('reset'), 0); });
 
-  const mapMember = r => r && ({ user_id:r.user_id, display_name:r.username, balance:n(r.balance), funded:n(r.funded),
+  const mapMember = r => r && ({ user_id:r.user_id, display_name:r.username, balance:n(r.balance), funded:n(r.funded), banked:n(r.banked),
     history:r.history||{}, joined_at:r.joined_at, is_host:r.is_host, seen_round:r.seen_round });
   const mapBet = r => ({ ...r, stake:n(r.stake), price:n(r.price), potential_payout:n(r.potential_payout), payout:n(r.payout) });
   const mapChat = r => ({ id:r.id, comp_id:r.comp_id, room:r.room, user_id:r.user_id, name:r.username,
@@ -4336,7 +4381,7 @@ async function liveApi(){
       const ch = sb.channel(`ft-${compId}-${uid}`)
         .on('postgres_changes', { event:'INSERT', schema:'public', table:'ft_chats' }, p => p.new && h.chat(mapChat(p.new)))
         .on('postgres_changes', { event:'UPDATE', schema:'public', table:'ft_chats', filter:`comp_id=eq.${compId}` }, p => p.new && h.pin(p.new))
-        .on('postgres_changes', { event:'UPDATE', schema:'public', table:'ft_members', filter:`user_id=eq.${uid}` }, p => p.new && h.member({ ...p.new, balance:n(p.new.balance), funded:n(p.new.funded) }))
+        .on('postgres_changes', { event:'UPDATE', schema:'public', table:'ft_members', filter:`user_id=eq.${uid}` }, p => p.new && h.member({ ...p.new, balance:n(p.new.balance), funded:n(p.new.funded), banked:n(p.new.banked) }))
         // every bet in the comp you're allowed to see (row level security drops others' hidden ones):
         // yours for My Bets, everyone's for a live player view
         .on('postgres_changes', { event:'*', schema:'public', table:'ft_bets', filter:`comp_id=eq.${compId}` },

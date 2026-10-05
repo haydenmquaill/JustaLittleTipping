@@ -25,7 +25,7 @@ window.createMockApi = function(page){
     const at = ms => new Date(Math.abs(ms)<HR ? now+ms : Math.round((now+ms)/(5*MIN))*(5*MIN)).toISOString();
     const season = { id:2027 };
     const ME = 'mock-user';
-    const STORE = 'ft-mock-v9';
+    const STORE = 'ft-mock-v10';
     // round, home, away, kick-off offset, status, venue, live: [quarter, clock secs, home g.b per qtr, away g.b per qtr]
     const FX = [
       [5,'Carlton Blues','Richmond Tigers',-26*HR,'concluded','MCG',
@@ -277,6 +277,7 @@ window.createMockApi = function(page){
       q.members[ME] = { display_name:'Hayden', balance:h.balance, history:h.history, joined_at:at(-40*DAY) };
       // weekly-allowance comps (the rest stay one-off, so both kinds can be tested)
       ['c-quaill','c-boys','c-famnrl'].forEach(id => weeklyize(st.comps[id]));
+      spendize(st.comps['c-office'], 100);
     }
     // turn a seeded one-off comp into a weekly-allowance one with the same profits: each member is
     // paid from the first round they have history for, and history becomes { b:balance, f:funded }
@@ -289,6 +290,21 @@ window.createMockApi = function(page){
         m.history = Object.fromEntries(rs.map(r => [r, { b:m.history[r] + A*(r-jr), f:A*(r-jr+1) }]));
         m.balance = Math.round((m.balance + A*(cr-jr))*100)/100;
         m.funded = A*(cr-jr+1);
+      });
+    }
+    // turn a seeded one-off comp into a weekly spend one at amount W: each round's gain (scaled to W)
+    // is banked if positive, everyone sits on W, and history becomes { b, f, k }
+    function spendize(c, W){
+      const old = c.starting_balance, cr = CUR[c.sport];
+      c.rules = { ...c.rules, bankroll:'spend' }; c.starting_balance = W;
+      Object.values(c.members).forEach(m => {
+        const rs = Object.keys(m.history||{}).map(Number).sort((a,b) => a-b);
+        const jr = rs.length ? rs[0] : cr;
+        let prev = old, k = 0; const h = {};
+        rs.forEach(r => { k += Math.max(0, (m.history[r] - prev) * W / old); prev = m.history[r]; h[r] = { b:W, f:W*(r-jr+1), k:Math.round(k*100)/100 }; });
+        m.history = h;
+        m.banked = Math.round((k + Math.max(0, (m.balance - prev) * W / old))*100)/100;
+        m.balance = W; m.funded = W*(cr-jr+1);
       });
     }
     const save = () => { try{ localStorage.setItem(STORE, JSON.stringify(st)); }catch(e){} };
@@ -369,7 +385,7 @@ window.createMockApi = function(page){
       },
       async hostComp({ name, display_name, sport='afl', starting_balance, rules }){
         const id = 'c-'+uid().slice(0,8);
-        rules = { ...rules, bankroll: rules && rules.bankroll==='once' ? 'once' : 'weekly' };
+        rules = { ...rules, bankroll: rules && ['once','spend'].includes(rules.bankroll) ? rules.bankroll : 'weekly' };
         st.comps[id] = { id, sport, name, code:newCode(), host_id:ME, starting_balance, start_round:CUR[sport], rules, pinned:null,
           created_at:new Date().toISOString(),
           members:{ [ME]:{ display_name, balance:starting_balance, funded:starting_balance, history:{}, joined_at:new Date().toISOString() } }, bets:[] };
@@ -404,12 +420,12 @@ window.createMockApi = function(page){
       async pin(id, msgId){ const c = comp(id); if(c.host_id!==ME) throw new Error('Only the host can do that.'); c.pinned = msgId; save(); return meta(c); },
       async members(id){
         // oldest members first
-        return Object.entries(comp(id).members).map(([user_id,m]) => ({ user_id, display_name:m.display_name, balance:m.balance, funded:m.funded, joined_at:m.joined_at }))
+        return Object.entries(comp(id).members).map(([user_id,m]) => ({ user_id, display_name:m.display_name, balance:m.balance, funded:m.funded, banked:m.banked, joined_at:m.joined_at }))
           .sort((a,b) => new Date(a.joined_at) - new Date(b.joined_at));
       },
       // ── leaderboard ──
       async standings(id){
-        return Object.entries(comp(id).members).map(([user_id,m]) => ({ user_id, display_name:m.display_name, balance:m.balance, funded:m.funded,
+        return Object.entries(comp(id).members).map(([user_id,m]) => ({ user_id, display_name:m.display_name, balance:m.balance, funded:m.funded, banked:m.banked,
           history:m.history||{}, joined_at:m.joined_at }));
       },
       // someone else's bets as you'd see them: settled ones, plus pending ones that aren't hidden.
@@ -579,7 +595,7 @@ window.createMockApi = function(page){
       },
       reset(){
         try{
-          ['ft-mock-v1','ft-mock-v2','ft-mock-v3','ft-mock-v4','ft-mock-v5','ft-mock-v6','ft-mock-v7','ft-mock-v8', STORE].forEach(k => localStorage.removeItem(k));
+          ['ft-mock-v1','ft-mock-v2','ft-mock-v3','ft-mock-v4','ft-mock-v5','ft-mock-v6','ft-mock-v7','ft-mock-v8','ft-mock-v9', STORE].forEach(k => localStorage.removeItem(k));
           Object.keys(localStorage).filter(k => k.startsWith('ft-slip-') || k.startsWith('ft-chat-read-')).forEach(k => localStorage.removeItem(k));
         }catch(e){}
       },
