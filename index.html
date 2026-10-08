@@ -1893,7 +1893,10 @@ async function openLink(url){
 function listenLive(){
   if(S.unlisten) S.unlisten();
   const compId = S.comp.id;
+  let joined = false;
   S.unlisten = api.subscribe(compId, {
+    // anything sent while the connection was down is lost, so a reconnect re-fetches it
+    status: st => { if(st!=='SUBSCRIBED') return; if(joined) catchUp(); joined = true; },
     chat: msg => onChatMessage(msg.room, msg.comp_id, msg),
     pin: row => {
       if(row.comp_id!==compId) return;
@@ -1947,6 +1950,41 @@ function listenLive(){
     },
   });
 }
+
+/* updates sent while the app was in the background (or offline) never arrive, so coming back
+   re-fetches what they would have changed: the fixture, live data, your balance and bets */
+let _catchUp = null, _caughtUp = 0;
+function catchUp(){
+  if(!S.comp || !S.user || _catchUp || Date.now() - _caughtUp < 3000) return _catchUp;
+  _catchUp = (async () => {
+    try{
+      const compId = S.comp.id;
+      const fresh = await api.matches(S.season.id, S.comp.sport);
+      if(!S.comp || S.comp.id!==compId) return;
+      const reLive = [];
+      fresh.forEach(r => {
+        const m = S.matchIdx[r.id];
+        if(!m){ S.matches.push(r); S.matchIdx[r.id] = r; return; }
+        // live data that's loaded and may have moved on: in play now, or was when we last heard
+        if(m.live!==undefined && (r.status==='live' || m.status==='live')) reLive.push(m);
+        Object.assign(m, r);
+      });
+      const [ent] = await Promise.all([api.entrant(compId), ...reLive.map(async m => { m.live = (await api.matchLive(m.id)) || null; })]);
+      if(ent && S.comp && S.comp.id===compId){
+        Object.assign(S.entrant, { balance:ent.balance, funded:ent.funded, banked:ent.banked });
+        setBalance(ent.balance);
+      }
+      if(S.view==='round') renderRound();
+      if(S.view==='match'){ renderNav2(); renderMatch(); }
+      if(S.view==='mybets') renderMyBets();
+      if(S.view==='player') renderPlayer(true);
+    }catch(e){ console.warn(e); }
+    finally{ _caughtUp = Date.now(); _catchUp = null; }
+  })();
+  return _catchUp;
+}
+document.addEventListener('visibilitychange', () => { if(document.visibilityState==='visible') catchUp(); });
+window.addEventListener('online', () => catchUp());
 
 /* ════════ fixture loading ════════ */
 // the fixture for one code (AFL or NRL), shared by every comp of that code
@@ -5397,7 +5435,7 @@ async function liveApi(){
             p => { const r = (p.new && p.new.user_id) ? p.new : (p.old || {}); h.bets(r.user_id); })
         .on('postgres_changes', { event:'UPDATE', schema:'public', table:'ft_matches' }, p => p.new && h.match(p.new))
         .on('postgres_changes', { event:'INSERT', schema:'public', table:'ft_unlocks', filter:`user_id=eq.${uid}` }, p => p.new && h.unlock(p.new))
-        .subscribe();
+        .subscribe(st => h.status && h.status(st));
       return () => { sb.removeChannel(ch); };
     },
   };
