@@ -227,22 +227,22 @@
   .mk-src{font-size:10px;letter-spacing:.04em;color:rgba(255,255,255,.45);text-align:center;padding:8px 0 0}
 
   /* ── match hero (top of the match view, every tab) ── */
-  .hero{background:radial-gradient(ellipse at 50% 0%,#2a4688 0%,var(--blue) 45%,var(--blue-deep) 100%);color:#fff;
+  .hero{background:var(--blue);color:#fff;
     margin:-10px -12px 12px;padding:12px 14px 16px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.35)}
-  .hero-meta{font-size:11px;color:rgba(255,255,255,.6);letter-spacing:.04em}
+  .hero-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:19px;line-height:1.1}
+  .hero-meta{font-size:12px;color:rgba(255,255,255,.75);margin-top:2px}
   .hero-grid{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;row-gap:6px;column-gap:10px;margin-top:10px}
-  .hero-team{display:flex;flex-direction:column;align-items:center;gap:7px;min-width:0}
-  .hero-team .hn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;text-transform:uppercase;
-    max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .tb.xl{width:60px;height:60px;font-size:17px;border-radius:4px}
+  .hero-grid .tb.xl{width:84px;height:84px;justify-self:center}
   .hero-v{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:30px;color:rgba(255,255,255,.3)}
   .hero-pts{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:48px;line-height:1;font-variant-numeric:tabular-nums}
   .hero-st{display:inline-block;background:var(--green-acc);color:#08230f;font-family:'Barlow Condensed',sans-serif;font-weight:800;
     font-size:19px;padding:5px 13px;border-radius:5px;font-variant-numeric:tabular-nums;white-space:nowrap}
-  .hero-st.ft{background:rgba(255,255,255,.16);color:#fff}
+  .hero-st.ft{background:var(--err);color:#fff}
   .hero .cd{font-size:13px;padding:6px 12px}
-  .hero-gb{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:21px;color:rgba(255,255,255,.6);font-variant-numeric:tabular-nums}
-  .hero-sub{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:16px;white-space:nowrap}
+  .hero-gb{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:21px;color:rgba(255,255,255,.85);font-variant-numeric:tabular-nums}
+  .hero-sub{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:17px;margin-top:10px}
+  .hero-ven{font-size:12px;color:rgba(255,255,255,.75);margin-top:2px}
   .hero-sub b{font-weight:800}
 
   /* ── match stats ── */
@@ -1432,11 +1432,13 @@ function teamInfo(name){
 function teamTile(t, cls){
   return `<span class="tb ${cls}" style="background:linear-gradient(135deg,${t.c1} 0 50%,${t.c2} 50% 100%)">${esc(t.abbr)}</span>`;
 }
-function teamBadge(name, cls=''){
+// onDark: the AFL's light version of the logo, for club-colour backgrounds
+function logoSrc(abbr, onDark=false){ return `assets/teams/${curSport()}/${onDark && curSport()==='afl' ? 'light/' : ''}${abbr}.svg`; }
+function teamBadge(name, cls='', onDark=false){
   const t = teamInfo(name);
   if(!t.known) return teamTile(t, cls);
   return `<span class="tb logo ${cls}" data-c1="${t.c1}" data-c2="${t.c2}" data-abbr="${esc(t.abbr)}">`+
-    `<img src="assets/teams/${curSport()}/${t.abbr}.svg" alt="${esc(t.abbr)}" onerror="teamLogoMissing(this)"></span>`;
+    `<img src="${logoSrc(t.abbr, onDark)}" alt="${esc(t.abbr)}" onerror="teamLogoMissing(this)"></span>`;
 }
 window.teamLogoMissing = img => {
   const el = img.parentNode, d = el.dataset;
@@ -2361,26 +2363,33 @@ function heroVals(m){
     const per = L[side];
     return per && per.length ? `${per[per.length-1][0]}.${per[per.length-1][1]}` : '';
   };
-  const sub = mg>0 ? `<b>${esc(teamInfo(m.home_team).abbr)}</b> by ${mg}`
-            : mg<0 ? `<b>${esc(teamInfo(m.away_team).abbr)}</b> by ${-mg}` : 'Scores level';
+  // the margin by full club name: "Hawthorn by 24" during play, "Brisbane Lions won by 7 points" at full time
+  const lead = esc(teamName(mg>0 ? m.home_team : m.away_team)), by = Math.abs(mg);
+  const sub = m.status==='concluded'
+    ? (mg ? `<b>${lead}</b> won by ${by} point${by===1 ? '' : 's'}` : 'Match drawn')
+    : (mg ? `<b>${lead}</b> by ${by}` : 'Scores level');
   return { hs:esc(hs), as:esc(as), gbH:breakdown('home'), gbA:breakdown('away'), sub };
 }
+// AFL match-card style: the two clubs' colours as the background, home on the left
 function heroHTML(m){
-  const ph = heroPhase(m);
-  const team = t => `<div class="hero-team">${teamBadge(t,'xl')}<div class="hn">${esc(teamName(t))}</div></div>`;
-  let rows;
+  const ph = heroPhase(m), th = teamInfo(m.home_team), ta = teamInfo(m.away_team);
+  const bg = `linear-gradient(rgba(8,12,28,.45),rgba(8,12,28,.62)),linear-gradient(100deg,${th.c1} 15%,${ta.c1} 85%)`;
+  let rows, under = '';
   if(ph==='pre'){
-    rows = `<div></div><div>${cdHTML(m)}</div><div></div>`+
-      `<div></div><div class="hero-sub">${esc(fmtWhen(m.commence_time))}</div><div></div>`;
+    rows = `<div></div><div>${cdHTML(m)}</div><div></div>`;
   } else {
     const v = heroVals(m);
     const pill = ph==='done' ? `<span class="hero-st ft">Full Time</span>`
       : `<span class="hero-st" data-clk="${esc(m.id)}">${liveClock(m)}</span>`;
-    rows = `<div class="hero-pts" data-h="hs">${v.hs}</div><div>${pill}</div><div class="hero-pts" data-h="as">${v.as}</div>`+
-      `<div class="hero-gb" data-h="gbH">${v.gbH}</div><div class="hero-sub" data-h="sub">${v.sub}</div><div class="hero-gb" data-h="gbA">${v.gbA}</div>`;
+    rows = `<div class="hero-pts" data-h="hs">${v.hs}</div><div></div><div class="hero-pts" data-h="as">${v.as}</div>`+
+      `<div class="hero-gb" data-h="gbH">${v.gbH}</div><div>${pill}</div><div class="hero-gb" data-h="gbA">${v.gbA}</div>`;
+    under = `<div class="hero-sub" data-h="sub">${v.sub}</div>`;
   }
-  return `<div class="hero" data-ph="${ph}"><div class="hero-meta">Round ${esc(m.round)}${m.venue ? ' · '+esc(m.venue) : ''}</div>`+
-    `<div class="hero-grid">${team(m.home_team)}<div class="hero-v">V</div>${team(m.away_team)}${rows}</div></div>`;
+  return `<div class="hero" data-ph="${ph}" style="background:${bg}">`+
+    `<div class="hero-title">${esc(teamName(m.home_team))} Vs ${esc(teamName(m.away_team))}</div>`+
+    `<div class="hero-meta">Round ${esc(m.round)} • ${esc(fmtWhen(m.commence_time))}</div>`+
+    `<div class="hero-grid">${teamBadge(m.home_team,'xl',true)}<div class="hero-v">V</div>${teamBadge(m.away_team,'xl',true)}${rows}</div>`+
+    under + (m.venue ? `<div class="hero-ven">${esc(m.venue)}</div>` : '') + `</div>`;
 }
 // update the hero's figures where they are; a change of phase (kick-off, full time) redraws it
 function patchHero(list, m){
@@ -2909,12 +2918,12 @@ function wormNrlHTML(m, events){
 }
 // a score on the AFL worm: team and time, goal or behind, who kicked it and their tally at that point, their photo
 function wormEventTipHTML(m, e, upto){
-  const t = teamInfo(e.team==='home' ? m.home_team : m.away_team), code = curSport();
+  const t = teamInfo(e.team==='home' ? m.home_team : m.away_team);
   const mine = upto.filter(x => x.player===e.player && x.team===e.team);
   const g = mine.filter(x => x.type==='goal').length, b = mine.length - g;
   const i = e.player.indexOf(' ');
   const who = e.player==='Rushed' || i < 0 ? esc(e.player) : `${esc(e.player.slice(0, i))} <b>${esc(e.player.slice(i+1))}</b>`;
-  return `<div class="wt-top" style="background:${t.c1}">${t.known ? `<img src="assets/teams/${code}/${t.abbr}.svg" alt="" onerror="this.remove()">` : ''}${esc(scoreWhen(m, e))}</div>`+
+  return `<div class="wt-top" style="background:${t.c1}">${t.known ? `<img src="${logoSrc(t.abbr, true)}" alt="" onerror="this.remove()">` : ''}${esc(scoreWhen(m, e))}</div>`+
     `<div class="wt-body"><div class="wt-txt"><div class="k">${e.type==='goal' ? 'Goal' : 'Behind'}</div><div class="p">${who}</div>`+
       (e.player==='Rushed' ? '' : `<div class="n">${g} Goal${g===1 ? '' : 's'}, ${b} Behind${b===1 ? '' : 's'}</div>`)+
     `</div>${photoHTML(playerOf(m, e), 'wt-ph')}</div>`;
@@ -2953,8 +2962,9 @@ function wireWorm(m){
     const wrap = svg.parentElement, wr = wrap.getBoundingClientRect(), half = tip.offsetWidth/2 || 60;
     const px = X(f) / WORM.W * rc.width + (rc.left - wr.left);
     tip.style.left = Math.max(half, Math.min(wrap.clientWidth-half, px)) + 'px';
-    // sits above the plot so the line stays in view
-    tip.style.top = (hit.getBoundingClientRect().top - wr.top - tip.offsetHeight - 4) + 'px';
+    // its bottom edge sits just above the plot, so the line stays in view whatever the tooltip's height
+    tip.style.top = 'auto';
+    tip.style.bottom = (wr.bottom - hit.getBoundingClientRect().top + 4) + 'px';
   };
   const hide = () => { tip.classList.add('hidden'); xl.setAttribute('opacity','0'); };
   hit.addEventListener('pointermove', show);
