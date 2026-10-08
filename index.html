@@ -444,7 +444,6 @@
   .ladt th.pts, .ladt td.pts{background:#f3f5f9;font-weight:800}
   .ladt thead th.pts{background:var(--blue);color:#fff}
   .ladt td{padding:0 8px;font-size:15px}
-  .ladt td.pn{min-width:190px;gap:6px}
   .lad-pos{width:18px;text-align:right;font-weight:800;font-size:15px}
   .lad-mv{font-style:normal;font-size:10px;width:12px;text-align:center;color:var(--mid)}
   .lad-mv.up{color:var(--green-acc)} .lad-mv.down{color:var(--err)}
@@ -452,10 +451,12 @@
   .lad-next span{font-weight:700;font-size:13px;margin-left:3px}
   .fc{width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-weight:800;font-size:9px;color:#fff}
   .fc.w{background:#1a9f3c} .fc.l{background:#d81e2c} .fc.d{background:#ef7d10} .fc.b{background:#8a93a8}
-  .lad-cut td{height:0;padding:0;border-left:none;border-right:none;position:relative}
-  .lad-cut.top td{border-bottom:2px solid var(--err)} .lad-cut.wild td{border-bottom:2px solid var(--blue)}
-  .lad-cut span{position:sticky;left:0;display:inline-block;transform:translateY(50%);padding:1px 7px;font-size:9px;font-weight:800;color:#fff;border-radius:0 8px 8px 0}
-  .lad-cut.top span{background:var(--err)} .lad-cut.wild span{background:var(--blue)}
+  .ladt td.pn{min-width:132px;gap:6px}
+  .ladt tr.lad-end.top td{border-bottom:2px solid var(--err)}
+  .ladt tr.lad-end.wild td{border-bottom:2px solid var(--blue)}
+  .ladt tr.lad-end td.pn{z-index:3}
+  .lad-tag{position:absolute;left:0;bottom:-9px;padding:1px 7px;font-size:9px;font-weight:800;color:#fff;border-radius:0 8px 8px 0;line-height:14px}
+  .lad-tag.top{background:var(--err)} .lad-tag.wild{background:var(--blue)}
   .lad-lgd{align-items:center}
   .lad-lgd span{display:inline-flex;align-items:center;gap:5px}
   .lad-ln{width:16px;height:2px;display:inline-block}
@@ -4124,18 +4125,18 @@ function paintLadder(list, lad, have, sel){
   const cols = nrl
     ? [['played','P'],['pts','Pts'],['won','W'],['drawn','D'],['lost','L'],['byes','B'],['pf','PF'],['pa','PA'],['diff','PD']]
     : [['played','P'],['pts','Pts'],['pct','%'],['won','W'],['lost','L'],['drawn','D'],['pf','PF'],['pa','PA']];
-  const span = cols.length + 3;
   const fmt = (k, v) => v==null ? '' : k==='pct' ? Number(v).toFixed(1) : k==='diff' && v>0 ? '+'+v : esc(v);
   const head = `<tr><th class="pn">Club</th>${cols.map(([k, l]) => `<th class="${k==='pts' ? 'pts' : ''}">${l}</th>`).join('')}<th>Form</th><th>Up Next</th></tr>`;
-  const cut = (cls, label) => `<tr class="lad-cut ${cls}"><td colspan="${span}"><span>${label}</span></td></tr>`;
   const rows = lad.rows.map(r => {
     const mv = r.move>0 ? '<i class="lad-mv up">▲</i>' : r.move<0 ? '<i class="lad-mv down">▼</i>' : '<i class="lad-mv">–</i>';
     const form = (r.form || []).slice(-5).map(x => `<i class="fc ${x==='W' ? 'w' : x==='L' ? 'l' : x==='D' ? 'd' : 'b'}">${esc(x)}</i>`).join('');
     const next = r.next ? `${teamBadge(r.next, 'sm')}<span>${esc(teamInfo(r.next).abbr)}</span>` : '';
-    const row = `<tr><td class="pn"><span class="lad-pos">${r.pos}</span>${mv}${teamBadge(r.team, 'sm')}<span class="nm">${esc(teamFull(r.team))}</span></td>`+
+    // the last row of the finals / wildcard zone carries the line, and its fixed club cell the label, so both stay in view
+    const end = r.pos===f.top ? 'top' : f.wild && r.pos===f.wild ? 'wild' : '';
+    const tag = end ? `<span class="lad-tag ${end}">${end==='top' ? `Top ${f.top}` : 'WC'}</span>` : '';
+    return `<tr${end ? ` class="lad-end ${end}"` : ''}><td class="pn"><span class="lad-pos">${r.pos}</span>${mv}${teamBadge(r.team, 'sm')}<span class="nm">${esc(teamName(r.team))}</span>${tag}</td>`+
       cols.map(([k]) => `<td class="${k==='pts' ? 'pts' : ''}">${fmt(k, r[k])}</td>`).join('')+
       `<td><span class="lad-form">${form}</span></td><td><span class="lad-next">${next}</span></td></tr>`;
-    return row + (r.pos===f.top ? cut('top', `Top ${f.top}`) : f.wild && r.pos===f.wild ? cut('wild', 'WC') : '');
   }).join('');
   const legend = `<div class="lgd lad-lgd"><span><i class="lad-ln top"></i><b>Top ${f.top}:</b> ${nrl ? 'Qualify for the finals' : 'Qualify to play finals'}</span>`+
     (f.wild ? `<span><i class="lad-ln wild"></i><b>WC:</b> ${f.top+1}th–${f.wild}th play Wildcard Finals</span>` : '')+
