@@ -25,7 +25,7 @@
     { "abbr": "CAN", "name": "Raiders", "full": "Canberra Raiders",          "nick": "Raiders",     "match": ["raiders"],                           "colours": ["#6dbe45", "#002b5c"] },
     { "abbr": "CBY", "name": "Bulldogs", "full": "Canterbury-Bankstown Bulldogs",         "nick": "Bulldogs",    "match": ["bulldogs", "canterbury"],            "colours": ["#00539f", "#ffffff"] },
     { "abbr": "CRO", "name": "Sharks", "full": "Cronulla-Sutherland Sharks",           "nick": "Sharks",      "match": ["sharks", "cronulla"],                "colours": ["#00a5db", "#000000"] },
-    { "abbr": "DOL", "name": "Dolphins", "full": "Dolphins",         "nick": "Dolphins",    "match": ["dolphins"],                          "colours": ["#e0132e", "#f9c100"] },
+    { "abbr": "DOL", "name": "Dolphins", "full": "Redcliffe Dolphins",         "nick": "Dolphins",    "match": ["dolphins"],                          "colours": ["#e0132e", "#f9c100"] },
     { "abbr": "GLD", "name": "Titans", "full": "Gold Coast Titans",           "nick": "Titans",      "match": ["titans"],                            "colours": ["#009fdf", "#fbb900"] },
     { "abbr": "MAN", "name": "Sea Eagles", "full": "Manly-Warringah Sea Eagles",       "nick": "Sea Eagles",  "match": ["sea eagles", "manly"],               "colours": ["#6f163d", "#ffffff"] },
     { "abbr": "MEL", "name": "Storm", "full": "Melbourne Storm",            "nick": "Storm",       "match": ["storm"],                             "colours": ["#4b2d84", "#fbbd00"] },
