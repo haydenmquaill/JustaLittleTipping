@@ -543,8 +543,8 @@ window.createMockApi = function(page){
       },
       async markets(id){ return odds[id] || null; },
       // a plausible ladder after the last completed round, deterministic per code
-      async ladder(_s, sport){
-        const round = CUR[sport] - 1, nrl = sport==='nrl';
+      async ladder(_s, sport, at){
+        const round = at!=null ? at : CUR[sport] - 1, nrl = sport==='nrl';
         let s = (nrl ? 7 : 3) * 104729 % 233280;
         const rnd = () => (s = (s*9301 + 49297) % 233280) / 233280;
         const names = (TEAMS[sport] || []).filter(t => !t.joins || t.joins <= 2027).map(t => t.name);
@@ -570,6 +570,7 @@ window.createMockApi = function(page){
         });
         return { round, rows };
       },
+      async ladderList(sport){ return Array.from({ length:CUR[sport] }, (_, i) => ({ season:season.id, round:CUR[sport] - 1 - i })); },
       // ── betting (per comp) ──
       async myBets(id){ return (st.mine[id]||[]).slice(); },
       // mock cash out uses the page's own pricing (the live version re-prices on the server)

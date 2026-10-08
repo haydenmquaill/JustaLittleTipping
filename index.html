@@ -297,28 +297,20 @@
     font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;font-variant-numeric:tabular-nums}
   .bx > span.h{min-height:30px;background:#f0f3f8;color:var(--ink-soft);font-size:14px;border-left:none}
   .bx > span.t{border-left:none}
+  /* last 10 scores: a row of cards, newest first */
+  .l10{display:flex;gap:8px;overflow-x:auto;padding:4px 11px 11px;scrollbar-width:none}
+  .l10::-webkit-scrollbar{display:none}
+  .l10-c{position:relative;flex-shrink:0;width:118px;height:140px;border-radius:8px;overflow:hidden;color:#fff;
+    background:linear-gradient(160deg,var(--c1) 55%,var(--c2) 140%)}
+  .l10-k{position:absolute;top:7px;left:7px;z-index:1;background:#fff;color:var(--ink);border-radius:11px;padding:2px 9px;
+    font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px}
+  .l10-p{position:absolute;left:0;right:0;bottom:30px;margin:auto;width:92px;height:92px;object-fit:cover;object-position:top}
+  .l10-n{position:absolute;left:0;right:0;bottom:0;padding:4px 7px 5px;background:rgba(0,0,0,.45);font-family:'Barlow Condensed',sans-serif;
+    font-weight:700;font-size:13px;line-height:1.1;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .l10-n small{display:block;font-family:system-ui,sans-serif;font-weight:400;font-size:10px;text-transform:none;opacity:.8}
   .l10-none{padding:4px 11px 11px;font-size:12px;color:var(--mid)}
   /* team stats: home value, label, away value, with a split bar underneath */
-  .ts-sec{padding:9px 11px 3px;font-family:'Oswald',sans-serif;font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
-    color:var(--blue);border-top:1px solid #eef0f4}
-  .ts-r{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2px 8px;padding:5px 11px 7px}
-  .ts-r .v{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;font-variant-numeric:tabular-nums;white-space:nowrap}
-  .ts-r .l{text-align:center;font-size:12px;color:var(--ink-soft)}
-  .ts-b{grid-column:1 / -1;display:flex;gap:3px;height:5px}
-  .ts-b i{display:block;border-radius:3px;min-width:3px}
   .ts-note{padding:8px 11px 11px;font-size:12px;color:var(--mid);border-top:1px solid #eef0f4}
-  /* AFL player stats table */
-  .pt-h, .pt-r{display:grid;grid-template-columns:24px minmax(0,1fr) repeat(8,30px);align-items:center;gap:0 2px;padding:0 8px 0 11px}
-  .pt-h{border-top:1px solid #eef0f4;background:#f7f9fc}
-  .pt-h button{border:none;background:none;cursor:pointer;padding:8px 0;font-family:'Oswald',sans-serif;font-weight:600;font-size:11px;color:var(--ink-soft)}
-  .pt-h button.on{color:var(--blue);box-shadow:inset 0 -2px var(--blue)}
-  .pt-h .nm{grid-column:1 / 3;font-size:11px;color:var(--mid)}
-  .pt-r{border-top:1px solid #eef0f4;min-height:38px}
-  .pt-r .jn{width:22px;height:22px;border-radius:3px;display:flex;align-items:center;justify-content:center;
-    font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px}
-  .pt-r .nm{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:6px}
-  .pt-r .c{text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:14px;font-variant-numeric:tabular-nums}
-  .pt-r .c.on{font-weight:800;color:var(--blue)}
   /* Match Stats switcher, under the hero */
   .sv-tabs{padding:0 0 10px}
   /* NRL: tries, conversions and the half-time score under the hero */
@@ -371,16 +363,39 @@
   .pe.dark{background:#3a3a3a;color:#d7df23}
   .pe.dark .pe-l{color:#fff;border-color:rgba(255,255,255,.3)}
   .pe.dark .pe-p, .pe.dark .pe-team{color:#fff}
-  /* NRL top performers: each side's leader, split in the clubs' colours */
-  .tp{padding:8px 11px 4px}
-  .tp-t{text-align:center;font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:5px}
-  .tp-bar{position:relative;height:70px;border-radius:6px 6px 0 0;overflow:hidden;background:linear-gradient(105deg,var(--h) 50%,var(--a) 50%)}
-  .tp-ph{position:absolute;bottom:0;height:70px;width:auto}
-  .tp-ph.l{left:6px} .tp-ph.r{right:6px}
-  .tp-v{position:absolute;top:50%;transform:translateY(-50%);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:400}
-  .tp-v.l{right:calc(50% + 22px)} .tp-v.r{left:calc(50% + 22px)}
-  .tp-v.b{font-weight:800}
-  .tp-n{display:flex;justify-content:space-between;gap:8px;padding:7px 2px;font-size:13px;font-weight:600;color:var(--ink)}
+  /* top performers / match leaders: each side's leader, split in the clubs' colours */
+  .mtp{padding:8px 11px 4px}
+  .mtp-t{text-align:center;font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:5px}
+  .mtp-bar{position:relative;height:70px;border-radius:6px 6px 0 0;overflow:hidden;background:linear-gradient(105deg,var(--h) 50%,var(--a) 50%)}
+  .mtp-ph{position:absolute;bottom:0;height:70px;width:auto}
+  .mtp-ph.l{left:6px} .mtp-ph.r{right:6px}
+  .mtp-v{position:absolute;top:50%;transform:translateY(-50%);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:400}
+  .mtp-v.l{right:calc(50% + 22px)} .mtp-v.r{left:calc(50% + 22px)}
+  .mtp-v.b{font-weight:800}
+  .mtp-n{display:flex;justify-content:space-between;gap:8px;padding:7px 2px;font-size:13px;font-weight:600;color:var(--ink)}
+  /* AFL match leaders: a row of tiles you swipe through, one stat each */
+  .ml{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 11px 12px;scrollbar-width:none}
+  .ml::-webkit-scrollbar{display:none}
+  .ml-t{position:relative;flex:0 0 85%;max-width:340px;height:196px;border-radius:8px;overflow:hidden;scroll-snap-align:center;color:#fff}
+  .ml-s{position:absolute;inset:0;display:none;background:linear-gradient(135deg,var(--c) 30%,rgba(0,0,0,.55) 160%),var(--c)}
+  .ml-s.on{display:block}
+  .ml-b{position:absolute;top:0;left:0;z-index:2;padding:6px 26px 6px 12px;background:rgba(255,255,255,.22);clip-path:polygon(0 0,100% 0,88% 100%,0 100%);
+    font-family:'Oswald',sans-serif;font-weight:700;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+  .ml-k{position:absolute;top:40px;left:14px;font-family:'Oswald',sans-serif;font-weight:600;font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+  .ml-v{position:absolute;top:54px;left:12px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:46px;line-height:1}
+  .ml-a{position:absolute;top:102px;left:14px;font-size:10px;text-transform:uppercase;letter-spacing:.03em}
+  .ml-a b{font-weight:800}
+  .ml-w{position:absolute;left:14px;bottom:12px;z-index:1;max-width:58%}
+  .ml-f{font-size:14px;line-height:1.1}
+  .ml-l{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:22px;line-height:1;text-transform:uppercase}
+  .ml-p{font-family:'Oswald',sans-serif;font-weight:600;font-size:10px;letter-spacing:.05em;text-transform:uppercase;margin-top:3px}
+  .ml-ph{position:absolute;right:0;bottom:0;height:88%;width:auto}
+  .ml-j{position:absolute;top:6px;right:8px;z-index:2;background:var(--blue-deep);border-radius:11px;padding:2px 9px;font-size:11px;font-weight:600}
+  .ml-nav{position:absolute;right:6px;top:50%;transform:translateY(-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:4px}
+  .ml-nav button{border:none;background:rgba(0,0,0,.35);color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:16px;line-height:1;
+    transform:rotate(90deg)}
+  .ml-nav i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.45)}
+  .ml-nav i.on{background:#fff}
   /* the score bar once the hero has scrolled away */
   .hero-mini{position:sticky;top:-10px;z-index:30;height:0;margin:0 -12px}
   .hm-in{display:flex;align-items:center;justify-content:center;gap:12px;padding:6px 12px;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.35);
@@ -411,8 +426,82 @@
   /* what a table's abbreviations stand for */
   .lgd{display:flex;flex-wrap:wrap;gap:3px 12px;padding:8px 11px 11px;font-size:11px;color:var(--ink-soft);border-top:1px solid #eef0f4}
   .lgd b{color:var(--ink)}
-  .ld-abbr{padding-top:6px}
-  .ld-abbr b{color:#fff}
+  /* grid lines in the wide tables */
+  .nt th, .nt td{border:1px solid #e3e7ef}
+  .nt .pn{box-shadow:none}
+  .pt-ph{width:30px;height:30px;object-fit:cover;object-position:top;border-radius:50%;background:#eef0f4;flex-shrink:0}
+  .nt td.pn .nm b{font-weight:800}
+  .pt-mode{display:flex;justify-content:flex-end;gap:0;padding:0 11px 8px}
+  .pt-mode button{border:none;background:#eef0f4;color:var(--ink-soft);padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer}
+  .pt-mode button:first-child{border-radius:14px 0 0 14px} .pt-mode button:last-child{border-radius:0 14px 14px 0}
+  .pt-mode button.on{background:var(--blue);color:#fff}
+  /* ladder: season and round selectors, then the wide table */
+  .lad-sel{display:flex;gap:8px;margin-bottom:10px}
+  .lad-sel label{display:flex;flex-direction:column;gap:2px;background:#fff;border-radius:18px;padding:5px 14px;font-size:10px;color:var(--mid)}
+  .lad-sel select{border:none;background:none;font-size:14px;font-weight:700;color:var(--ink);padding:0}
+  .lad{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.25)}
+  .ladt th{background:#fff;font-size:11px;font-family:'Oswald',sans-serif;font-weight:600;color:var(--ink-soft);padding:0 8px}
+  .ladt th.pts, .ladt td.pts{background:#f3f5f9;font-weight:800}
+  .ladt thead th.pts{background:var(--blue);color:#fff}
+  .ladt td{padding:0 8px;font-size:15px}
+  .ladt td.pn{min-width:190px;gap:6px}
+  .lad-pos{width:18px;text-align:right;font-weight:800;font-size:15px}
+  .lad-mv{font-style:normal;font-size:10px;width:12px;text-align:center;color:var(--mid)}
+  .lad-mv.up{color:var(--green-acc)} .lad-mv.down{color:var(--err)}
+  .lad-form, .lad-next{display:flex;align-items:center;gap:3px}
+  .lad-next span{font-weight:700;font-size:13px;margin-left:3px}
+  .fc{width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-weight:800;font-size:9px;color:#fff}
+  .fc.w{background:#1a9f3c} .fc.l{background:#d81e2c} .fc.d{background:#ef7d10} .fc.b{background:#8a93a8}
+  .lad-cut td{height:0;padding:0;border-left:none;border-right:none;position:relative}
+  .lad-cut.top td{border-bottom:2px solid var(--err)} .lad-cut.wild td{border-bottom:2px solid var(--blue)}
+  .lad-cut span{position:sticky;left:0;display:inline-block;transform:translateY(50%);padding:1px 7px;font-size:9px;font-weight:800;color:#fff;border-radius:0 8px 8px 0}
+  .lad-cut.top span{background:var(--err)} .lad-cut.wild span{background:var(--blue)}
+  .lad-lgd{align-items:center}
+  .lad-lgd span{display:inline-flex;align-items:center;gap:5px}
+  .lad-ln{width:16px;height:2px;display:inline-block}
+  .lad-ln.top{background:var(--err)} .lad-ln.wild{background:var(--blue)}
+  /* AFL team stats: a section per group with both logos; match figures either side of a pair of bars, season figures under */
+  .ats{border-top:1px solid #eef0f4;padding:6px 0 4px}
+  .ats-h{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding:8px 11px;border-bottom:2px solid var(--blue)}
+  .ats-h span{text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:22px}
+  .ats-h .tb{width:40px;height:40px}
+  .ats-r{padding:4px 11px 8px}
+  .ats-l{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;margin:6px 0 4px}
+  .ats-l::before, .ats-l::after{content:"";flex:1;height:1px;background:#eef0f4}
+  .ats-g{display:grid;grid-template-columns:1fr 64px 1fr;align-items:end;gap:10px}
+  .ats-g.rings{grid-template-columns:1fr 1fr;align-items:start}
+  .ats-v{display:flex;flex-direction:column;align-items:center;text-align:center}
+  .ats-v small{font-size:9px;font-weight:700;color:var(--mid)}
+  .ats-v > b{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:34px;line-height:1}
+  .ats-s{display:flex;flex-direction:column;gap:1px;margin-top:3px;font-size:9px;text-transform:uppercase;color:var(--mid);letter-spacing:.02em}
+  .ats-s b{font-size:12px;color:var(--ink-soft);margin-right:3px}
+  .ats-x{display:flex;flex-direction:column;font-size:11px;font-weight:700;margin-top:3px}
+  .ats-x small{font-size:8px;text-transform:uppercase;color:var(--mid);margin-top:2px}
+  .ats-bars{display:flex;align-items:flex-end;gap:4px;height:56px}
+  .ats-bars i{flex:1;border-radius:2px 2px 0 0}
+  .ats-pos{display:flex;align-items:center;gap:6px}
+  .ats-pos i{font-style:normal;color:#fff;font-weight:800;font-size:13px;padding:4px 8px;min-width:46px}
+  .ats-pos i:last-child{text-align:right}
+  .ats-pos span{flex:0 0 8px}
+  .ring{width:96px;height:96px}
+  .ring.gauge{width:96px;height:58px}
+  /* NRL team stats: nrl.com cards with slanted bars, rings and a gauge */
+  .nts{border-top:8px solid #f4f5f8;padding:10px 11px 6px}
+  .nts-h{text-align:center;font-family:'Oswald',sans-serif;font-weight:600;font-size:15px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+  .nts-r{padding:5px 0 9px}
+  .nts-l{text-align:center;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:3px}
+  .nts-b{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px}
+  .nts-b.txt{grid-template-columns:1fr 1fr}
+  .nts-b.txt .v:last-child{text-align:right}
+  .nts-b .v{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:400;min-width:34px;font-variant-numeric:tabular-nums}
+  .nts-b .v:last-child{text-align:right}
+  .nts-b .v.b{font-weight:800}
+  .nts-bar{display:flex;gap:4px;height:12px}
+  .nts-bar i{transform:skewX(-25deg);min-width:4px}
+  .nts-rings{display:flex;justify-content:center;gap:28px;align-items:center}
+  .nts-rings > div{display:flex;flex-direction:column;align-items:center}
+  .nts-rings small{font-size:11px;color:var(--ink-soft)}
+  .nts-rings.one .v{font-family:'Barlow Condensed',sans-serif;font-size:24px}
 
   /* ── bet rows (slip, my bets, key moments) ── */
   .bet{display:flex;align-items:flex-start;gap:9px;background:#fff;color:var(--ink);
@@ -732,35 +821,6 @@
   @media (prefers-reduced-motion:reduce){.ach-toast,.ach-toast.out,.ach-toast::after,.ach-toast .ach-ic{animation:none}.ach-toast::after{display:none}}
 
   /* ── ladder ── */
-  .ld{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.25)}
-  .ld-head,.ld-row{display:grid;grid-template-columns:20px 12px minmax(0,1fr) 22px 22px 22px 18px 44px 28px;
-    align-items:center;column-gap:4px;padding:7px 9px 7px 6px;border-left:4px solid transparent}
-  .ld.nrl .ld-head,.ld.nrl .ld-row{grid-template-columns:20px 12px minmax(0,1fr) 22px 22px 22px 18px 18px 38px 28px}
-  .ld-head{font-family:'Oswald',sans-serif;font-weight:600;font-size:9px;letter-spacing:.08em;text-transform:uppercase;
-    color:var(--mid);text-align:center;border-bottom:1.5px solid var(--line)}
-  .ld-head .tl{text-align:left}
-  .ld-row{border-top:1px solid #eef0f4}
-  .ld-row.top{border-left-color:var(--green-acc)}
-  .ld-row.wild{border-left-color:var(--gold)}
-  .ld-pos{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;color:var(--blue);text-align:center}
-  .ld-mv{font-size:8px;text-align:center;color:var(--mid)}
-  .ld-mv.up{color:var(--ok)} .ld-mv.down{color:var(--err)}
-  .ld-team{display:flex;align-items:center;gap:7px;min-width:0}
-  .ld-tw{display:flex;flex-direction:column;min-width:0;gap:3px}
-  .ld-nm{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;line-height:1;text-transform:uppercase;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .ld-form{display:flex;align-items:center;gap:2px}
-  .fm{width:11px;height:11px;border-radius:2px;font-style:normal;font-family:'Oswald',sans-serif;font-weight:700;font-size:7px;
-    line-height:11px;text-align:center;color:#fff}
-  .fm.w{background:var(--ok)} .fm.l{background:#d06a7c} .fm.d{background:var(--gold)}
-  .ld-next{font-size:9px;color:var(--mid);margin-left:5px;white-space:nowrap}
-  .ld-n{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:14px;text-align:center;color:var(--ink-soft);
-    font-variant-numeric:tabular-nums}
-  .ld-n.ld-pts{font-weight:800;font-size:16px;color:var(--blue)}
-  .ld-legend{display:flex;flex-wrap:wrap;gap:6px 16px;padding:10px 4px 0;font-size:11px;color:rgba(255,255,255,.7)}
-  .ld-legend span{display:inline-flex;align-items:center;gap:6px}
-  .ld-legend .lg{width:4px;height:14px;border-radius:1px;display:inline-block}
-  .ld-legend .lg.top{background:var(--green-acc)} .ld-legend .lg.wild{background:var(--gold)}
 
   /* ── account ── */
   .acct{background:#fff;color:var(--ink);padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.25)}
@@ -1455,7 +1515,7 @@ function groups(){
           ['disposals','Disposals'],['stats','Player Stats'],['other','Other']];
 }
 // cards open by default — every other market starts collapsed
-const DEFAULT_OPEN = new Set(['h2h','spreads','stats-timeline','stats-leaders','stats-feed','stats-team','stats-pbp','stats-top']);
+const DEFAULT_OPEN = new Set(['h2h','spreads','stats-timeline','stats-leaders','stats-last10','stats-feed','stats-team','stats-pbp','stats-top']);
 // cards with more rows than this show the TOP_N first
 const TOP_N = 10;
 // markets where only one outcome can land — an SGM may hold one leg per market
@@ -2745,9 +2805,9 @@ function paintStatView(list, m){
     `</div>`;
     body.innerHTML = cardHTML('stats-timeline', 'Timeline', toggle + `<div class="tl-body"></div>`) +
       (nrl ? cardHTML('stats-pbp', 'Play by Play', `<div class="pbp-body"></div>`)
-           : cardHTML('stats-feed', 'Match Feed', `<label class="mf-only"><span>Scoring events only</span><span class="switch"><input type="checkbox" id="mf-only"${S.feedScoring ? ' checked' : ''}><i></i></span></label><div class="mf-body"></div>`));
+           : cardHTML('stats-last10', 'Last 10 Scores', `<div class="l10-body"></div>`) + cardHTML('stats-feed', 'Match Feed', `<label class="mf-only"><span>Scoring events only</span><span class="switch"><input type="checkbox" id="mf-only"${S.feedScoring ? ' checked' : ''}><i></i></span></label><div class="mf-body"></div>`));
     paintTimeline(list, m, events);
-    if(nrl) paintPbp(list, m); else paintFeed(list, m, events);
+    if(nrl) paintPbp(list, m); else { paintLast10(list, m, events); paintFeed(list, m, events); }
     const only = $('mf-only');
     if(only) only.addEventListener('change', () => { S.feedScoring = only.checked; paintFeed(list, m, statEvents(m)); });
     body.querySelectorAll('[data-tl]').forEach(b => b.addEventListener('click', () => {
@@ -2759,7 +2819,7 @@ function paintStatView(list, m){
     body.innerHTML = cardHTML('stats-team', 'Team Stats', `<div class="ts-body"></div>`);
     paintTeamStats(list, m, events);
   } else {
-    body.innerHTML = (m.sport==='nrl' ? cardHTML('stats-top', 'Top Performing Players', `<div class="tp-body"></div>`) : '') +
+    body.innerHTML = cardHTML('stats-top', m.sport==='nrl' ? 'Top Performing Players' : 'Match Leaders', `<div class="mtp-body"></div>`) +
       cardHTML('stats-leaders', 'Player Stats', playerTeamRibHTML(m) + `<div class="st-rows"></div>`);
     paintTop(list, m);
     paintLeaders(list, m);
@@ -2776,6 +2836,12 @@ function paintTimeline(list, m, events){
   el.innerHTML = S.tlView==='worm' ? wormHTML(m, events) : boxHTML(m);
   if(S.tlView==='worm') wireWorm(m);
 }
+function paintLast10(list, m, events){
+  const el = list.querySelector('.l10-body'); if(!el) return;
+  const row = el.querySelector('.l10'), x = row ? row.scrollLeft : 0;
+  el.innerHTML = last10HTML(m, events);
+  const now = el.querySelector('.l10'); if(now) now.scrollLeft = x;
+}
 function paintFeed(list, m, events){
   const el = list.querySelector('.mf-body'); if(el) el.innerHTML = feedHTML(m, events);
 }
@@ -2788,8 +2854,17 @@ function paintNrlSummary(list, m){
 function paintTeamStats(list, m, events){
   const el = list.querySelector('.ts-body'); if(el) el.innerHTML = m.sport==='nrl' ? nrlTeamStatsHTML(m, events) : teamStatsHTML(m, events);
 }
+// unchanged data leaves the card alone, so a swipe or a joint leader being shown isn't undone
 function paintTop(list, m){
-  const el = list.querySelector('.tp-body'); if(el) el.innerHTML = nrlTopHTML(m);
+  const el = list.querySelector('.mtp-body'); if(!el) return;
+  const html = topHTML(m); if(el._html===html) return;
+  el._html = html; el.innerHTML = html;
+  el.querySelectorAll('.ml-t').forEach(tile => tile.querySelectorAll('[data-mv]').forEach(b => b.addEventListener('click', () => {
+    const slides = tile.querySelectorAll('.ml-s'), dots = tile.querySelectorAll('.ml-nav i');
+    const i = (Number(tile.dataset.i) + Number(b.dataset.mv) + slides.length) % slides.length;
+    tile.dataset.i = i;
+    slides.forEach((x, j) => x.classList.toggle('on', j===i)); dots.forEach((x, j) => x.classList.toggle('on', j===i));
+  })));
 }
 function paintLeaders(list, m){
   const el = list.querySelector('.st-rows'); if(!el) return;
@@ -2798,6 +2873,7 @@ function paintLeaders(list, m){
   const now = el.querySelector('.ptw'); if(now) now.scrollLeft = x;
   const more = el.querySelector('.mk-more[data-stats-all]');
   if(more) more.addEventListener('click', () => { S.statsAll = !S.statsAll; paintLeaders(list, m); });
+  el.querySelectorAll('[data-avg]').forEach(b => b.addEventListener('click', () => { S.ptAvg = b.dataset.avg==='1'; paintLeaders(list, m); }));
   el.querySelectorAll('[data-pt]').forEach(b => b.addEventListener('click', () => {
     S.ptSort = b.classList.contains('on') ? '' : b.dataset.pt; paintLeaders(list, m);
   }));
@@ -2811,7 +2887,7 @@ function patchStats(list, m){
   if(S.stView==='summary'){
     const tip = $('worm-tip');
     if(S.tlView!=='worm' || !tip || tip.classList.contains('hidden')) paintTimeline(list, m, events);
-    if(m.sport==='nrl') paintPbp(list, m); else paintFeed(list, m, events);
+    if(m.sport==='nrl') paintPbp(list, m); else { paintLast10(list, m, events); paintFeed(list, m, events); }
   }
   if(S.stView==='team') paintTeamStats(list, m, events);
   if(S.stView==='players'){ paintTop(list, m); paintLeaders(list, m); }
@@ -2835,6 +2911,15 @@ function boxHTML(m){
       P.map(q => `<span>${cell((L[side] || [])[q-1])}</span>`).join('');
   });
   return `<div class="bx" style="grid-template-columns:58px repeat(${sp.periods},1fr)">${html}</div>`;
+}
+function last10HTML(m, events){
+  const ev = events.slice(-10).reverse();
+  if(!ev.length) return `<div class="l10-none">No scores yet.</div>`;
+  return `<div class="l10">` + ev.map(e => {
+    const t = teamInfo(e.team==='home' ? m.home_team : m.away_team);
+    return `<div class="l10-c" style="--c1:${t.c1};--c2:${t.c2}"><span class="l10-k">${e.type==='goal' ? 'Goal!' : 'Behind'}</span>`+
+      photoHTML(playerOf(m, e), 'l10-p') + `<div class="l10-n">${esc(e.player)}<small>${esc(scoreWhen(m, e))}</small></div></div>`;
+  }).join('') + `</div>`;
 }
 // the AFL match feed, newest first: goals and behinds as cards, the commentary between them, and a line where each quarter ended
 function feedHTML(m, events){
@@ -2887,51 +2972,140 @@ function scoringInfo(m, events){
   if(mg>0) s.home.front += Math.max(0, end - t); else if(mg<0) s.away.front += Math.max(0, end - t);
   return s;
 }
-// home value, label, away value, with a split bar in the clubs' colours (no bar when hn is null)
-function statRow(m, label, hv, av, hn, an){
-  const hc = teamInfo(m.home_team).c1, ac = teamInfo(m.away_team).c1;
-  const bar = hn==null ? '' : `<div class="ts-b"><i style="flex:${hn || (an ? 0 : 1)};background:${hc}"></i><i style="flex:${an || (hn ? 0 : 1)};background:${ac}"></i></div>`;
-  return `<div class="ts-r"><span class="v">${hv}</span><span class="l">${label}</span><span class="v">${av}</span>${bar}</div>`;
-}
-function statSec(title, rows){ return rows ? `<div class="ts-sec">${title}</div>${rows}` : ''; }
 
 /* ── AFL ── */
+/* ── rings, gauges and bars for the team stats ── */
+// a ring filled to pct in colour, the value in the middle
+function ringSVG(pct, col, text, sub=''){
+  const r = 26, c = 2*Math.PI*r, d = Math.max(0, Math.min(100, Number(pct)||0))/100*c;
+  return `<svg class="ring" viewBox="0 0 64 64"><circle cx="32" cy="32" r="${r}" fill="none" stroke="#eef0f4" stroke-width="6"/>`+
+    `<circle cx="32" cy="32" r="${r}" fill="none" stroke="${col}" stroke-width="6" stroke-dasharray="${d} ${c}" transform="rotate(-90 32 32)"/>`+
+    (sub ? `<text x="32" y="25" text-anchor="middle" font-size="6" font-weight="700" fill="#8a93a8">${sub}</text>` : '')+
+    `<text x="32" y="${sub ? 38 : 36}" text-anchor="middle" font-size="12" font-weight="800" fill="#16203a">${esc(text)}</text></svg>`;
+}
+// one ring shared by both sides (e.g. possession %), home clockwise from the top
+function splitRingSVG(h, a, hc, ac){
+  const r = 26, c = 2*Math.PI*r, hp = (Number(h)||0)/((Number(h)||0) + (Number(a)||0) || 1)*c;
+  return `<svg class="ring" viewBox="0 0 64 64"><circle cx="32" cy="32" r="${r}" fill="none" stroke="${ac}" stroke-width="6"/>`+
+    `<circle cx="32" cy="32" r="${r}" fill="none" stroke="${hc}" stroke-width="6" stroke-dasharray="${hp} ${c}" transform="rotate(-90 32 32)"/></svg>`;
+}
+// half a ring filled to value / max (play-the-ball speed)
+function gaugeSVG(v, max, col, text){
+  const r = 26, half = Math.PI*r, d = Math.max(0, Math.min(1, (Number(v)||0)/(max||1)))*half;
+  return `<svg class="ring gauge" viewBox="0 0 64 38"><path d="M6 34 A26 26 0 0 1 58 34" fill="none" stroke="#eef0f4" stroke-width="6"/>`+
+    `<path d="M6 34 A26 26 0 0 1 58 34" fill="none" stroke="${col}" stroke-width="6" stroke-dasharray="${d} ${half}"/>`+
+    `<text x="32" y="33" text-anchor="middle" font-size="12" font-weight="800" fill="#16203a">${esc(text)}</text></svg>`;
+}
+const num1 = v => v==null || v==='' ? '—' : (Math.round(Number(v)*10)/10).toLocaleString('en-AU');
+
+/* ── AFL: afl.com.au style — a section per group with both clubs' logos; each stat as match figures with a pair of
+   bars (the higher in its club's colour), and each side's season average and total underneath ── */
 function teamStatsHTML(m, events){
   const L = m.live || {}, F = L.final, I = L.inter, s = scoringInfo(m, events);
-  const row = (...a) => statRow(m, ...a);
-  const num = (label, k) => row(label, F.home[k], F.away[k], F.home[k], F.away[k]);
-  const pct = (label, h, a) => row(label, `${h}%`, `${a}%`, h, a);
+  const hc = teamInfo(m.home_team).c1, ac = teamInfo(m.away_team).c1;
+  const logo = side => teamBadge(side==='home' ? m.home_team : m.away_team, 'ats-logo');
+  const sec = (title, rows) => rows ? `<div class="ats"><div class="ats-h">${logo('home')}<span>${title}</span>${logo('away')}</div>${rows}</div>` : '';
+  const season = (side, k) => {
+    const x = F && F[side] && F[side].season; if(!x) return '';
+    return `<div class="ats-s"><span><b>${num1(x.a[k])}</b> season avg.</span>${x.t[k]!=null ? `<span><b>${num1(x.t[k])}</b> season total</span>` : ''}</div>`;
+  };
+  const bars = (h, a) => {
+    const mx = Math.max(Number(h)||0, Number(a)||0) || 1, ht = v => Math.max(6, Math.round((Number(v)||0)/mx*100));
+    return `<div class="ats-bars"><i style="height:${ht(h)}%;background:${(Number(h)||0)>=(Number(a)||0) ? hc : '#cfd3da'}"></i>`+
+      `<i style="height:${ht(a)}%;background:${(Number(a)||0)>=(Number(h)||0) ? ac : '#cfd3da'}"></i></div>`;
+  };
+  // a counted stat: match figures, bars, season figures (k: the key in the season data)
+  const row = (label, hv, av, k, hn=hv, an=av, extraH='', extraA='') =>
+    `<div class="ats-r"><div class="ats-l"><span>${label}</span></div><div class="ats-g">`+
+      `<div class="ats-v"><small>Match</small><b>${hv}</b>${extraH}${k ? season('home', k) : ''}</div>${bars(hn, an)}`+
+      `<div class="ats-v"><small>Match</small><b>${av}</b>${extraA}${k ? season('away', k) : ''}</div></div></div>`;
+  const stat = (label, k, sk=k) => row(label, F.home[k], F.away[k], sk);
+  // a percentage as a ring each side
+  const rings = (label, h, a, k) =>
+    `<div class="ats-r"><div class="ats-l"><span>${label}</span></div><div class="ats-g rings">`+
+      `<div class="ats-v">${ringSVG(h, hc, `${num1(h)}%`, 'MATCH')}${k ? season('home', k) : ''}</div>`+
+      `<div class="ats-v">${ringSVG(a, ac, `${num1(a)}%`, 'MATCH')}${k ? season('away', k) : ''}</div></div></div>`;
   const cnt = (x, k) => x.n[k] || 0;
   const when = (x, f) => x ? esc(f(x)) : '—';
-  const posts = x => (x.lp || 0) + (x.rp || 0);
+  const extra = side => `<div class="ats-x"><small>Last goal</small>${when(s[side].last, e => scoreWhen(m, e))}`+
+    `<small>Biggest lead</small>${when(s[side].lead, x => `${x.pts} pts, ${scoreWhen(m, x.e)}`)}</div>`;
   const goalEff = (side, x) => x.i50 ? Math.round(cnt(s[side], 'goal') / x.i50 * 1000) / 10 : 0;
-  let html = statSec('Scoring',
-    row('Time in front', clock(s.home.front), clock(s.away.front), s.home.front, s.away.front) +
-    row('Last goal', when(s.home.last, e => scoreWhen(m, e)), when(s.away.last, e => scoreWhen(m, e))) +
-    row('Biggest lead', when(s.home.lead, x => `${x.pts} pts, ${scoreWhen(m, x.e)}`), when(s.away.lead, x => `${x.pts} pts, ${scoreWhen(m, x.e)}`)) +
-    row('Goals', cnt(s.home, 'goal'), cnt(s.away, 'goal'), cnt(s.home, 'goal'), cnt(s.away, 'goal')) +
-    row('Behinds', cnt(s.home, 'behind'), cnt(s.away, 'behind'), cnt(s.home, 'behind'), cnt(s.away, 'behind')) +
-    row('Rushed behinds', s.home.ru, s.away.ru, s.home.ru, s.away.ru) +
-    (F ? row('Hit the post', posts(F.home), posts(F.away), posts(F.home), posts(F.away)) +
-         row('Touched', F.home.tch, F.away.tch, F.home.tch, F.away.tch) : ''));
-  if(F){
-    html += statSec('Disposals', num('Disposals', 'd') + num('Kicks', 'k') + num('Handballs', 'h') + num('Inside 50s', 'i50') +
-        pct('Disposal efficiency', F.home.de, F.away.de) + pct('Goal efficiency', goalEff('home', F.home), goalEff('away', F.away)) +
-        num('Frees for', 'ff')) +
-      statSec('Stoppages', num('Hitouts', 'ho') + num('Total clearances', 'cl') + num('Centre clearances', 'ccl') + num('Stoppage clearances', 'scl')) +
-      statSec('Possessions', num('Contested possessions', 'cp') + num('Uncontested possessions', 'up') + num('Turnovers', 'to') +
-        num('Intercepts', 'it') + pct('Time in possession', F.home.poss, F.away.poss)) +
-      statSec('Marks', num('Marks', 'm') + num('Marks inside 50', 'mi50') + num('Contested marks', 'cm')) +
-      statSec('Defence', num('Tackles', 't') + num('Tackles inside 50', 'ti50'));
-  }
-  // interchanges arrive a quarter at a time
+  let html = '';
+  if(F) html += sec('Disposals', stat('Disposals', 'd') + stat('Kicks', 'k') + stat('Handballs', 'h') + stat('Inside 50s', 'i50') +
+      rings('Disposal Efficiency', F.home.de, F.away.de, 'de') + rings('Goal Efficiency', goalEff('home', F.home), goalEff('away', F.away)) +
+      stat('Free Kicks', 'ff')) +
+    sec('Stoppages', stat('Hit-Outs', 'ho') + stat('Clearances', 'cl') + stat('Centre Clearances', 'ccl') + stat('Stoppage Clearances', 'scl')) +
+    sec('Possession', stat('Contested Possessions', 'cp') + stat('Uncontested Possessions', 'up') + stat('Turn Overs', 'to') + stat('Intercepts', 'it') +
+      `<div class="ats-r"><div class="ats-l"><span>Possession</span></div><div class="ats-pos"><i style="flex:${F.home.poss || 0};background:${hc}">${F.home.poss}%</i>`+
+        `<span></span><i style="flex:${F.away.poss || 0};background:${ac}">${F.away.poss}%</i></div></div>`) +
+    sec('Marks', stat('Marks', 'm') + stat('Marks Inside 50', 'mi50') + stat('Contested Marks', 'cm'));
+  html += sec('Scoring', row('Goals', cnt(s.home, 'goal'), cnt(s.away, 'goal'), F ? 'g' : '') + row('Behinds', cnt(s.home, 'behind'), cnt(s.away, 'behind'), F ? 'b' : '') +
+    row('Time In Front', clock(s.home.front), clock(s.away.front), '', s.home.front, s.away.front, extra('home'), extra('away')) +
+    row('Rushed Behinds', s.home.ru, s.away.ru, '') +
+    (F ? row('Hit the Post', (F.home.lp||0) + (F.home.rp||0), (F.away.lp||0) + (F.away.rp||0), '') + row('Touched', F.home.tch, F.away.tch, '') : ''));
+  if(F) html += sec('Defence', stat('Tackles', 't') + stat('Tackles Inside 50', 'ti50'));
+  // interchanges arrive a quarter at a time; the cap rings them
   let ic = '';
   if(I && (I.home || []).length){
-    const h = I.home.reduce((a, b) => a + b, 0), a = (I.away || []).reduce((x, y) => x + y, 0), cap = I.cap ? `/${I.cap}` : '';
-    ic = row(`Interchanges${I.home.length < 4 ? ` (to Q${I.home.length})` : ''}`, `${h}${cap}`, `${a}${cap}`, h, a);
+    const h = I.home.reduce((x, y) => x + y, 0), a = (I.away || []).reduce((x, y) => x + y, 0), cap = I.cap || 0;
+    const icSeason = side => { const x = F && F[side] && F[side].season; return x && cap ? `<div class="ats-s"><span><b>${num1(x.a.ic)}/${cap}</b> season avg.</span><span><b>${x.t.ic}/${cap*x.n}</b> season total</span></div>` : ''; };
+    ic = `<div class="ats-r"><div class="ats-l"><span>Interchanges Made${I.home.length < 4 ? ` (to Q${I.home.length})` : ''}</span></div><div class="ats-g rings">`+
+      `<div class="ats-v">${ringSVG(cap ? h/cap*100 : 0, hc, cap ? `${h}/${cap}` : h, 'MATCH')}${icSeason('home')}</div>`+
+      `<div class="ats-v">${ringSVG(cap ? a/cap*100 : 0, ac, cap ? `${a}/${cap}` : a, 'MATCH')}${icSeason('away')}</div></div></div>`;
   }
-  html += statSec('General', (F ? num('Bounces', 'bo') + num('One percenters', 'op') : '') + ic);
+  html += sec('General', (F ? stat('Bounces', 'bo') + stat('One Percenters', 'op') : '') + ic);
   if(!F) html += `<div class="ts-note">The rest of the team stats arrive at full time.</div>`;
+  return html;
+}
+
+/* ── NRL: nrl.com style — a card per group; each stat as slanted bars with the figures at each end (the better one
+   bold), percentages as rings, play-the-ball speed as a gauge ── */
+// stats where fewer is better (the bold goes to the lower figure)
+const NRL_LESS = new Set(['Errors','Penalties Conceded','Ruck Infringements','On Reports','Missed Tackles','Ineffective Tackles',
+  'Average Play The Ball Speed','Inside 10 Metres','Penalties conceded','Ruck infringements','Set restarts']);
+function nrlTeamStatsHTML(m, events){
+  const L = m.live || {}, F = L.final, pbp = L.pbp || [], s = scoringInfo(m, events);
+  const hc = teamInfo(m.home_team).c1, ac = teamInfo(m.away_team).c1;
+  const card = (title, rows) => rows ? `<div class="nts"><div class="nts-h">${title}</div>${rows}</div>` : '';
+  const better = (label, h, a) => { const x = Number(h)||0, y = Number(a)||0; if(x===y) return 0; return (NRL_LESS.has(label) ? x < y : x > y) ? -1 : 1; };
+  const bar = (label, hv, av, hn=hv, an=av) => {
+    const b = better(label, hn, an), x = Number(hn)||0, y = Number(an)||0;
+    return `<div class="nts-r"><div class="nts-l">${esc(label)}</div><div class="nts-b"><span class="v${b<0 ? ' b' : ''}">${hv}</span>`+
+      `<div class="nts-bar"><i style="flex:${x || (y ? 0.0001 : 1)};background:${hc}"></i><i style="flex:${y || (x ? 0.0001 : 1)};background:${ac}"></i></div>`+
+      `<span class="v${b>0 ? ' b' : ''}">${av}</span></div></div>`;
+  };
+  const rings = (label, h, a, hf, af) => `<div class="nts-r"><div class="nts-l">${esc(label)}</div><div class="nts-rings">`+
+    `<div>${ringSVG(h, hc, `${num1(h)}%`)}${hf ? `<small>${esc(hf)}</small>` : ''}</div><div>${ringSVG(a, ac, `${num1(a)}%`)}${af ? `<small>${esc(af)}</small>` : ''}</div></div></div>`;
+  const cnt = (x, k) => x.n[k] || 0;
+  const count = (side, test) => pbp.filter(e => e.team===side && test(e)).length;
+  const live = (label, test) => bar(label, count('home', test), count('away', test));
+  const when = (x, f) => x ? esc(f(x)) : '—';
+  const at = e => nrlMin(eventGameSecs(m, e));
+  let html = card('Scoring',
+    bar('Tries', cnt(s.home, 'try'), cnt(s.away, 'try')) + bar('Conversions', cnt(s.home, 'conversion'), cnt(s.away, 'conversion')) +
+    bar('Penalty Goals', cnt(s.home, 'penalty'), cnt(s.away, 'penalty')) +
+    bar('Field Goals', cnt(s.home, 'field_goal') + cnt(s.home, 'field_goal_2'), cnt(s.away, 'field_goal') + cnt(s.away, 'field_goal_2')) +
+    bar('Time in Front', clock(s.home.front), clock(s.away.front), s.home.front, s.away.front) +
+    `<div class="nts-r"><div class="nts-l">Biggest Lead</div><div class="nts-b txt"><span class="v">${when(s.home.lead, x => `${x.pts} pts, ${at(x.e)}`)}</span>`+
+      `<span class="v">${when(s.away.lead, x => `${x.pts} pts, ${at(x.e)}`)}</span></div></div>`);
+  if(!F && pbp.length) html += card('Match',
+    live('Line Breaks', e => e.ty==='LineBreak') + live('Errors', e => e.ty==='Error') + live('Penalties Conceded', e => e.ty==='Penalty') +
+    live('Set Restarts', e => e.ty==='SetRestart') + live('Ruck Infringements', e => e.ty==='RuckInfringement') +
+    live('Kick Bombs', e => e.ty==='KickBomb') + live('Interchanges', e => e.ty==='Interchange'));
+  // the NRL's own groups at full time
+  if(F && F.groups){
+    F.groups.forEach(g => {
+      html += card(esc(g.t), (g.s || []).map(x => {
+        if(x.ty==='PercentageCombined') return `<div class="nts-r"><div class="nts-l">${esc(x.t)}</div><div class="nts-rings one"><span class="v">${num1(x.h)}%</span>`+
+          `${splitRingSVG(x.h, x.a, hc, ac)}<span class="v">${num1(x.a)}%</span></div></div>`;
+        if(/Percentage/.test(x.ty)) return rings(x.t, x.h, x.a, x.hf, x.af);
+        if(x.ty==='Range') return `<div class="nts-r"><div class="nts-l">${esc(x.t)}</div><div class="nts-rings">`+
+          `<div>${gaugeSVG(x.h, 5, hc, `${num1(x.h)}s`)}</div><div>${gaugeSVG(x.a, 5, ac, `${num1(x.a)}s`)}</div></div></div>`;
+        if(x.u==='Minutes') return bar(x.t, clock(x.h), clock(x.a), x.h, x.a);
+        return bar(x.t, num1(x.h), num1(x.a), x.h, x.a);
+      }).join(''));
+    });
+  } else html += `<div class="ts-note">The rest of the team stats arrive at full time.</div>`;
   return html;
 }
 // All / home / away for the player table
@@ -2940,23 +3114,29 @@ function playerTeamRibHTML(m){
   const b = (k, l) => `<button class="rib${cur===k ? ' active' : ''}" data-pteam="${k}">${esc(l)}</button>`;
   return `<div class="mk-rib">${b('all', 'All')}${b('home', teamInfo(m.home_team).abbr)}${b('away', teamInfo(m.away_team).abbr)}</div>`;
 }
-const PT_COLS = [['af','AF','AFL Fantasy'],['gb','G.B','Goals.Behinds'],['d','D','Disposals'],['k','K','Kicks'],['h','H','Handballs'],
-  ['m','M','Marks'],['t','T','Tackles'],['ho','HO','Hitouts']];
+const PT_COLS = [['af','AF','AFL Fantasy'],['g','G','Goals'],['b','B','Behinds'],['d','D','Disposals'],['k','K','Kicks'],['h','H','Handballs'],
+  ['m','M','Marks'],['t','T','Tackles'],['ho','HO','Hitouts'],['cl','CLR','Clearances'],['mg','MG','Metres Gained'],['ga','GA','Goal Assists'],['tog','ToG%','Time on Ground']];
+// the afl.com.au player table: photo, jumper, name, every column; scrolls sideways with the player fixed on the left.
+// Match / Season avg. switches the figures to each player's season average before this match
 function aflPlayersHTML(m){
   if(m.status!=='concluded') return `<div class="ts-note">Player stats show at full time.</div>`;
-  const key = sortKey(PT_COLS, 'af'), team = S.ptTeam || 'all';
-  const val = (p, k) => k==='gb' ? (p.g||0)*1000 + (p.b||0) : Number(p[k])||0;
+  const avg = !!S.ptAvg, key = sortKey(PT_COLS, 'af'), team = S.ptTeam || 'all';
+  const val = (p, k) => avg ? (p.sa ? p.sa[k] : null) : p[k];
   const all = ((m.live || {}).players || []).filter(p => team==='all' || p.team===team)
-    .sort((a, b) => key ? val(b, key) - val(a, key) || val(b, 'af') - val(a, 'af') : teamOrder(a, b));
+    .sort((a, b) => key ? (Number(val(b, key))||0) - (Number(val(a, key))||0) || (Number(val(b, 'af'))||0) - (Number(val(a, 'af'))||0) : teamOrder(a, b));
   const shown = S.statsAll ? all : all.slice(0, TOP_N);
-  const head = `<div class="pt-h"><span class="nm">Player</span>${PT_COLS.map(([k, l, t]) =>
-    `<button class="${k===key ? 'on' : ''}" data-pt="${k}" title="${esc(t)}">${l}</button>`).join('')}</div>`;
+  const fmt = v => v==null ? '—' : esc(avg ? num1(v) : v);
+  const toggle = `<div class="pt-mode"><button type="button" class="${avg ? '' : 'on'}" data-avg="0">Match</button><button type="button" class="${avg ? 'on' : ''}" data-avg="1">Season avg.</button></div>`;
+  const head = `<tr><th class="pn">Player</th>${PT_COLS.map(([k, l, t]) =>
+    `<th><button class="${k===key ? 'on' : ''}" data-pt="${k}" title="${esc(t)}">${esc(l)}</button></th>`).join('')}</tr>`;
   const rows = shown.map(p => {
-    const t = teamInfo(p.team==='home' ? m.home_team : m.away_team);
-    return `<div class="pt-r"><span class="jn" style="background:${t.c1};color:#fff">${esc(p.n ?? '')}</span><span class="nm">${esc(shortName(p.name))}</span>`+
-      PT_COLS.map(([k]) => `<span class="c${k===key ? ' on' : ''}">${k==='gb' ? `${p.g||0}.${p.b||0}` : esc(p[k] ?? 0)}</span>`).join('') + `</div>`;
+    const t = teamInfo(p.team==='home' ? m.home_team : m.away_team), sp = p.name.indexOf(' ');
+    const name = sp > 0 ? `${esc(p.name.slice(0, sp))} <b>${esc(p.name.slice(sp+1))}</b>` : esc(p.name);
+    return `<tr><td class="pn">${photoHTML(p, 'pt-ph') || '<span class="pt-ph"></span>'}<span class="jn" style="background:${t.c1};color:#fff">${esc(p.n ?? '')}</span>`+
+      `<span class="nm">${name}</span></td>` + PT_COLS.map(([k]) => `<td class="${k===key ? 'on' : ''}">${fmt(val(p, k))}</td>`).join('') + `</tr>`;
   }).join('');
-  return head + rows + moreBtn(all.length) + legendHTML([['#', 'Player Number'], ...PT_COLS.map(([, l, t]) => [l, t])]);
+  return toggle + `<div class="ptw"><table class="nt"><thead>${head}</thead><tbody>${rows}</tbody></table></div>` + moreBtn(all.length) +
+    legendHTML([['#', 'Player Number'], ...PT_COLS.map(([, l, t]) => [l, t])]);
 }
 // what the abbreviations stand for, under a table
 function legendHTML(pairs){ return `<div class="lgd">${pairs.map(([a, t]) => `<span><b>${esc(a)}:</b> ${esc(t)}</span>`).join('')}</div>`; }
@@ -2968,6 +3148,7 @@ function shortName(n){ const i = n.indexOf(' '); return i > 0 ? `${n[0]}.${n.sli
 function moreBtn(n){
   return n>TOP_N ? `<button class="mk-more" data-stats-all="1">${S.statsAll ? `View top ${TOP_N} players` : `View all ${n} players`}</button>` : '';
 }
+
 
 /* ── NRL ── */
 // under the hero: tries and conversions (home value · label · away value, with the scorers under each side)
@@ -3024,49 +3205,49 @@ function pbpHTML(m){
     return `<div class="pe" style="${t ? `color:${t.c1}` : ''}">${left}<div class="pe-r"><div class="pe-t">${esc(e.t)}</div>${who}${sub}</div></div>`;
   }).join('') + `</div>`;
 }
-// NRL Player Stats' first card: each side's leader in four stats, split in the clubs' colours (full time)
-const NRL_TOP = [['tacklesMade','Most Tackles'],['allRunMetres','Most Run Metres'],['lineBreaks','Most Line Breaks'],['fantasyPointsTotal','Most Fantasy Points']];
-function nrlTopHTML(m){
-  if(m.status!=='concluded') return `<div class="ts-note">Top performers show at full time.</div>`;
-  const players = (m.live || {}).players || [], hc = teamInfo(m.home_team).c1, ac = teamInfo(m.away_team).c1;
+// AFL Match Leaders (full time): a tile per stat with the match's leader across both teams, swiped sideways;
+// joint leaders share a tile, stepped through with its arrows
+const ML_STATS = [['g','Goals'],['d','Disposals'],['m','Marks'],['si','Score Involvements'],['t','Tackles'],['cp','Contested Possessions'],['af','AFL Fantasy']];
+// the player's field position for the match, as a role (an approximation of the AFL's own labels)
+const POS_ROLE = { FB:'Key Defender', CHB:'Key Defender', BPL:'Defender', BPR:'Defender', HBFL:'Defender', HBFR:'Defender',
+  C:'Midfielder', WL:'Midfielder', WR:'Midfielder', R:'Midfielder', RR:'Midfielder', RK:'Ruck',
+  HFFL:'Forward', HFFR:'Forward', FPL:'Forward', FPR:'Forward', CHF:'Key Forward', FF:'Key Forward', INT:'Interchange', SUB:'Substitute' };
+function matchLeadersHTML(m){
+  if(m.status!=='concluded') return `<div class="ts-note">Match leaders show at full time.</div>`;
+  const players = (m.live || {}).players || [];
+  const tiles = ML_STATS.map(([k, title]) => {
+    const top = Math.max(0, ...players.map(p => Number(p[k])||0));
+    if(!top) return '';
+    const lead = players.filter(p => (Number(p[k])||0)===top).sort((a, b) => a.name.localeCompare(b.name));
+    const slides = lead.map((p, i) => {
+      const t = teamInfo(p.team==='home' ? m.home_team : m.away_team), sp = p.name.indexOf(' ');
+      const avg = p.sa && p.sa[k]!=null ? `<div class="ml-a">Season avg. <b>${esc(p.sa[k])}</b></div>` : '';
+      return `<div class="ml-s${i ? '' : ' on'}" style="--c:${t.c1}"><div class="ml-k">Match total</div><div class="ml-v">${top}</div>${avg}`+
+        `<div class="ml-w"><div class="ml-f">${esc(sp > 0 ? p.name.slice(0, sp) : '')}</div><div class="ml-l">${esc(sp > 0 ? p.name.slice(sp+1) : p.name)}</div>`+
+        `<div class="ml-p">${esc(POS_ROLE[p.pos] || '')}</div></div>${photoHTML(p, 'ml-ph')}</div>`;
+    }).join('');
+    const nav = lead.length > 1 ? `<span class="ml-j">${lead.length} Joint Leaders</span><div class="ml-nav"><button type="button" data-mv="-1" aria-label="Previous">‹</button>`+
+      lead.map((_, i) => `<i class="${i ? '' : 'on'}"></i>`).join('') + `<button type="button" data-mv="1" aria-label="Next">›</button></div>` : '';
+    return `<div class="ml-t" data-i="0">${slides}<div class="ml-b">${title}</div>${nav}</div>`;
+  }).join('');
+  return tiles ? `<div class="ml">${tiles}</div>` : `<div class="ts-note">No match leaders for this match.</div>`;
+}
+// NRL Player Stats' first card: each side's leader in a few stats, split in the clubs' colours (full time)
+const TOP_STATS = {
+  nrl:[['tacklesMade','Most Tackles'],['allRunMetres','Most Run Metres'],['lineBreaks','Most Line Breaks'],['fantasyPointsTotal','Most Fantasy Points']] };
+function topHTML(m){
+  if(m.sport!=='nrl') return matchLeadersHTML(m);
+  if(m.status!=='concluded') return `<div class="ts-note">Top performers show at full time.</div>`;  const players = (m.live || {}).players || [], hc = teamInfo(m.home_team).c1, ac = teamInfo(m.away_team).c1;
   const best = (side, k) => players.filter(p => p.team===side && p[k]!=null).sort((a, b) => (Number(b[k])||0) - (Number(a[k])||0))[0];
-  return NRL_TOP.map(([k, title]) => {
+  return (TOP_STATS[m.sport] || []).map(([k, title]) => {
     const h = best('home', k), a = best('away', k);
     if(!h && !a) return '';
     const hv = h ? Number(h[k])||0 : 0, av = a ? Number(a[k])||0 : 0;
-    return `<div class="tp"><div class="tp-t">${title}</div>`+
-      `<div class="tp-bar" style="--h:${hc};--a:${ac}">${photoHTML(h, 'tp-ph l')}<span class="tp-v l${hv>av ? ' b' : ''}">${h ? esc(hv) : '—'}</span>`+
-        `<span class="tp-v r${av>hv ? ' b' : ''}">${a ? esc(av) : '—'}</span>${photoHTML(a, 'tp-ph r')}</div>`+
-      `<div class="tp-n"><span>${h ? esc(h.name) : ''}</span><span>${a ? esc(a.name) : ''}</span></div></div>`;
+    return `<div class="mtp"><div class="mtp-t">${title}</div>`+
+      `<div class="mtp-bar" style="--h:${hc};--a:${ac}">${photoHTML(h, 'mtp-ph l')}<span class="mtp-v l${hv>av ? ' b' : ''}">${h ? esc(hv) : '—'}</span>`+
+        `<span class="mtp-v r${av>hv ? ' b' : ''}">${a ? esc(av) : '—'}</span>${photoHTML(a, 'mtp-ph r')}</div>`+
+      `<div class="mtp-n"><span>${h ? esc(h.name) : ''}</span><span>${a ? esc(a.name) : ''}</span></div></div>`;
   }).join('');
-}
-function nrlTeamStatsHTML(m, events){
-  const L = m.live || {}, F = L.final, pbp = L.pbp || [], s = scoringInfo(m, events);
-  const row = (...a) => statRow(m, ...a);
-  const cnt = (x, k) => x.n[k] || 0;
-  const count = (side, test) => pbp.filter(e => e.team===side && test(e)).length;
-  const live = (label, test) => { const h = count('home', test), a = count('away', test); return row(label, h, a, h, a); };
-  const when = (x, f) => x ? esc(f(x)) : '—';
-  const at = e => nrlMin(eventGameSecs(m, e));
-  let html = statSec('Scoring',
-    row('Time in front', clock(s.home.front), clock(s.away.front), s.home.front, s.away.front) +
-    row('Biggest lead', when(s.home.lead, x => `${x.pts} pts, ${at(x.e)}`), when(s.away.lead, x => `${x.pts} pts, ${at(x.e)}`)) +
-    row('Tries', cnt(s.home, 'try'), cnt(s.away, 'try'), cnt(s.home, 'try'), cnt(s.away, 'try')) +
-    row('Conversions', cnt(s.home, 'conversion'), cnt(s.away, 'conversion'), cnt(s.home, 'conversion'), cnt(s.away, 'conversion')) +
-    row('Penalty goals', cnt(s.home, 'penalty'), cnt(s.away, 'penalty'), cnt(s.home, 'penalty'), cnt(s.away, 'penalty')) +
-    row('Field goals', cnt(s.home, 'field_goal') + cnt(s.home, 'field_goal_2'), cnt(s.away, 'field_goal') + cnt(s.away, 'field_goal_2'),
-        cnt(s.home, 'field_goal') + cnt(s.home, 'field_goal_2'), cnt(s.away, 'field_goal') + cnt(s.away, 'field_goal_2')));
-  if(pbp.length) html += statSec('Match',
-    live('Line breaks', e => e.ty==='LineBreak') + live('Errors', e => e.ty==='Error') + live('Penalties conceded', e => e.ty==='Penalty') +
-    live('Set restarts', e => e.ty==='SetRestart') + live('Ruck infringements', e => e.ty==='RuckInfringement') +
-    live('Kick bombs', e => e.ty==='KickBomb') + live('Interchanges', e => e.ty==='Interchange'));
-  // the NRL's own groups at full time
-  if(F && F.groups){
-    const fmt = (x, v, f) => v==null ? '—' : x.u==='Minutes' ? clock(v) : /Percentage/.test(x.ty) ? `${v}%${f ? ` <small>(${esc(f)})</small>` : ''}` :
-      x.u==='Seconds' ? `${v}s` : esc(v);
-    F.groups.forEach(g => { html += statSec(esc(g.t), (g.s || []).map(x => row(esc(x.t), fmt(x, x.h, x.hf), fmt(x, x.a, x.af), Number(x.h)||0, Number(x.a)||0)).join('')); });
-  } else html += `<div class="ts-note">The rest of the team stats arrive at full time.</div>`;
-  return html;
 }
 // the match centre's player table: every column, scrolling sideways with the player fixed on the left
 const NRL_COLS = [['minutesPlayed','MIN','Mins Played'],['points','PTS','Points'],['tries','T','Tries'],['conversions','C','Conversions'],
@@ -3920,36 +4101,59 @@ function cashOutQuote(b){
    The code's official ladder (ft_ladders, from the match-centre feeds). Finals spots are
    marked: AFL top 6 + 7th–10th Wildcard Round (from 2026), NRL top 8 — see SPORT_INFO. */
 async function renderLadder(){
-  const list = $('ladder-list');
-  await swr('ladder:'+curSport(), list, () => api.ladder(S.season.id, curSport()), lad => paintLadder(list, lad), () => S.view==='ladder');
+  const list = $('ladder-list'), sport = curSport();
+  // which ladders are stored (season and round), for the selectors; the newest unless one has been picked
+  let have = [];
+  try{ have = (await api.ladderList(sport)) || []; }catch(e){ console.warn(e); }
+  const pick = S.ladderSel && S.ladderSel.sport===sport && have.some(x => x.season===S.ladderSel.season && x.round===S.ladderSel.round) ? S.ladderSel : null;
+  const sel = pick || (have[0] ? { sport, season:have[0].season, round:have[0].round } : { sport, season:S.season.id, round:null });
+  await swr(`ladder:${sport}:${sel.season}:${sel.round}`, list, () => api.ladder(sel.season, sport, sel.round), lad => paintLadder(list, lad, have, sel), () => S.view==='ladder');
 }
-function paintLadder(list, lad){
+// the AFL / NRL site's ladder: a wide table that scrolls sideways with the club fixed on the left
+function paintLadder(list, lad, have, sel){
   const sp = SP(), nrl = curSport()==='nrl', f = sp.finals;
-  S.ladderInfo = lad ? `${sp.label} ${S.season.id} · ${lad.round>0 ? 'after Round '+lad.round : 'before Round 1'}` : '';
+  const roundName = r => r>0 ? `Round ${r}` : 'Pre-season';
+  S.ladderInfo = lad ? `${sp.label} ${sel.season} · ${lad.round>0 ? 'after Round '+lad.round : 'before Round 1'}` : '';
   renderNav2();
-  if(!lad || !lad.rows || !lad.rows.length){ list.innerHTML = '<div class="empty">The ladder appears once the season is under way.</div>'; return; }
-  const cols = nrl ? ['P','W','L','D','B','+/−','Pts'] : ['P','W','L','D','%','Pts'];
-  const head = `<div class="ld-head"><span>#</span><span></span><span class="tl">Team</span>${cols.map(c => `<span>${c}</span>`).join('')}</div>`;
+  const seasons = [...new Set(have.map(x => x.season))];
+  const rounds = have.filter(x => x.season===sel.season).map(x => x.round);
+  const selects = have.length ? `<div class="lad-sel">`+
+    `<label><span>Season</span><select id="lad-season">${seasons.map(s => `<option value="${s}"${s===sel.season ? ' selected' : ''}>${s}</option>`).join('')}</select></label>`+
+    `<label><span>Round</span><select id="lad-round">${rounds.map(r => `<option value="${r}"${r===(lad ? lad.round : sel.round) ? ' selected' : ''}>${roundName(r)}</option>`).join('')}</select></label></div>` : '';
+  if(!lad || !lad.rows || !lad.rows.length){ list.innerHTML = selects + '<div class="empty">The ladder appears once the season is under way.</div>'; wireLadderSel(list, have); return; }
+  const cols = nrl
+    ? [['played','P'],['pts','Pts'],['won','W'],['drawn','D'],['lost','L'],['byes','B'],['pf','PF'],['pa','PA'],['diff','PD']]
+    : [['played','P'],['pts','Pts'],['pct','%'],['won','W'],['lost','L'],['drawn','D'],['pf','PF'],['pa','PA']];
+  const span = cols.length + 3;
+  const fmt = (k, v) => v==null ? '' : k==='pct' ? Number(v).toFixed(1) : k==='diff' && v>0 ? '+'+v : esc(v);
+  const head = `<tr><th class="pn">Club</th>${cols.map(([k, l]) => `<th class="${k==='pts' ? 'pts' : ''}">${l}</th>`).join('')}<th>Form</th><th>Up Next</th></tr>`;
+  const cut = (cls, label) => `<tr class="lad-cut ${cls}"><td colspan="${span}"><span>${label}</span></td></tr>`;
   const rows = lad.rows.map(r => {
-    const zone = r.pos<=f.top ? ' top' : (f.wild && r.pos<=f.wild) ? ' wild' : '';
-    const mv = r.move>0 ? `<span class="ld-mv up">▲</span>` : r.move<0 ? `<span class="ld-mv down">▼</span>` : `<span class="ld-mv"></span>`;
-    const form = (r.form||[]).slice(-5).map(x => `<i class="fm ${x==='W'?'w':x==='L'?'l':'d'}">${esc(x)}</i>`).join('');
-    const nums = nrl
-      ? [r.played, r.won, r.lost, r.drawn, r.byes, (r.diff>0?'+':'')+r.diff]
-      : [r.played, r.won, r.lost, r.drawn, Number(r.pct).toFixed(1)];
-    return `<div class="ld-row${zone}"><span class="ld-pos">${r.pos}</span>${mv}`+
-      `<span class="ld-team">${teamBadge(r.team,'sm')}<span class="ld-tw"><span class="ld-nm">${esc(teamName(r.team))}</span>`+
-        `<span class="ld-form">${form}${r.next ? `<span class="ld-next">v ${esc(teamInfo(r.next).abbr)}</span>` : ''}</span></span></span>`+
-      nums.map(v => `<span class="ld-n">${esc(v)}</span>`).join('')+
-      `<span class="ld-n ld-pts">${esc(r.pts)}</span></div>`;
+    const mv = r.move>0 ? '<i class="lad-mv up">▲</i>' : r.move<0 ? '<i class="lad-mv down">▼</i>' : '<i class="lad-mv">–</i>';
+    const form = (r.form || []).slice(-5).map(x => `<i class="fc ${x==='W' ? 'w' : x==='L' ? 'l' : x==='D' ? 'd' : 'b'}">${esc(x)}</i>`).join('');
+    const next = r.next ? `${teamBadge(r.next, 'sm')}<span>${esc(teamInfo(r.next).abbr)}</span>` : '';
+    const row = `<tr><td class="pn"><span class="lad-pos">${r.pos}</span>${mv}${teamBadge(r.team, 'sm')}<span class="nm">${esc(teamFull(r.team))}</span></td>`+
+      cols.map(([k]) => `<td class="${k==='pts' ? 'pts' : ''}">${fmt(k, r[k])}</td>`).join('')+
+      `<td><span class="lad-form">${form}</span></td><td><span class="lad-next">${next}</span></td></tr>`;
+    return row + (r.pos===f.top ? cut('top', `Top ${f.top}`) : f.wild && r.pos===f.wild ? cut('wild', 'WC') : '');
   }).join('');
-  const legend = `<div class="ld-legend"><span><i class="lg top"></i>Top ${f.top}: finals</span>`+
-    (f.wild ? `<span><i class="lg wild"></i>${f.top+1}th–${f.wild}th: Wildcard Round</span>` : '')+`</div>`+
-    `<div class="ld-legend ld-abbr">`+(nrl
-      ? [['P','Played'],['W','Won'],['L','Lost'],['D','Drawn'],['B','Byes'],['+/−','Points difference'],['Pts','Points']]
-      : [['P','Played'],['W','Won'],['L','Lost'],['D','Drawn'],['%','Percentage'],['Pts','Points']]).map(([a, t]) => `<span><b>${a}:</b> ${t}</span>`).join('')+
-      `<span><b>Form:</b> Last 5 games</span></div>`;
-  list.innerHTML = `<div class="ld${nrl?' nrl':''}">${head}${rows}</div>${legend}`;
+  const legend = `<div class="lgd lad-lgd"><span><i class="lad-ln top"></i><b>Top ${f.top}:</b> ${nrl ? 'Qualify for the finals' : 'Qualify to play finals'}</span>`+
+    (f.wild ? `<span><i class="lad-ln wild"></i><b>WC:</b> ${f.top+1}th–${f.wild}th play Wildcard Finals</span>` : '')+
+    `<span><i class="fc w">W</i> Won</span><span><i class="fc l">L</i> Lost</span><span><i class="fc d">D</i> Drawn</span>${nrl ? '<span><i class="fc b">B</i> Bye</span>' : ''}</div>`+
+    legendHTML(nrl
+      ? [['P','Played'],['Pts','Points'],['W','Won'],['D','Drawn'],['L','Lost'],['B','Byes'],['PF','Points For'],['PA','Points Against'],['PD','Points Difference'],['Form','Last 5 Games']]
+      : [['P','Played'],['Pts','Points'],['%','Percentage'],['W','Won'],['L','Lost'],['D','Drawn'],['PF','Points For'],['PA','Points Against'],['Form','Last 5 Games']]);
+  list.innerHTML = selects + `<div class="lad"><div class="ptw"><table class="nt ladt"><thead>${head}</thead><tbody>${rows}</tbody></table></div>${legend}</div>`;
+  wireLadderSel(list, have);
+}
+function wireLadderSel(list, have){
+  const season = $('lad-season'), round = $('lad-round'), sport = curSport();
+  const go = (s, r) => { S.ladderSel = { sport, season:s, round:r }; renderLadder(); };
+  if(season) season.addEventListener('change', () => {
+    const s = Number(season.value), latest = have.find(x => x.season===s);       // the newest round of that season
+    go(s, latest ? latest.round : null);
+  });
+  if(round) round.addEventListener('change', () => go(Number(season.value), Number(round.value)));
 }
 
 /* ════════ LEADERBOARD ════════
@@ -5642,9 +5846,16 @@ async function liveApi(){
     },
     async markets(id){ return chk(await sb.from('ft_odds').select('markets, bookmaker, pulled_at').eq('match_id', id).maybeSingle()); },
     // the latest ladder for the code (written by the fixture importer)
-    async ladder(season, sport){
-      return chk(await sb.from('ft_ladders').select('round, rows').eq('sport', sport).eq('season', season)
-        .order('round', { ascending:false }).limit(1).maybeSingle());
+    // one season's ladder: after a given round, or the latest
+    async ladder(season, sport, round){
+      let q = sb.from('ft_ladders').select('round, rows').eq('sport', sport).eq('season', season);
+      if(round!=null) q = q.eq('round', round);
+      return chk(await q.order('round', { ascending:false }).limit(1).maybeSingle());
+    },
+    // every stored ladder for the code, newest first, for the season and round selectors
+    async ladderList(sport){
+      return chk(await sb.from('ft_ladders').select('season, round').eq('sport', sport)
+        .order('season', { ascending:false }).order('round', { ascending:false })) || [];
     },
 
     // ── betting (per comp) ──
