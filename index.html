@@ -1205,7 +1205,7 @@ const LEG_CAP = 15;                 // hard ceiling on multi legs — each comp 
 const QLEN = 1800;                  // nominal AFL quarter length (s), when the feed doesn't give the real one
 /* everything that differs between the codes. A comp is one sport; SP() gives its profile. */
 const SPORT_INFO = {
-  afl:{ label:'AFL', periods:4, periodLen:QLEN, per:q => 'Q'+q, perName:'Quarter', breaks:['Quarter Time','Half Time','Three Quarter Time'],
+  afl:{ label:'AFL', periods:4, periodLen:QLEN, minLen:1200, per:q => 'Q'+q, perName:'Quarter', breaks:['Quarter Time','Half Time','Three Quarter Time'],
         periodsTitle:'Quarters & Halves', scorersTitle:'Goal Scorers', scorersCard:'Goal Kickers', wormStep:20,
         stats:[['d','Disposals'],['k','Kicks'],['h','Handballs'],['m','Marks'],['t','Tackles'],['g','Goals'],['af','Fantasy']],
         pts:{ goal:6, behind:1 }, evLabel:{ goal:'GOAL', behind:'BEHIND' },
@@ -2568,8 +2568,8 @@ function patchStats(list, m){
    away team's along the bottom; club badges on the left and the margin scale on the right. */
 const WORM = { W:340, H:236, L:38, R:30, B:30 };
 let _worm = null;                   // geometry + points for the hover layer
-// each period's column spans its real length (live.plen) once it's over, and the one being played
-// stretches to the clock; NRL halves are a fixed length
+// each period's column spans its real length (live.plen) once it's over. The one being played spans
+// the 20 minutes every quarter runs to (minLen), then squishes as time-on passes; NRL halves are fixed
 function periodLens(m, events){
   const L = m.live || {}, sp = SP(m.sport), done = m.status==='concluded';
   return Array.from({ length:sp.periods }, (_, i) => {
@@ -2577,7 +2577,7 @@ function periodLens(m, events){
     if(sp.fixedLen) return sp.periodLen;
     if(known > 0) return known;
     const last = Math.max(0, ...events.filter(e => e.q===q).map(e => e.secs));
-    if(!done && q===L.q) return Math.max(1, last, liveSecs(m));
+    if(!done && q===L.q) return Math.max(sp.minLen || 1, last, liveSecs(m));
     return Math.max(sp.periodLen, last);
   });
 }
