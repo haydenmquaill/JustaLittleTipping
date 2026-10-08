@@ -330,6 +330,36 @@
   .pt-r .nm{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:6px}
   .pt-r .c{text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:14px;font-variant-numeric:tabular-nums}
   .pt-r .c.on{font-weight:800;color:var(--blue)}
+  /* Match Stats switcher, under the hero */
+  .sv-tabs{padding:0 0 10px}
+  /* NRL: tries, conversions and the half-time score under the hero */
+  .ns{background:#fff;color:var(--ink);margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.25);padding:4px 11px 8px}
+  .ns-r{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;padding:6px 0;border-bottom:1px solid #eef0f4;font-size:12px}
+  .ns-k{text-align:center;font-family:'Oswald',sans-serif;font-weight:600;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mid)}
+  .ns-k b{display:block;font-family:'Barlow Condensed',sans-serif;font-size:16px;letter-spacing:0;color:var(--ink)}
+  .ns-l.r{text-align:right}
+  .ns-l .none{color:var(--mid)}
+  .ns-ht{text-align:center;padding-top:7px;font-family:'Oswald',sans-serif;font-weight:600;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mid)}
+  .ns-ht b{font-family:'Barlow Condensed',sans-serif;font-size:16px;letter-spacing:0;color:var(--ink);margin-left:6px}
+  /* play by play: scoring plays stand out */
+  .tl-row.sc .w{color:var(--blue)}
+  /* NRL player table: scrolls sideways, the player column stays put */
+  .ptw{overflow-x:auto;border-top:1px solid #eef0f4}
+  .nt{border-collapse:collapse;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .nt th, .nt td{padding:0 4px;height:36px;text-align:center;border-bottom:1px solid #eef0f4;font-family:'Barlow Condensed',sans-serif;font-size:14px}
+  .nt th{height:30px;background:#f7f9fc}
+  .nt th button{border:none;background:none;cursor:pointer;padding:6px 2px;min-width:30px;font-family:'Oswald',sans-serif;font-weight:600;font-size:11px;color:var(--ink-soft)}
+  .nt th button.on{color:var(--blue);box-shadow:inset 0 -2px var(--blue)}
+  .nt td.on{font-weight:800;color:var(--blue)}
+  .nt .pn{position:sticky;left:0;z-index:1;background:#fff;text-align:left;padding-left:11px;font-size:11px;color:var(--mid)}
+  .nt th.pn{background:#f7f9fc}
+  .nt td.pn{display:flex;align-items:center;gap:6px;min-width:128px;box-shadow:1px 0 0 #eef0f4}
+  .nt .jn{width:22px;height:22px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px}
+  .nt td.pn .nm{font-weight:700;font-size:14px;color:var(--ink)}
+  /* a column's full name, on press and hold */
+  #col-tip{position:fixed;z-index:200;transform:translate(-50%,-100%);pointer-events:none;background:var(--blue-deep);color:#fff;border-radius:5px;
+    padding:4px 8px;font-size:12px;white-space:nowrap;opacity:0;transition:opacity .15s}
+  #col-tip.on{opacity:1}
 
   /* ── bet rows (slip, my bets, key moments) ── */
   .bet{display:flex;align-items:flex-start;gap:9px;background:#fff;color:var(--ink);
@@ -1318,10 +1348,10 @@ const S = {
   drafts:{},                        // match id → legs of the Same Game Multi being built
   multi:[],                         // legs of the Multi being built (one per match, any round)
   padListOpen:false,                // builder pad leg list expanded
-  statKey:'d', statsAll:false,      // Match Stats: stat shown in the leaders card, and whether all players show
+  stView:'summary', statsAll:false, // Match Stats: the view open (summary | team | players), and whether all players show
   ladderInfo:'',                    // "AFL 2027 · after Round 4" for the Ladder header
   membersAll:false,                 // Account host tools: show every member, not just the top 10
-  tlView:'worm',                    // Match Stats timeline: worm | table
+  tlView:'worm',                    // Match Stats timeline: worm | box
   board:{ round:null, tab:'standings', scope:'round' },
   player:{ id:null, name:'' },      // whose page is open in the player view
   profiles:{},                      // user id → who they barrack for: { afl:{ team, season, since_round, changes }, nrl:{…} } (null = none)
@@ -1372,7 +1402,7 @@ function groups(){
           ['disposals','Disposals'],['stats','Player Stats'],['other','Other']];
 }
 // cards open by default — every other market starts collapsed
-const DEFAULT_OPEN = new Set(['h2h','spreads','stats-timeline','stats-goals','stats-leaders','stats-last10','stats-team']);
+const DEFAULT_OPEN = new Set(['h2h','spreads','stats-timeline','stats-leaders','stats-last10','stats-team','stats-pbp']);
 // cards with more rows than this show the TOP_N first
 const TOP_N = 10;
 // markets where only one outcome can land — an SGM may hold one leg per market
@@ -1432,8 +1462,8 @@ function teamInfo(name){
 function teamTile(t, cls){
   return `<span class="tb ${cls}" style="background:linear-gradient(135deg,${t.c1} 0 50%,${t.c2} 50% 100%)">${esc(t.abbr)}</span>`;
 }
-// onDark: the AFL's light version of the logo, for club-colour backgrounds
-function logoSrc(abbr, onDark=false){ return `assets/teams/${curSport()}/${onDark && curSport()==='afl' ? 'light/' : ''}${abbr}.svg`; }
+// onDark: the club's light version of the logo, for club-colour backgrounds
+function logoSrc(abbr, onDark=false){ return `assets/teams/${curSport()}/${onDark ? 'light/' : ''}${abbr}.svg`; }
 function teamBadge(name, cls='', onDark=false){
   const t = teamInfo(name);
   if(!t.known) return teamTile(t, cls);
@@ -2600,10 +2630,13 @@ function marketParts(m, key, outs){
 /* ════════ MATCH STATS ════════
    From the live feed: scoring events drive the worm, the scorers card and the timeline;
    per-player stats drive the leaders card. Periods, scoring and stats come from SP(). */
+/* Match Stats: the hero, NRL's scoring summary, then a switcher: Summary (AFL) / Play by Play (NRL),
+   Team Stats and Player Stats. Feed updates refresh the contents in place. */
+const STAT_VIEWS = ['summary','team','players'];
 function renderStats(m){
   const list = $('match-list');
   $('pane-match').classList.remove('locked');
-  const L = m.live, sp = SP(m.sport), afl = m.sport==='afl';
+  const L = m.live, nrl = m.sport==='nrl';
   const sig = ['st', m.id, !isOpen(m) && !!L].join('|');
   if(list.dataset.sig===sig){ patchStats(list, m); return; }
   list.dataset.sig = sig;
@@ -2611,43 +2644,57 @@ function renderStats(m){
     list.innerHTML = heroHTML(m) + `<div class="empty">Match stats go live at kick-off.</div>`;
     return;
   }
-  const events = statEvents(m);
-  // timeline card: the worm, or the scoring as a Box (AFL) / table (NRL)
-  const toggle = `<div class="tl-toggle">`+
-    `<button class="${S.tlView==='worm'?'active':''}" data-tl="worm" aria-label="Worm" title="Worm">`+
-      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15h3v-4h3v6h3V8h3v5h3v-3h3"/></svg></button>`+
-    `<button class="${S.tlView==='table'?'active':''}" data-tl="table" aria-label="${afl ? 'Box' : 'Table'}" title="${afl ? 'Box' : 'Table'}">`+
-      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M3 10h18M3 14.5h18M9 5v14M15 5v14"/></svg></button>`+
-  `</div>`;
-  list.innerHTML = heroHTML(m) +
-    cardHTML('stats-timeline', 'Timeline', toggle + `<div class="tl-body"></div>`) +
-    (afl ? cardHTML('stats-last10', 'Last 10 Scores', `<div class="l10-body"></div>`) +
-           cardHTML('stats-team', 'Team Stats', `<div class="ts-body"></div>`)
-         : cardHTML('stats-goals', sp.scorersCard, `<div class="gk-body">${scorersHTML(m, events)}</div>`)) +
-    cardHTML('stats-leaders', 'Player Stats', (afl ? playerTeamRibHTML(m) : leadersRibHTML(m)) + `<div class="st-rows"></div>`);
-  paintTimeline(list, m, events);
-  if(afl){ paintLast10(list, m, events); paintTeamStats(list, m, events); }
-  paintLeaders(list, m);
-  wireCollapse(list);
-  list.querySelectorAll('[data-tl]').forEach(b => b.addEventListener('click', () => {
-    S.tlView = b.dataset.tl;
-    list.querySelectorAll('[data-tl]').forEach(x => x.classList.toggle('active', x===b));
-    paintTimeline(list, m, statEvents(m));
+  if(!STAT_VIEWS.includes(S.stView)) S.stView = 'summary';
+  const tab = (k, l) => `<button class="rib${S.stView===k ? ' active' : ''}" data-sv="${k}">${l}</button>`;
+  list.innerHTML = heroHTML(m) + (nrl ? `<div class="ns"></div>` : '') +
+    `<div class="mk-rib bare sv-tabs">${tab('summary', nrl ? 'Play by Play' : 'Summary')}${tab('team', 'Team Stats')}${tab('players', 'Player Stats')}</div>` +
+    `<div class="sv-body"></div>`;
+  if(nrl) paintNrlSummary(list, m);
+  paintStatView(list, m);
+  list.querySelectorAll('[data-sv]').forEach(b => b.addEventListener('click', () => {
+    if(S.stView===b.dataset.sv) return;
+    S.stView = b.dataset.sv;
+    list.querySelectorAll('[data-sv]').forEach(x => x.classList.toggle('active', x===b));
+    paintStatView(list, m);
   }));
-  list.querySelectorAll('.rib[data-stat]').forEach(b => b.addEventListener('click', () => {
-    S.statKey = b.dataset.stat;
-    list.querySelectorAll('.rib[data-stat]').forEach(x => x.classList.toggle('active', x===b));
+}
+// the chosen view's cards
+function paintStatView(list, m){
+  const body = list.querySelector('.sv-body'); if(!body) return;
+  const nrl = m.sport==='nrl', events = statEvents(m);
+  if(S.stView==='summary'){
+    const toggle = `<div class="tl-toggle">`+
+      `<button class="${S.tlView==='worm'?'active':''}" data-tl="worm" aria-label="Worm" title="Worm">`+
+        `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15h3v-4h3v6h3V8h3v5h3v-3h3"/></svg></button>`+
+      `<button class="${S.tlView!=='worm'?'active':''}" data-tl="box" aria-label="Box" title="Box">`+
+        `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M3 10h18M3 14.5h18M9 5v14M15 5v14"/></svg></button>`+
+    `</div>`;
+    body.innerHTML = cardHTML('stats-timeline', 'Timeline', toggle + `<div class="tl-body"></div>`) +
+      (nrl ? cardHTML('stats-pbp', 'Play by Play', `<div class="pbp-body"></div>`) : cardHTML('stats-last10', 'Last 10 Scores', `<div class="l10-body"></div>`));
+    paintTimeline(list, m, events);
+    if(nrl) paintPbp(list, m); else paintLast10(list, m, events);
+    body.querySelectorAll('[data-tl]').forEach(b => b.addEventListener('click', () => {
+      S.tlView = b.dataset.tl;
+      body.querySelectorAll('[data-tl]').forEach(x => x.classList.toggle('active', x===b));
+      paintTimeline(list, m, statEvents(m));
+    }));
+  } else if(S.stView==='team'){
+    body.innerHTML = cardHTML('stats-team', 'Team Stats', `<div class="ts-body"></div>`);
+    paintTeamStats(list, m, events);
+  } else {
+    body.innerHTML = cardHTML('stats-leaders', 'Player Stats', playerTeamRibHTML(m) + `<div class="st-rows"></div>`);
     paintLeaders(list, m);
-  }));
-  list.querySelectorAll('.rib[data-pteam]').forEach(b => b.addEventListener('click', () => {
-    S.ptTeam = b.dataset.pteam;
-    list.querySelectorAll('.rib[data-pteam]').forEach(x => x.classList.toggle('active', x===b));
-    paintLeaders(list, m);
-  }));
+    body.querySelectorAll('.rib[data-pteam]').forEach(b => b.addEventListener('click', () => {
+      S.ptTeam = b.dataset.pteam;
+      body.querySelectorAll('.rib[data-pteam]').forEach(x => x.classList.toggle('active', x===b));
+      paintLeaders(list, m);
+    }));
+  }
+  wireCollapse(body);
 }
 function paintTimeline(list, m, events){
   const el = list.querySelector('.tl-body'); if(!el) return;
-  el.innerHTML = S.tlView==='worm' ? wormHTML(m, events) : m.sport==='afl' ? boxHTML(m) : timelineHTML(m, events);
+  el.innerHTML = S.tlView==='worm' ? wormHTML(m, events) : boxHTML(m);
   if(S.tlView==='worm') wireWorm(m);
 }
 function paintLast10(list, m, events){
@@ -2656,43 +2703,84 @@ function paintLast10(list, m, events){
   el.innerHTML = last10HTML(m, events);
   const now = el.querySelector('.l10'); if(now) now.scrollLeft = x;
 }
+function paintPbp(list, m){
+  const el = list.querySelector('.pbp-body'); if(el) el.innerHTML = pbpHTML(m);
+}
+function paintNrlSummary(list, m){
+  const el = list.querySelector('.ns'); if(el) el.innerHTML = nrlSummaryHTML(m);
+}
 function paintTeamStats(list, m, events){
-  const el = list.querySelector('.ts-body'); if(el) el.innerHTML = teamStatsHTML(m, events);
+  const el = list.querySelector('.ts-body'); if(el) el.innerHTML = m.sport==='nrl' ? nrlTeamStatsHTML(m, events) : teamStatsHTML(m, events);
 }
 function paintLeaders(list, m){
   const el = list.querySelector('.st-rows'); if(!el) return;
-  el.innerHTML = m.sport==='afl' ? aflPlayersHTML(m)
-    : m.status==='concluded' ? leadersRowsHTML(m) : `<div class="ts-note">Player stats show at full time.</div>`;
+  const wide = el.querySelector('.ptw'), x = wide ? wide.scrollLeft : 0;
+  el.innerHTML = m.sport==='nrl' ? nrlPlayersHTML(m) : aflPlayersHTML(m);
+  const now = el.querySelector('.ptw'); if(now) now.scrollLeft = x;
   const more = el.querySelector('.mk-more[data-stats-all]');
   if(more) more.addEventListener('click', () => { S.statsAll = !S.statsAll; paintLeaders(list, m); });
-  el.querySelectorAll('[data-pt]').forEach(b => b.addEventListener('click', () => { S.ptSort = b.dataset.pt; paintLeaders(list, m); }));
+  el.querySelectorAll('[data-pt]').forEach(b => b.addEventListener('click', () => {
+    if(b._held){ b._held = false; return; }                  // a press-and-hold showed the name instead
+    S.ptSort = b.dataset.pt; paintLeaders(list, m);
+  }));
+  wireColTips(el);
 }
-// a feed update: the hero's figures and every card's contents, all where they are
+// a feed update: the hero's figures and the open view's contents, all where they are
 function patchStats(list, m){
   patchHero(list, m);
   if(isOpen(m) || !m.live) return;
   const events = statEvents(m);
-  const tip = $('worm-tip');
-  if(S.tlView!=='worm' || !tip || tip.classList.contains('hidden')) paintTimeline(list, m, events);
-  if(m.sport==='afl'){ paintLast10(list, m, events); paintTeamStats(list, m, events); }
-  const gk = list.querySelector('.gk-body'); if(gk) gk.innerHTML = scorersHTML(m, events);
-  paintLeaders(list, m);
+  if(m.sport==='nrl') paintNrlSummary(list, m);
+  if(S.stView==='summary'){
+    const tip = $('worm-tip');
+    if(S.tlView!=='worm' || !tip || tip.classList.contains('hidden')) paintTimeline(list, m, events);
+    if(m.sport==='nrl') paintPbp(list, m); else paintLast10(list, m, events);
+  }
+  if(S.stView==='team') paintTeamStats(list, m, events);
+  if(S.stView==='players') paintLeaders(list, m);
 }
 
-/* ── AFL stats blocks ── */
+/* ── column names: tap a header to sort, press and hold (or hover) for its full name ── */
+function wireColTips(root){
+  root.querySelectorAll('[data-tip]').forEach(b => {
+    let timer = null;
+    const clear = () => { clearTimeout(timer); timer = null; };
+    b.addEventListener('pointerdown', ev => {
+      if(ev.pointerType==='mouse') return;
+      clear(); timer = setTimeout(() => { b._held = true; showColTip(b); }, 450);
+    });
+    ['pointerup','pointercancel','pointerleave'].forEach(t => b.addEventListener(t, clear));
+    b.addEventListener('contextmenu', ev => ev.preventDefault());
+  });
+}
+function showColTip(b){
+  let tip = $('col-tip');
+  if(!tip){ tip = document.createElement('div'); tip.id = 'col-tip'; document.body.appendChild(tip); }
+  tip.textContent = b.dataset.tip;
+  const r = b.getBoundingClientRect();
+  tip.style.left = Math.max(8, Math.min(window.innerWidth - 8, r.left + r.width/2)) + 'px';
+  tip.style.top = (r.top - 6) + 'px';
+  tip.classList.add('on');
+  clearTimeout(tip._t); tip._t = setTimeout(() => tip.classList.remove('on'), 1600);
+}
+
+/* ── shared pieces ── */
 function playerOf(m, e){ return ((m.live || {}).players || []).find(p => p.name===e.player && p.team===e.team) || null; }
 function photoHTML(p, cls){ return p && p.photo ? `<img class="${cls}" src="${esc(encodeURI(p.photo))}" alt="" onerror="this.remove()">` : ''; }
 function scoreWhen(m, e){ return `${SP(m.sport).per(e.q)} ${gameClock(m.sport, e.q, e.secs)}`; }
-// each team's goals.behinds at the end of every quarter played (the current one so far)
+// NRL minutes as the NRL shows them: whole minutes played, e.g. 33'
+function nrlMin(gs){ return `${Math.floor(gs/60)}'`; }
+function eventGameSecs(m, e){ return (e.q-1) * SP(m.sport).periodLen + e.secs; }
+// each team's score at the end of every period played (the current one so far): goals.behinds (AFL), points (NRL)
 function boxHTML(m){
-  const L = m.live || {};
-  const cell = v => Array.isArray(v) ? `${v[0]}.${v[1]}` : '';
-  let html = `<span class="h t"></span>` + [1,2,3,4].map(q => `<span class="h">Q${q}</span>`).join('');
+  const L = m.live || {}, sp = SP(m.sport), P = Array.from({ length:sp.periods }, (_, i) => i+1);
+  const cell = v => Array.isArray(v) ? `${v[0]}.${v[1]}` : v==null ? '' : esc(v);
+  let html = `<span class="h t"></span>` + P.map(q => `<span class="h">${sp.per(q)}</span>`).join('');
   ['home','away'].forEach(side => {
     html += `<span class="t">${teamBadge(side==='home' ? m.home_team : m.away_team, 'sm')}</span>` +
-      [1,2,3,4].map(q => `<span>${cell((L[side] || [])[q-1])}</span>`).join('');
+      P.map(q => `<span>${cell((L[side] || [])[q-1])}</span>`).join('');
   });
-  return `<div class="bx">${html}</div>`;
+  return `<div class="bx" style="grid-template-columns:58px repeat(${sp.periods},1fr)">${html}</div>`;
 }
 function last10HTML(m, events){
   const ev = events.slice(-10).reverse();
@@ -2703,58 +2791,66 @@ function last10HTML(m, events){
       photoHTML(playerOf(m, e), 'l10-p') + `<div class="l10-n">${esc(e.player)}<small>${esc(scoreWhen(m, e))}</small></div></div>`;
   }).join('') + `</div>`;
 }
-// from the scores alone (so exact during play): time in front, last goal, biggest lead, goals / behinds / rushed
+// from the scores alone (so exact during play): time in front, biggest lead, last major score, and a count of each scoring type
 function scoringInfo(m, events){
   const L = m.live || {}, sp = SP(m.sport), lens = periodLens(m, events), done = m.status==='concluded';
+  const major = m.sport==='nrl' ? 'try' : 'goal';
   const abs = (q, secs) => lens.slice(0, q-1).reduce((a, b) => a + b, 0) + secs;
   const end = done ? abs(sp.periods + 1, 0) : abs(L.q || 1, liveSecs(m));
-  const side = () => ({ front:0, last:null, lead:null, g:0, b:0, ru:0 });
+  const side = () => ({ front:0, last:null, lead:null, n:{}, ru:0 });
   const s = { home:side(), away:side() };
   let t = 0, mg = 0;
   events.forEach(e => {
     const te = abs(e.q, e.secs);
     if(mg>0) s.home.front += te - t; else if(mg<0) s.away.front += te - t;
     t = te;
-    const x = s[e.team];
-    if(e.type==='goal'){ x.g++; x.last = e; mg += e.team==='home' ? 6 : -6; }
-    else { x.b++; if(e.player==='Rushed') x.ru++; mg += e.team==='home' ? 1 : -1; }
+    const x = s[e.team], v = sp.pts[e.type] || 0;
+    x.n[e.type] = (x.n[e.type] || 0) + 1;
+    if(e.type===major) x.last = e;
+    if(e.type==='behind' && e.player==='Rushed') x.ru++;
+    mg += e.team==='home' ? v : -v;
     if(mg>0 && (!s.home.lead || mg > s.home.lead.pts)) s.home.lead = { pts:mg, e };
     if(mg<0 && (!s.away.lead || -mg > s.away.lead.pts)) s.away.lead = { pts:-mg, e };
   });
   if(mg>0) s.home.front += Math.max(0, end - t); else if(mg<0) s.away.front += Math.max(0, end - t);
   return s;
 }
+// home value, label, away value, with a split bar in the clubs' colours (no bar when hn is null)
+function statRow(m, label, hv, av, hn, an){
+  const hc = teamInfo(m.home_team).c1, ac = teamInfo(m.away_team).c1;
+  const bar = hn==null ? '' : `<div class="ts-b"><i style="flex:${hn || (an ? 0 : 1)};background:${hc}"></i><i style="flex:${an || (hn ? 0 : 1)};background:${ac}"></i></div>`;
+  return `<div class="ts-r"><span class="v">${hv}</span><span class="l">${label}</span><span class="v">${av}</span>${bar}</div>`;
+}
+function statSec(title, rows){ return rows ? `<div class="ts-sec">${title}</div>${rows}` : ''; }
+
+/* ── AFL ── */
 function teamStatsHTML(m, events){
   const L = m.live || {}, F = L.final, I = L.inter, s = scoringInfo(m, events);
-  const hc = teamInfo(m.home_team).c1, ac = teamInfo(m.away_team).c1;
-  const row = (label, hv, av, hn, an) => {
-    const bar = hn==null ? '' : `<div class="ts-b"><i style="flex:${hn || (an ? 0 : 1)};background:${hc}"></i><i style="flex:${an || (hn ? 0 : 1)};background:${ac}"></i></div>`;
-    return `<div class="ts-r"><span class="v">${hv}</span><span class="l">${label}</span><span class="v">${av}</span>${bar}</div>`;
-  };
+  const row = (...a) => statRow(m, ...a);
   const num = (label, k) => row(label, F.home[k], F.away[k], F.home[k], F.away[k]);
   const pct = (label, h, a) => row(label, `${h}%`, `${a}%`, h, a);
-  const sec = (title, rows) => rows ? `<div class="ts-sec">${title}</div>${rows}` : '';
+  const cnt = (x, k) => x.n[k] || 0;
   const when = (x, f) => x ? esc(f(x)) : '—';
   const posts = x => (x.lp || 0) + (x.rp || 0);
-  const goalEff = (side, x) => x.i50 ? Math.round(s[side].g / x.i50 * 1000) / 10 : 0;
-  let html = sec('Scoring',
+  const goalEff = (side, x) => x.i50 ? Math.round(cnt(s[side], 'goal') / x.i50 * 1000) / 10 : 0;
+  let html = statSec('Scoring',
     row('Time in front', clock(s.home.front), clock(s.away.front), s.home.front, s.away.front) +
     row('Last goal', when(s.home.last, e => scoreWhen(m, e)), when(s.away.last, e => scoreWhen(m, e))) +
     row('Biggest lead', when(s.home.lead, x => `${x.pts} pts, ${scoreWhen(m, x.e)}`), when(s.away.lead, x => `${x.pts} pts, ${scoreWhen(m, x.e)}`)) +
-    row('Goals', s.home.g, s.away.g, s.home.g, s.away.g) +
-    row('Behinds', s.home.b, s.away.b, s.home.b, s.away.b) +
+    row('Goals', cnt(s.home, 'goal'), cnt(s.away, 'goal'), cnt(s.home, 'goal'), cnt(s.away, 'goal')) +
+    row('Behinds', cnt(s.home, 'behind'), cnt(s.away, 'behind'), cnt(s.home, 'behind'), cnt(s.away, 'behind')) +
     row('Rushed behinds', s.home.ru, s.away.ru, s.home.ru, s.away.ru) +
     (F ? row('Hit the post', posts(F.home), posts(F.away), posts(F.home), posts(F.away)) +
          row('Touched', F.home.tch, F.away.tch, F.home.tch, F.away.tch) : ''));
   if(F){
-    html += sec('Disposals', num('Disposals', 'd') + num('Kicks', 'k') + num('Handballs', 'h') + num('Inside 50s', 'i50') +
+    html += statSec('Disposals', num('Disposals', 'd') + num('Kicks', 'k') + num('Handballs', 'h') + num('Inside 50s', 'i50') +
         pct('Disposal efficiency', F.home.de, F.away.de) + pct('Goal efficiency', goalEff('home', F.home), goalEff('away', F.away)) +
         num('Frees for', 'ff')) +
-      sec('Stoppages', num('Hitouts', 'ho') + num('Total clearances', 'cl') + num('Centre clearances', 'ccl') + num('Stoppage clearances', 'scl')) +
-      sec('Possessions', num('Contested possessions', 'cp') + num('Uncontested possessions', 'up') + num('Turnovers', 'to') +
+      statSec('Stoppages', num('Hitouts', 'ho') + num('Total clearances', 'cl') + num('Centre clearances', 'ccl') + num('Stoppage clearances', 'scl')) +
+      statSec('Possessions', num('Contested possessions', 'cp') + num('Uncontested possessions', 'up') + num('Turnovers', 'to') +
         num('Intercepts', 'it') + pct('Time in possession', F.home.poss, F.away.poss)) +
-      sec('Marks', num('Marks', 'm') + num('Marks inside 50', 'mi50') + num('Contested marks', 'cm')) +
-      sec('Defence', num('Tackles', 't') + num('Tackles inside 50', 'ti50'));
+      statSec('Marks', num('Marks', 'm') + num('Marks inside 50', 'mi50') + num('Contested marks', 'cm')) +
+      statSec('Defence', num('Tackles', 't') + num('Tackles inside 50', 'ti50'));
   }
   // interchanges arrive a quarter at a time
   let ic = '';
@@ -2762,7 +2858,7 @@ function teamStatsHTML(m, events){
     const h = I.home.reduce((a, b) => a + b, 0), a = (I.away || []).reduce((x, y) => x + y, 0), cap = I.cap ? `/${I.cap}` : '';
     ic = row(`Interchanges${I.home.length < 4 ? ` (to Q${I.home.length})` : ''}`, `${h}${cap}`, `${a}${cap}`, h, a);
   }
-  html += sec('General', (F ? num('Bounces', 'bo') + num('One percenters', 'op') : '') + ic);
+  html += statSec('General', (F ? num('Bounces', 'bo') + num('One percenters', 'op') : '') + ic);
   if(!F) html += `<div class="ts-note">The rest of the team stats arrive at full time.</div>`;
   return html;
 }
@@ -2772,7 +2868,8 @@ function playerTeamRibHTML(m){
   const b = (k, l) => `<button class="rib${cur===k ? ' active' : ''}" data-pteam="${k}">${esc(l)}</button>`;
   return `<div class="mk-rib">${b('all', 'All')}${b('home', teamInfo(m.home_team).abbr)}${b('away', teamInfo(m.away_team).abbr)}</div>`;
 }
-const PT_COLS = [['af','AF'],['gb','G.B'],['d','D'],['k','K'],['h','H'],['m','M'],['t','T'],['ho','HO']];
+const PT_COLS = [['af','AF','AFL Fantasy'],['gb','G.B','Goals.Behinds'],['d','D','Disposals'],['k','K','Kicks'],['h','H','Handballs'],
+  ['m','M','Marks'],['t','T','Tackles'],['ho','HO','Hitouts']];
 function aflPlayersHTML(m){
   if(m.status!=='concluded') return `<div class="ts-note">Player stats show at full time.</div>`;
   const key = PT_COLS.some(([k]) => k===S.ptSort) ? S.ptSort : 'af', team = S.ptTeam || 'all';
@@ -2780,16 +2877,115 @@ function aflPlayersHTML(m){
   const all = ((m.live || {}).players || []).filter(p => team==='all' || p.team===team)
     .sort((a, b) => val(b, key) - val(a, key) || val(b, 'af') - val(a, 'af'));
   const shown = S.statsAll ? all : all.slice(0, TOP_N);
-  const short = n => { const i = n.indexOf(' '); return i > 0 ? `${n[0]}.${n.slice(i+1)}` : n; };
-  const head = `<div class="pt-h"><span class="nm">Player</span>${PT_COLS.map(([k, l]) => `<button class="${k===key ? 'on' : ''}" data-pt="${k}">${l}</button>`).join('')}</div>`;
+  const head = `<div class="pt-h"><span class="nm">Player</span>${PT_COLS.map(([k, l, t]) =>
+    `<button class="${k===key ? 'on' : ''}" data-pt="${k}" data-tip="${esc(t)}" title="${esc(t)}">${l}</button>`).join('')}</div>`;
   const rows = shown.map(p => {
     const t = teamInfo(p.team==='home' ? m.home_team : m.away_team);
-    return `<div class="pt-r"><span class="jn" style="background:${t.c1};color:#fff">${esc(p.n ?? '')}</span><span class="nm">${esc(short(p.name))}</span>`+
+    return `<div class="pt-r"><span class="jn" style="background:${t.c1};color:#fff">${esc(p.n ?? '')}</span><span class="nm">${esc(shortName(p.name))}</span>`+
       PT_COLS.map(([k]) => `<span class="c${k===key ? ' on' : ''}">${k==='gb' ? `${p.g||0}.${p.b||0}` : esc(p[k] ?? 0)}</span>`).join('') + `</div>`;
   }).join('');
-  const more = all.length>TOP_N
-    ? `<button class="mk-more" data-stats-all="1">${S.statsAll ? `View top ${TOP_N} players` : `View all ${all.length} players`}</button>` : '';
-  return head + rows + more;
+  return head + rows + moreBtn(all.length);
+}
+function shortName(n){ const i = n.indexOf(' '); return i > 0 ? `${n[0]}.${n.slice(i+1)}` : n; }
+function moreBtn(n){
+  return n>TOP_N ? `<button class="mk-more" data-stats-all="1">${S.statsAll ? `View top ${TOP_N} players` : `View all ${n} players`}</button>` : '';
+}
+
+/* ── NRL ── */
+// under the hero: each side's try scorers and conversions with the minute, and the half-time score once it's reached
+function nrlSummaryHTML(m){
+  const L = m.live || {}, events = statEvents(m), pbp = L.pbp || [];
+  const list = (side, type) => events.filter(e => e.team===side && e.type===type)
+    .map(e => `<div>${esc(e.player)} ${nrlMin(eventGameSecs(m, e))}</div>`).join('') || '<div class="none">—</div>';
+  const made = side => events.filter(e => e.team===side && e.type==='conversion').length;
+  const tried = side => pbp.filter(e => e.team===side && /^Conversion/.test(e.t)).length || made(side);
+  const tries = side => events.filter(e => e.team===side && e.type==='try').length;
+  const half = m.status==='concluded' || L.q > 1 || L.running===false;
+  const row = (label, h, a) => `<div class="ns-r"><div class="ns-l">${h}</div><div class="ns-k">${label}</div><div class="ns-l r">${a}</div></div>`;
+  return row(`Tries <b>${tries('home')} – ${tries('away')}</b>`, list('home', 'try'), list('away', 'try')) +
+    row(`Conversions <b>${made('home')}/${tried('home')} – ${made('away')}/${tried('away')}</b>`, list('home', 'conversion'), list('away', 'conversion')) +
+    (half ? `<div class="ns-ht">Half Time <b>${esc((L.home || [])[0] ?? 0)} – ${esc((L.away || [])[0] ?? 0)}</b></div>` : '');
+}
+// every event the game clock has reached, newest first, with the score after each scoring play
+function pbpHTML(m){
+  const pbp = ((m.live || {}).pbp || []).slice(), events = statEvents(m);
+  if(!pbp.length) return `<div class="l10-none">Nothing yet.</div>`;
+  const score = gs => {
+    let h = 0, a = 0;
+    events.forEach(e => { if(eventGameSecs(m, e) <= gs){ const v = SP(m.sport).pts[e.type] || 0; if(e.team==='home') h += v; else a += v; } });
+    return `${h}–${a}`;
+  };
+  const scoring = new Set(['Try','Goal','OnePointFieldGoal','TwoPointFieldGoal']);
+  return pbp.reverse().map(e => {
+    if(e.ty==='GameTime') return `<div class="tl-q">${esc(e.t)} · ${nrlMin(e.gs)}</div>`;
+    const team = e.team ? teamBadge(e.team==='home' ? m.home_team : m.away_team, 'sm') : '<span class="tb sm"></span>';
+    const who = e.off ? `${esc(e.p || '')} on, ${esc(e.off)} off` : esc(e.p || '');
+    return `<div class="tl-row${scoring.has(e.ty) ? ' sc' : ''}"><span class="t">${nrlMin(e.gs)}</span>${team}`+
+      `<span class="w">${esc(e.t)}${who ? `<small>${who}</small>` : ''}</span><span class="s">${scoring.has(e.ty) ? score(e.gs) : ''}</span></div>`;
+  }).join('');
+}
+function nrlTeamStatsHTML(m, events){
+  const L = m.live || {}, F = L.final, pbp = L.pbp || [], s = scoringInfo(m, events);
+  const row = (...a) => statRow(m, ...a);
+  const cnt = (x, k) => x.n[k] || 0;
+  const count = (side, test) => pbp.filter(e => e.team===side && test(e)).length;
+  const live = (label, test) => { const h = count('home', test), a = count('away', test); return row(label, h, a, h, a); };
+  const when = (x, f) => x ? esc(f(x)) : '—';
+  const at = e => nrlMin(eventGameSecs(m, e));
+  let html = statSec('Scoring',
+    row('Time in front', clock(s.home.front), clock(s.away.front), s.home.front, s.away.front) +
+    row('Biggest lead', when(s.home.lead, x => `${x.pts} pts, ${at(x.e)}`), when(s.away.lead, x => `${x.pts} pts, ${at(x.e)}`)) +
+    row('Tries', cnt(s.home, 'try'), cnt(s.away, 'try'), cnt(s.home, 'try'), cnt(s.away, 'try')) +
+    row('Conversions', cnt(s.home, 'conversion'), cnt(s.away, 'conversion'), cnt(s.home, 'conversion'), cnt(s.away, 'conversion')) +
+    row('Penalty goals', cnt(s.home, 'penalty'), cnt(s.away, 'penalty'), cnt(s.home, 'penalty'), cnt(s.away, 'penalty')) +
+    row('Field goals', cnt(s.home, 'field_goal') + cnt(s.home, 'field_goal_2'), cnt(s.away, 'field_goal') + cnt(s.away, 'field_goal_2'),
+        cnt(s.home, 'field_goal') + cnt(s.home, 'field_goal_2'), cnt(s.away, 'field_goal') + cnt(s.away, 'field_goal_2')));
+  if(pbp.length) html += statSec('Match',
+    live('Line breaks', e => e.ty==='LineBreak') + live('Errors', e => e.ty==='Error') + live('Penalties conceded', e => e.ty==='Penalty') +
+    live('Set restarts', e => e.ty==='SetRestart') + live('Ruck infringements', e => e.ty==='RuckInfringement') +
+    live('Kick bombs', e => e.ty==='KickBomb') + live('Interchanges', e => e.ty==='Interchange'));
+  // the NRL's own groups at full time
+  if(F && F.groups){
+    const fmt = (x, v, f) => v==null ? '—' : x.u==='Minutes' ? clock(v) : /Percentage/.test(x.ty) ? `${v}%${f ? ` <small>(${esc(f)})</small>` : ''}` :
+      x.u==='Seconds' ? `${v}s` : esc(v);
+    F.groups.forEach(g => { html += statSec(esc(g.t), (g.s || []).map(x => row(esc(x.t), fmt(x, x.h, x.hf), fmt(x, x.a, x.af), Number(x.h)||0, Number(x.a)||0)).join('')); });
+  } else html += `<div class="ts-note">The rest of the team stats arrive at full time.</div>`;
+  return html;
+}
+// the match centre's player table: every column, scrolling sideways with the player fixed on the left
+const NRL_COLS = [['minutesPlayed','MIN','Mins Played'],['points','PTS','Points'],['tries','T','Tries'],['conversions','C','Conversions'],
+  ['conversionAttempts','CA','Conversion Attempts'],['penaltyGoals','PG','Penalty Goals'],['goalConversionRate','G%','Goal Conversion Rate'],
+  ['onePointFieldGoals','1FG','1 Point Field Goals'],['twoPointFieldGoals','2FG','2 Point Field Goals'],['fantasyPointsTotal','FAN','Fantasy Total Points'],
+  ['allRuns','R','All Runs'],['allRunMetres','RM','All Run Metres'],['kickReturnMetres','KRM','Kick Return Metres'],
+  ['postContactMetres','PCM','Post Contact Metres'],['lineBreaks','LB','Line Breaks'],['lineBreakAssists','LBA','Line Break Assists'],
+  ['tryAssists','TA','Try Assists'],['lineEngagedRuns','LER','Line Engaged Runs'],['tackleBreaks','TB','Tackle Breaks'],['hitUps','HU','Hit Ups'],
+  ['playTheBallTotal','PTB','Play The Ball'],['playTheBallAverageSpeed','PTBS','Average Play The Ball Speed'],['dummyHalfRuns','DHR','Dummy Half Runs'],
+  ['dummyHalfRunMetres','DHM','Dummy Half Run Metres'],['oneOnOneSteal','1V1S','One on One Steal'],['offloads','OFF','Offloads'],
+  ['dummyPasses','DP','Dummy Passes'],['passes','P','Passes'],['receipts','REC','Receipts'],['passesToRunRatio','P/R','Passes To Run Ratio'],
+  ['tackleEfficiency','TK%','Tackle Efficiency'],['tacklesMade','TK','Tackles Made'],['missedTackles','MT','Missed Tackles'],
+  ['ineffectiveTackles','IT','Ineffective Tackles'],['intercepts','INT','Intercepts'],['kicksDefused','KD','Kicks Defused'],['kicks','K','Kicks'],
+  ['kickMetres','KM','Kicking Metres'],['forcedDropOutKicks','FDO','Forced Drop Outs'],['bombKicks','BK','Bomb Kicks'],['grubberKicks','GK','Grubbers'],
+  ['fortyTwentyKicks','40/20','40/20'],['twentyFortyKicks','20/40','20/40'],['crossFieldKicks','CFK','Cross Field Kicks'],['kicksDead','KDD','Kicked Dead'],
+  ['errors','ERR','Errors'],['handlingErrors','HE','Handling Errors'],['oneOnOneLost','1V1L','One on One Lost'],['penalties','PEN','Penalties'],
+  ['ruckInfringements','RI','Ruck Infringements'],['offsideWithinTenMetres','I10','Inside 10 Metres'],['onReport','OR','On Report'],
+  ['sinBins','SB','Sin Bins'],['sendOffs','SO','Send Offs'],['stintOne','S1','Stint One'],['stintTwo','S2','Stint Two']];
+function nrlPlayersHTML(m){
+  if(m.status!=='concluded') return `<div class="ts-note">Player stats show at full time.</div>`;
+  const players = ((m.live || {}).players || []);
+  const cols = NRL_COLS.filter(([k]) => players.some(p => p[k]!=null));
+  if(!cols.length) return `<div class="ts-note">Player stats aren’t available for this match.</div>`;
+  const key = cols.some(([k]) => k===S.ptSort) ? S.ptSort : 'fantasyPointsTotal', team = S.ptTeam || 'all';
+  const all = players.filter(p => team==='all' || p.team===team).sort((a, b) => (Number(b[key])||0) - (Number(a[key])||0));
+  const shown = S.statsAll ? all : all.slice(0, TOP_N);
+  const fmt = (k, v) => v==null ? '' : /^stint/.test(k) ? clock(v) : /Rate$|Efficiency$/.test(k) ? `${v}%` : esc(Math.round(Number(v)*100)/100);
+  const head = `<tr><th class="pn">Player</th>${cols.map(([k, l, t]) =>
+    `<th><button class="${k===key ? 'on' : ''}" data-pt="${k}" data-tip="${esc(t)}" title="${esc(t)}">${esc(l)}</button></th>`).join('')}</tr>`;
+  const rows = shown.map(p => {
+    const t = teamInfo(p.team==='home' ? m.home_team : m.away_team);
+    return `<tr><td class="pn"><span class="jn" style="background:${t.c1};color:#fff">${esc(p.n ?? '')}</span><span class="nm">${esc(shortName(p.name))}</span></td>`+
+      cols.map(([k]) => `<td class="${k===key ? 'on' : ''}">${fmt(k, p[k])}</td>`).join('') + `</tr>`;
+  }).join('');
+  return `<div class="ptw"><table class="nt"><thead>${head}</thead><tbody>${rows}</tbody></table></div>` + moreBtn(all.length);
 }
 
 /* the worm, AFL-app style: margin (home − away) over game time as a stepped line.
@@ -2954,117 +3150,50 @@ function wormNrlHTML(m, events){
     `<div class="worm-tip hidden" id="worm-tip"><b></b><span></span></div>`+
   `</div>`;
 }
-// a score on the AFL worm: team and time, goal or behind, who kicked it and their tally at that point, their photo
+// a score on the worm: team and time, what it was, who scored and their tally at that point, their photo
 function wormEventTipHTML(m, e, upto){
-  const t = teamInfo(e.team==='home' ? m.home_team : m.away_team);
+  const sp = SP(m.sport), t = teamInfo(e.team==='home' ? m.home_team : m.away_team);
   const mine = upto.filter(x => x.player===e.player && x.team===e.team);
-  const g = mine.filter(x => x.type==='goal').length, b = mine.length - g;
+  const n = type => mine.filter(x => x.type===type).length;
+  const many = (k, one, more) => `${k} ${k===1 ? one : more}`;
+  const tally = m.sport==='nrl'
+    ? [[n('try'), 'Try', 'Tries'], [n('conversion'), 'Conversion', 'Conversions'], [n('penalty'), 'Penalty Goal', 'Penalty Goals'],
+       [n('field_goal') + n('field_goal_2'), 'Field Goal', 'Field Goals']].filter(([k]) => k).map(a => many(...a)).join(', ')
+    : `${many(n('goal'), 'Goal', 'Goals')}, ${many(n('behind'), 'Behind', 'Behinds')}`;
+  const when = m.sport==='nrl' ? nrlMin(eventGameSecs(m, e)) : scoreWhen(m, e);
   const i = e.player.indexOf(' ');
   const who = e.player==='Rushed' || i < 0 ? esc(e.player) : `${esc(e.player.slice(0, i))} <b>${esc(e.player.slice(i+1))}</b>`;
-  return `<div class="wt-top" style="background:${t.c1}">${t.known ? `<img src="${logoSrc(t.abbr, true)}" alt="" onerror="this.remove()">` : ''}${esc(scoreWhen(m, e))}</div>`+
-    `<div class="wt-body"><div class="wt-txt"><div class="k">${e.type==='goal' ? 'Goal' : 'Behind'}</div><div class="p">${who}</div>`+
-      (e.player==='Rushed' ? '' : `<div class="n">${g} Goal${g===1 ? '' : 's'}, ${b} Behind${b===1 ? '' : 's'}</div>`)+
+  return `<div class="wt-top" style="background:${t.c1}">${t.known ? `<img src="${logoSrc(t.abbr, true)}" alt="" onerror="this.remove()">` : ''}${esc(when)}</div>`+
+    `<div class="wt-body"><div class="wt-txt"><div class="k">${esc(sp.evLabel[e.type] || e.type)}</div><div class="p">${who}</div>`+
+      (e.player==='Rushed' ? '' : `<div class="n">${esc(tally)}</div>`)+
     `</div>${photoHTML(playerOf(m, e), 'wt-ph')}</div>`;
 }
 function wireWorm(m){
   const hit = $('worm-hit'); if(!hit || !_worm || _worm.m!==m) return;
   const svg = hit.ownerSVGElement, tip = $('worm-tip'), xl = $('worm-x');
-  const { pts, X, pw, hAb, aAb } = _worm;
-  const sp = SP(m.sport), n = sp.periods;
+  const { pts, X, pw } = _worm;
   const endF = pts[pts.length-1].f;
-  const margin = p => p.mg>0 ? `${hAb} by ${p.mg}` : p.mg<0 ? `${aAb} by ${-p.mg}` : 'Scores level';
+  const hide = () => { tip.classList.add('hidden'); xl.setAttribute('opacity','0'); };
+  // snaps to the nearest score (nothing to show before the first one)
   const show = ev => {
+    const cand = pts.filter(c => c.e);
+    if(!cand.length){ hide(); return; }
     const rc = svg.getBoundingClientRect();
-    const sx = (ev.clientX - rc.left) / rc.width * WORM.W;
-    let f = Math.min(endF, Math.max(0, (sx - _worm.l) / pw)), p = pts[0];
-    if(m.sport==='afl'){
-      // AFL snaps to the nearest score (nothing to show before the first one)
-      const cand = pts.filter(c => c.e);
-      if(!cand.length){ hide(); return; }
-      p = cand.reduce((best, c) => Math.abs(c.f - f) < Math.abs(best.f - f) ? c : best, cand[cand.length-1]);
-      f = p.f;
-    } else {
-      for(const c of pts){ if(c.f<=f) p = c; else break; }
-    }
-    xl.setAttribute('x1', X(f)); xl.setAttribute('x2', X(f)); xl.setAttribute('opacity', '.5');
-    if(p.e){
-      tip.className = 'worm-tip ev';
-      tip.innerHTML = wormEventTipHTML(m, p.e, pts.filter(c => c.e && c.f <= p.f).map(c => c.e));
-    } else {
-      // the end of the line is now; anywhere else, the game time under the pointer (its own quarter at a boundary)
-      const q = Math.min(n, Math.max(1, Math.ceil(f*n))), secs = (f*n-(q-1))*pts.lens[q-1];
-      const when = p.end ? (m.status==='concluded' ? 'Full Time' : liveClock(m)) : `${sp.per(q)} ${gameClock(m.sport, q, secs)}`;
-      tip.className = 'worm-tip';
-      tip.innerHTML = `<b>${esc(margin(p))}</b><span>${esc(when)} · ${p.h}–${p.a}</span>`;
-    }
+    const f0 = Math.min(endF, Math.max(0, ((ev.clientX - rc.left) / rc.width * WORM.W - _worm.l) / pw));
+    const p = cand.reduce((best, c) => Math.abs(c.f - f0) < Math.abs(best.f - f0) ? c : best, cand[cand.length-1]);
+    xl.setAttribute('x1', X(p.f)); xl.setAttribute('x2', X(p.f)); xl.setAttribute('opacity', '.5');
+    tip.className = 'worm-tip ev';
+    tip.innerHTML = wormEventTipHTML(m, p.e, cand.filter(c => c.f <= p.f).map(c => c.e));
     const wrap = svg.parentElement, wr = wrap.getBoundingClientRect(), half = tip.offsetWidth/2 || 60;
-    const px = X(f) / WORM.W * rc.width + (rc.left - wr.left);
+    const px = X(p.f) / WORM.W * rc.width + (rc.left - wr.left);
     tip.style.left = Math.max(half, Math.min(wrap.clientWidth-half, px)) + 'px';
     // its bottom edge sits just above the plot, so the line stays in view whatever the tooltip's height
     tip.style.top = 'auto';
     tip.style.bottom = (wr.bottom - hit.getBoundingClientRect().top + 4) + 'px';
   };
-  const hide = () => { tip.classList.add('hidden'); xl.setAttribute('opacity','0'); };
   hit.addEventListener('pointermove', show);
   hit.addEventListener('pointerdown', show);
   hit.addEventListener('pointerleave', hide);
-}
-// AFL: goal kickers with goals.behinds. NRL: try scorers with their try count.
-function scorersHTML(m, events){
-  const nrl = m.sport==='nrl';
-  const col = side => {
-    const by = new Map();
-    events.filter(e => e.team===side).forEach(e => {
-      const r = by.get(e.player) || { g:0, b:0 };
-      if(nrl){ if(e.type==='try') r.g++; }
-      else if(e.type==='goal') r.g++; else r.b++;
-      by.set(e.player, r);
-    });
-    const rows = [...by.entries()].filter(([,r]) => r.g>0).sort((a,b) => b[1].g-a[1].g || b[1].b-a[1].b);
-    const team = side==='home' ? m.home_team : m.away_team;
-    return `<div class="gk-col"><div class="gk-team">${teamBadge(team,'sm')}${esc(teamName(team))}</div>`+
-      (rows.length ? rows.map(([p,r]) => `<div class="gk-row"><span>${esc(p)}</span><span class="v">${nrl ? r.g : `${r.g}.${r.b}`}</span></div>`).join('')
-                   : `<div class="gk-none">${nrl ? 'No tries yet' : 'No goals yet'}</div>`)+`</div>`;
-  };
-  return `<div class="gk">${col('home')}${col('away')}</div>`;
-}
-function leadersRibHTML(m){
-  const stats = SP(m.sport).stats;
-  if(!stats.some(([k]) => k===S.statKey)) S.statKey = stats[0][0];     // e.g. switched from an AFL comp to NRL
-  return `<div class="mk-rib">${stats.map(([k,l]) =>
-    `<button class="rib${k===S.statKey?' active':''}" data-stat="${k}">${l}</button>`).join('')}</div>`;
-}
-function leadersRowsHTML(m){
-  const players = (m.live && m.live.players) || [];
-  const stats = SP(m.sport).stats;
-  const key = S.statKey, first = stats[0][0];
-  const sorted = players.slice().sort((a,b) => (b[key]||0)-(a[key]||0) || (b[first]||0)-(a[first]||0));
-  const shown = S.statsAll ? sorted : sorted.slice(0, TOP_N);
-  const sub = p => m.sport==='nrl'
-    ? (key==='rm' ? `${p.t} tackles` : `${p.rm}m run`)
-    : (key==='d' ? `${p.k} K · ${p.h} H` : key==='g' ? `${p.g}.${p.b}` : `${p.d} disposals`);
-  const rows = shown.map((p,i) => {
-    const team = p.team==='home' ? m.home_team : m.away_team;
-    return `<div class="st-row"><span class="rk">${i+1}</span>${teamBadge(team,'sm')}`+
-      `<span class="nm">${esc(p.name)}</span><span class="sub">${esc(sub(p))}</span><span class="val">${p[key]||0}</span></div>`;
-  }).join('');
-  const more = sorted.length>TOP_N
-    ? `<button class="mk-more" data-stats-all="1">${S.statsAll ? `View top ${TOP_N} players` : `View all ${sorted.length} players`}</button>` : '';
-  return rows + more;
-}
-function timelineHTML(m, events){
-  if(!events.length) return `<div class="tl-row"><span class="w">No scores yet</span></div>`;
-  const sp = SP(m.sport);
-  let h = 0, a = 0, html = '', q = 0;
-  events.forEach(e => {
-    if(e.q!==q){ q = e.q; html += `<div class="tl-q">${sp.perName} ${q}</div>`; }
-    const v = sp.pts[e.type] || 0;
-    if(e.team==='home') h += v; else a += v;
-    const team = e.team==='home' ? m.home_team : m.away_team;
-    html += `<div class="tl-row"><span class="t">${gameClock(m.sport, e.q, e.secs)}</span>${teamBadge(team,'sm')}`+
-      `<span class="w">${esc(e.player)}<small>${esc(sp.evLabel[e.type]||e.type)}</small></span><span class="s">${h}–${a}</span></div>`;
-  });
-  return html;
 }
 
 /* ════════ BUILDER PAD (Multi + Same Game Multi) ════════ */
