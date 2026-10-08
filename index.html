@@ -255,8 +255,8 @@
   .worm svg{display:block;width:100%;height:auto;touch-action:pan-y}
   .worm-tip{position:absolute;top:30px;pointer-events:none;background:var(--blue-deep);color:#fff;border-radius:6px;
     padding:6px 9px;box-shadow:0 4px 14px rgba(0,0,0,.3);white-space:nowrap;transform:translateX(-50%)}
-  .worm-tip b{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;line-height:1.05}
-  .worm-tip span{display:block;font-size:10px;color:rgba(255,255,255,.7)}
+  .worm-tip:not(.ev) b{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;line-height:1.05}
+  .worm-tip:not(.ev) span{display:block;font-size:10px;color:rgba(255,255,255,.7)}
   .gk{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#eef0f4;border-top:1px solid #eef0f4}
   .gk-col{background:#fff;padding:8px 11px}
   .gk-col .gk-team{display:flex;align-items:center;gap:7px;margin-bottom:6px;font-family:'Oswald',sans-serif;font-weight:700;
@@ -280,6 +280,56 @@
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .tl-row .w small{font-family:'Oswald',sans-serif;font-weight:600;font-size:9px;letter-spacing:.08em;color:var(--mid);margin-left:4px}
   .tl-row .s{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;color:var(--ink-soft)}
+  /* worm tooltip on a score: team strip with the time, what it was, who kicked it and their tally, their photo */
+  .worm-tip.ev{padding:0;overflow:hidden;background:#fff;color:var(--ink);width:210px;white-space:normal}
+  .wt-top{display:flex;align-items:center;gap:7px;padding:5px 9px;color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px}
+  .wt-top img{width:20px;height:20px;object-fit:contain}
+  .wt-body{display:flex;align-items:flex-end;gap:6px;padding:6px 0 0 9px;min-height:62px}
+  .wt-txt{flex:1;min-width:0;padding-bottom:7px}
+  .wt-txt .k{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;text-transform:uppercase}
+  .wt-txt .p{font-size:12px;line-height:1.2}
+  .wt-txt .p b{font-weight:800}
+  .wt-txt .n{font-size:10px;color:var(--mid);margin-top:2px}
+  .wt-ph{width:58px;height:58px;object-fit:cover;object-position:top;flex-shrink:0}
+  /* Box view: each team's goals.behinds at the end of every quarter */
+  .bx{display:grid;grid-template-columns:58px repeat(4,1fr);border-top:1px solid #eef0f4}
+  .bx > span{display:flex;align-items:center;justify-content:center;min-height:52px;border-left:1px solid #eef0f4;border-bottom:1px solid #eef0f4;
+    font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;font-variant-numeric:tabular-nums}
+  .bx > span.h{min-height:30px;background:#f0f3f8;color:var(--ink-soft);font-size:14px;border-left:none}
+  .bx > span.t{border-left:none}
+  /* last 10 scores: a row of cards, newest first */
+  .l10{display:flex;gap:8px;overflow-x:auto;padding:4px 11px 11px;scrollbar-width:none}
+  .l10::-webkit-scrollbar{display:none}
+  .l10-c{position:relative;flex-shrink:0;width:118px;height:140px;border-radius:8px;overflow:hidden;color:#fff;
+    background:linear-gradient(160deg,var(--c1) 55%,var(--c2) 140%)}
+  .l10-k{position:absolute;top:7px;left:7px;z-index:1;background:#fff;color:var(--ink);border-radius:11px;padding:2px 9px;
+    font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px}
+  .l10-p{position:absolute;left:0;right:0;bottom:30px;margin:auto;width:92px;height:92px;object-fit:cover;object-position:top}
+  .l10-n{position:absolute;left:0;right:0;bottom:0;padding:4px 7px 5px;background:rgba(0,0,0,.45);font-family:'Barlow Condensed',sans-serif;
+    font-weight:700;font-size:13px;line-height:1.1;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .l10-n small{display:block;font-family:system-ui,sans-serif;font-weight:400;font-size:10px;text-transform:none;opacity:.8}
+  .l10-none{padding:4px 11px 11px;font-size:12px;color:var(--mid)}
+  /* team stats: home value, label, away value, with a split bar underneath */
+  .ts-sec{padding:9px 11px 3px;font-family:'Oswald',sans-serif;font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--blue);border-top:1px solid #eef0f4}
+  .ts-r{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2px 8px;padding:5px 11px 7px}
+  .ts-r .v{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .ts-r .l{text-align:center;font-size:12px;color:var(--ink-soft)}
+  .ts-b{grid-column:1 / -1;display:flex;gap:3px;height:5px}
+  .ts-b i{display:block;border-radius:3px;min-width:3px}
+  .ts-note{padding:8px 11px 11px;font-size:12px;color:var(--mid);border-top:1px solid #eef0f4}
+  /* AFL player stats table */
+  .pt-h, .pt-r{display:grid;grid-template-columns:24px minmax(0,1fr) repeat(8,30px);align-items:center;gap:0 2px;padding:0 8px 0 11px}
+  .pt-h{border-top:1px solid #eef0f4;background:#f7f9fc}
+  .pt-h button{border:none;background:none;cursor:pointer;padding:8px 0;font-family:'Oswald',sans-serif;font-weight:600;font-size:11px;color:var(--ink-soft)}
+  .pt-h button.on{color:var(--blue);box-shadow:inset 0 -2px var(--blue)}
+  .pt-h .nm{grid-column:1 / 3;font-size:11px;color:var(--mid)}
+  .pt-r{border-top:1px solid #eef0f4;min-height:38px}
+  .pt-r .jn{width:22px;height:22px;border-radius:3px;display:flex;align-items:center;justify-content:center;
+    font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px}
+  .pt-r .nm{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:6px}
+  .pt-r .c{text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:14px;font-variant-numeric:tabular-nums}
+  .pt-r .c.on{font-weight:800;color:var(--blue)}
 
   /* ── bet rows (slip, my bets, key moments) ── */
   .bet{display:flex;align-items:flex-start;gap:9px;background:#fff;color:var(--ink);
@@ -1322,7 +1372,7 @@ function groups(){
           ['disposals','Disposals'],['stats','Player Stats'],['other','Other']];
 }
 // cards open by default — every other market starts collapsed
-const DEFAULT_OPEN = new Set(['h2h','spreads','stats-timeline','stats-goals','stats-leaders']);
+const DEFAULT_OPEN = new Set(['h2h','spreads','stats-timeline','stats-goals','stats-leaders','stats-last10','stats-team']);
 // cards with more rows than this show the TOP_N first
 const TOP_N = 10;
 // markets where only one outcome can land — an SGM may hold one leg per market
@@ -2506,7 +2556,7 @@ function marketParts(m, key, outs){
 function renderStats(m){
   const list = $('match-list');
   $('pane-match').classList.remove('locked');
-  const L = m.live, sp = SP(m.sport);
+  const L = m.live, sp = SP(m.sport), afl = m.sport==='afl';
   const sig = ['st', m.id, !isOpen(m) && !!L].join('|');
   if(list.dataset.sig===sig){ patchStats(list, m); return; }
   list.dataset.sig = sig;
@@ -2515,18 +2565,21 @@ function renderStats(m){
     return;
   }
   const events = statEvents(m);
-  // timeline card: the worm, or the same scoring as a table
+  // timeline card: the worm, or the scoring as a Box (AFL) / table (NRL)
   const toggle = `<div class="tl-toggle">`+
     `<button class="${S.tlView==='worm'?'active':''}" data-tl="worm" aria-label="Worm" title="Worm">`+
       `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15h3v-4h3v6h3V8h3v5h3v-3h3"/></svg></button>`+
-    `<button class="${S.tlView==='table'?'active':''}" data-tl="table" aria-label="Table" title="Table">`+
+    `<button class="${S.tlView==='table'?'active':''}" data-tl="table" aria-label="${afl ? 'Box' : 'Table'}" title="${afl ? 'Box' : 'Table'}">`+
       `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M3 10h18M3 14.5h18M9 5v14M15 5v14"/></svg></button>`+
   `</div>`;
   list.innerHTML = heroHTML(m) +
     cardHTML('stats-timeline', 'Timeline', toggle + `<div class="tl-body"></div>`) +
-    cardHTML('stats-goals', sp.scorersCard, `<div class="gk-body">${scorersHTML(m, events)}</div>`) +
-    cardHTML('stats-leaders', 'Player Stats', leadersRibHTML(m) + `<div class="st-rows"></div>`);
+    (afl ? cardHTML('stats-last10', 'Last 10 Scores', `<div class="l10-body"></div>`) +
+           cardHTML('stats-team', 'Team Stats', `<div class="ts-body"></div>`)
+         : cardHTML('stats-goals', sp.scorersCard, `<div class="gk-body">${scorersHTML(m, events)}</div>`)) +
+    cardHTML('stats-leaders', 'Player Stats', (afl ? playerTeamRibHTML(m) : leadersRibHTML(m)) + `<div class="st-rows"></div>`);
   paintTimeline(list, m, events);
+  if(afl){ paintLast10(list, m, events); paintTeamStats(list, m, events); }
   paintLeaders(list, m);
   wireCollapse(list);
   list.querySelectorAll('[data-tl]').forEach(b => b.addEventListener('click', () => {
@@ -2539,27 +2592,157 @@ function renderStats(m){
     list.querySelectorAll('.rib[data-stat]').forEach(x => x.classList.toggle('active', x===b));
     paintLeaders(list, m);
   }));
+  list.querySelectorAll('.rib[data-pteam]').forEach(b => b.addEventListener('click', () => {
+    S.ptTeam = b.dataset.pteam;
+    list.querySelectorAll('.rib[data-pteam]').forEach(x => x.classList.toggle('active', x===b));
+    paintLeaders(list, m);
+  }));
 }
 function paintTimeline(list, m, events){
   const el = list.querySelector('.tl-body'); if(!el) return;
-  el.innerHTML = S.tlView==='worm' ? wormHTML(m, events) : timelineHTML(m, events);
+  el.innerHTML = S.tlView==='worm' ? wormHTML(m, events) : m.sport==='afl' ? boxHTML(m) : timelineHTML(m, events);
   if(S.tlView==='worm') wireWorm(m);
+}
+function paintLast10(list, m, events){
+  const el = list.querySelector('.l10-body'); if(!el) return;
+  const row = el.querySelector('.l10'), x = row ? row.scrollLeft : 0;
+  el.innerHTML = last10HTML(m, events);
+  const now = el.querySelector('.l10'); if(now) now.scrollLeft = x;
+}
+function paintTeamStats(list, m, events){
+  const el = list.querySelector('.ts-body'); if(el) el.innerHTML = teamStatsHTML(m, events);
 }
 function paintLeaders(list, m){
   const el = list.querySelector('.st-rows'); if(!el) return;
-  el.innerHTML = leadersRowsHTML(m);
+  el.innerHTML = m.sport==='afl' ? aflPlayersHTML(m)
+    : m.status==='concluded' ? leadersRowsHTML(m) : `<div class="ts-note">Player stats show at full time.</div>`;
   const more = el.querySelector('.mk-more[data-stats-all]');
   if(more) more.addEventListener('click', () => { S.statsAll = !S.statsAll; paintLeaders(list, m); });
+  el.querySelectorAll('[data-pt]').forEach(b => b.addEventListener('click', () => { S.ptSort = b.dataset.pt; paintLeaders(list, m); }));
 }
-// a feed update: the hero's figures, the timeline, scorers and player stats, all where they are
+// a feed update: the hero's figures and every card's contents, all where they are
 function patchStats(list, m){
   patchHero(list, m);
   if(isOpen(m) || !m.live) return;
   const events = statEvents(m);
   const tip = $('worm-tip');
   if(S.tlView!=='worm' || !tip || tip.classList.contains('hidden')) paintTimeline(list, m, events);
+  if(m.sport==='afl'){ paintLast10(list, m, events); paintTeamStats(list, m, events); }
   const gk = list.querySelector('.gk-body'); if(gk) gk.innerHTML = scorersHTML(m, events);
   paintLeaders(list, m);
+}
+
+/* ── AFL stats blocks ── */
+function playerOf(m, e){ return ((m.live || {}).players || []).find(p => p.name===e.player && p.team===e.team) || null; }
+function photoHTML(p, cls){ return p && p.photo ? `<img class="${cls}" src="${esc(encodeURI(p.photo))}" alt="" onerror="this.remove()">` : ''; }
+function scoreWhen(m, e){ return `${SP(m.sport).per(e.q)} ${gameClock(m.sport, e.q, e.secs)}`; }
+// each team's goals.behinds at the end of every quarter played (the current one so far)
+function boxHTML(m){
+  const L = m.live || {};
+  const cell = v => Array.isArray(v) ? `${v[0]}.${v[1]}` : '';
+  let html = `<span class="h t"></span>` + [1,2,3,4].map(q => `<span class="h">Q${q}</span>`).join('');
+  ['home','away'].forEach(side => {
+    html += `<span class="t">${teamBadge(side==='home' ? m.home_team : m.away_team, 'sm')}</span>` +
+      [1,2,3,4].map(q => `<span>${cell((L[side] || [])[q-1])}</span>`).join('');
+  });
+  return `<div class="bx">${html}</div>`;
+}
+function last10HTML(m, events){
+  const ev = events.slice(-10).reverse();
+  if(!ev.length) return `<div class="l10-none">No scores yet.</div>`;
+  return `<div class="l10">` + ev.map(e => {
+    const t = teamInfo(e.team==='home' ? m.home_team : m.away_team);
+    return `<div class="l10-c" style="--c1:${t.c1};--c2:${t.c2}"><span class="l10-k">${e.type==='goal' ? 'Goal!' : 'Behind'}</span>`+
+      photoHTML(playerOf(m, e), 'l10-p') + `<div class="l10-n">${esc(e.player)}<small>${esc(scoreWhen(m, e))}</small></div></div>`;
+  }).join('') + `</div>`;
+}
+// from the scores alone (so exact during play): time in front, last goal, biggest lead, goals / behinds / rushed
+function scoringInfo(m, events){
+  const L = m.live || {}, sp = SP(m.sport), lens = periodLens(m, events), done = m.status==='concluded';
+  const abs = (q, secs) => lens.slice(0, q-1).reduce((a, b) => a + b, 0) + secs;
+  const end = done ? abs(sp.periods + 1, 0) : abs(L.q || 1, liveSecs(m));
+  const side = () => ({ front:0, last:null, lead:null, g:0, b:0, ru:0 });
+  const s = { home:side(), away:side() };
+  let t = 0, mg = 0;
+  events.forEach(e => {
+    const te = abs(e.q, e.secs);
+    if(mg>0) s.home.front += te - t; else if(mg<0) s.away.front += te - t;
+    t = te;
+    const x = s[e.team];
+    if(e.type==='goal'){ x.g++; x.last = e; mg += e.team==='home' ? 6 : -6; }
+    else { x.b++; if(e.player==='Rushed') x.ru++; mg += e.team==='home' ? 1 : -1; }
+    if(mg>0 && (!s.home.lead || mg > s.home.lead.pts)) s.home.lead = { pts:mg, e };
+    if(mg<0 && (!s.away.lead || -mg > s.away.lead.pts)) s.away.lead = { pts:-mg, e };
+  });
+  if(mg>0) s.home.front += Math.max(0, end - t); else if(mg<0) s.away.front += Math.max(0, end - t);
+  return s;
+}
+function teamStatsHTML(m, events){
+  const L = m.live || {}, F = L.final, I = L.inter, s = scoringInfo(m, events);
+  const hc = teamInfo(m.home_team).c1, ac = teamInfo(m.away_team).c1;
+  const row = (label, hv, av, hn, an) => {
+    const bar = hn==null ? '' : `<div class="ts-b"><i style="flex:${hn || (an ? 0 : 1)};background:${hc}"></i><i style="flex:${an || (hn ? 0 : 1)};background:${ac}"></i></div>`;
+    return `<div class="ts-r"><span class="v">${hv}</span><span class="l">${label}</span><span class="v">${av}</span>${bar}</div>`;
+  };
+  const num = (label, k) => row(label, F.home[k], F.away[k], F.home[k], F.away[k]);
+  const pct = (label, h, a) => row(label, `${h}%`, `${a}%`, h, a);
+  const sec = (title, rows) => rows ? `<div class="ts-sec">${title}</div>${rows}` : '';
+  const when = (x, f) => x ? esc(f(x)) : '—';
+  const posts = x => (x.lp || 0) + (x.rp || 0);
+  const goalEff = (side, x) => x.i50 ? Math.round(s[side].g / x.i50 * 1000) / 10 : 0;
+  let html = sec('Scoring',
+    row('Time in front', clock(s.home.front), clock(s.away.front), s.home.front, s.away.front) +
+    row('Last goal', when(s.home.last, e => scoreWhen(m, e)), when(s.away.last, e => scoreWhen(m, e))) +
+    row('Biggest lead', when(s.home.lead, x => `${x.pts} pts, ${scoreWhen(m, x.e)}`), when(s.away.lead, x => `${x.pts} pts, ${scoreWhen(m, x.e)}`)) +
+    row('Goals', s.home.g, s.away.g, s.home.g, s.away.g) +
+    row('Behinds', s.home.b, s.away.b, s.home.b, s.away.b) +
+    row('Rushed behinds', s.home.ru, s.away.ru, s.home.ru, s.away.ru) +
+    (F ? row('Hit the post', posts(F.home), posts(F.away), posts(F.home), posts(F.away)) +
+         row('Touched', F.home.tch, F.away.tch, F.home.tch, F.away.tch) : ''));
+  if(F){
+    html += sec('Disposals', num('Disposals', 'd') + num('Kicks', 'k') + num('Handballs', 'h') + num('Inside 50s', 'i50') +
+        pct('Disposal efficiency', F.home.de, F.away.de) + pct('Goal efficiency', goalEff('home', F.home), goalEff('away', F.away)) +
+        num('Frees for', 'ff')) +
+      sec('Stoppages', num('Hitouts', 'ho') + num('Total clearances', 'cl') + num('Centre clearances', 'ccl') + num('Stoppage clearances', 'scl')) +
+      sec('Possessions', num('Contested possessions', 'cp') + num('Uncontested possessions', 'up') + num('Turnovers', 'to') +
+        num('Intercepts', 'it') + pct('Time in possession', F.home.poss, F.away.poss)) +
+      sec('Marks', num('Marks', 'm') + num('Marks inside 50', 'mi50') + num('Contested marks', 'cm')) +
+      sec('Defence', num('Tackles', 't') + num('Tackles inside 50', 'ti50'));
+  }
+  // interchanges arrive a quarter at a time
+  let ic = '';
+  if(I && (I.home || []).length){
+    const h = I.home.reduce((a, b) => a + b, 0), a = (I.away || []).reduce((x, y) => x + y, 0), cap = I.cap ? `/${I.cap}` : '';
+    ic = row(`Interchanges${I.home.length < 4 ? ` (to Q${I.home.length})` : ''}`, `${h}${cap}`, `${a}${cap}`, h, a);
+  }
+  html += sec('General', (F ? num('Bounces', 'bo') + num('One percenters', 'op') : '') + ic);
+  if(!F) html += `<div class="ts-note">The rest of the team stats arrive at full time.</div>`;
+  return html;
+}
+// All / home / away for the player table
+function playerTeamRibHTML(m){
+  const cur = S.ptTeam || 'all';
+  const b = (k, l) => `<button class="rib${cur===k ? ' active' : ''}" data-pteam="${k}">${esc(l)}</button>`;
+  return `<div class="mk-rib">${b('all', 'All')}${b('home', teamInfo(m.home_team).abbr)}${b('away', teamInfo(m.away_team).abbr)}</div>`;
+}
+const PT_COLS = [['af','AF'],['gb','G.B'],['d','D'],['k','K'],['h','H'],['m','M'],['t','T'],['ho','HO']];
+function aflPlayersHTML(m){
+  if(m.status!=='concluded') return `<div class="ts-note">Player stats show at full time.</div>`;
+  const key = PT_COLS.some(([k]) => k===S.ptSort) ? S.ptSort : 'af', team = S.ptTeam || 'all';
+  const val = (p, k) => k==='gb' ? (p.g||0)*1000 + (p.b||0) : Number(p[k])||0;
+  const all = ((m.live || {}).players || []).filter(p => team==='all' || p.team===team)
+    .sort((a, b) => val(b, key) - val(a, key) || val(b, 'af') - val(a, 'af'));
+  const shown = S.statsAll ? all : all.slice(0, TOP_N);
+  const short = n => { const i = n.indexOf(' '); return i > 0 ? `${n[0]}.${n.slice(i+1)}` : n; };
+  const head = `<div class="pt-h"><span class="nm">Player</span>${PT_COLS.map(([k, l]) => `<button class="${k===key ? 'on' : ''}" data-pt="${k}">${l}</button>`).join('')}</div>`;
+  const rows = shown.map(p => {
+    const t = teamInfo(p.team==='home' ? m.home_team : m.away_team);
+    return `<div class="pt-r"><span class="jn" style="background:${t.c1};color:#fff">${esc(p.n ?? '')}</span><span class="nm">${esc(short(p.name))}</span>`+
+      PT_COLS.map(([k]) => `<span class="c${k===key ? ' on' : ''}">${k==='gb' ? `${p.g||0}.${p.b||0}` : esc(p[k] ?? 0)}</span>`).join('') + `</div>`;
+  }).join('');
+  const more = all.length>TOP_N
+    ? `<button class="mk-more" data-stats-all="1">${S.statsAll ? `View top ${TOP_N} players` : `View all ${all.length} players`}</button>` : '';
+  return head + rows + more;
 }
 
 /* the worm, AFL-app style: margin (home − away) over game time as a stepped line.
@@ -2589,7 +2772,7 @@ function wormPoints(m, events){
   events.forEach(e => {
     const v = sp.pts[e.type] || 0;
     if(e.team==='home') h += v; else a += v;
-    pts.push({ f:at(e.q, e.secs), mg:h-a, h, a });
+    pts.push({ f:at(e.q, e.secs), mg:h-a, h, a, e });
   });
   const endF = m.status==='concluded' ? 1 : at(L.q||1, liveSecs(m));
   pts.push({ f:Math.max(endF, pts[pts.length-1].f), mg:h-a, h, a, end:true });
@@ -2645,7 +2828,9 @@ function wormHTML(m, events){
   const band = (per, y) => P.map(q => {
     const v = per && per[q-1];
     if(v==null) return '';
-    return txt(colMid(q), y, Array.isArray(v) ? `${v[0]}.${v[1]}` : v, 'text-anchor="middle" font-size="17" font-weight="700" font-family="Barlow Condensed,sans-serif" fill="#16203a"');
+    // goals.behinds with the total in bold, e.g. 6.1 (37)
+    const s = Array.isArray(v) ? `<tspan font-weight="500">${v[0]}.${v[1]} </tspan><tspan font-weight="800">(${v[0]*6 + v[1]})</tspan>` : v;
+    return txt(colMid(q), y, s, 'text-anchor="middle" font-size="15" font-family="Barlow Condensed,sans-serif" fill="#16203a"');
   }).join('');
   svg += band(live.home, B/2+6) + band(live.away, H-B/2+6);
   // margin scale on the right — absolute values, either side of zero
@@ -2722,26 +2907,51 @@ function wormNrlHTML(m, events){
     `<div class="worm-tip hidden" id="worm-tip"><b></b><span></span></div>`+
   `</div>`;
 }
+// a score on the AFL worm: team and time, goal or behind, who kicked it and their tally at that point, their photo
+function wormEventTipHTML(m, e, upto){
+  const t = teamInfo(e.team==='home' ? m.home_team : m.away_team), code = curSport();
+  const mine = upto.filter(x => x.player===e.player && x.team===e.team);
+  const g = mine.filter(x => x.type==='goal').length, b = mine.length - g;
+  const i = e.player.indexOf(' ');
+  const who = e.player==='Rushed' || i < 0 ? esc(e.player) : `${esc(e.player.slice(0, i))} <b>${esc(e.player.slice(i+1))}</b>`;
+  return `<div class="wt-top" style="background:${t.c1}">${t.known ? `<img src="assets/teams/${code}/${t.abbr}.svg" alt="" onerror="this.remove()">` : ''}${esc(scoreWhen(m, e))}</div>`+
+    `<div class="wt-body"><div class="wt-txt"><div class="k">${e.type==='goal' ? 'Goal' : 'Behind'}</div><div class="p">${who}</div>`+
+      (e.player==='Rushed' ? '' : `<div class="n">${g} Goal${g===1 ? '' : 's'}, ${b} Behind${b===1 ? '' : 's'}</div>`)+
+    `</div>${photoHTML(playerOf(m, e), 'wt-ph')}</div>`;
+}
 function wireWorm(m){
   const hit = $('worm-hit'); if(!hit || !_worm || _worm.m!==m) return;
   const svg = hit.ownerSVGElement, tip = $('worm-tip'), xl = $('worm-x');
   const { pts, X, pw, hAb, aAb } = _worm;
   const sp = SP(m.sport), n = sp.periods;
   const endF = pts[pts.length-1].f;
+  const margin = p => p.mg>0 ? `${hAb} by ${p.mg}` : p.mg<0 ? `${aAb} by ${-p.mg}` : 'Scores level';
   const show = ev => {
     const rc = svg.getBoundingClientRect();
     const sx = (ev.clientX - rc.left) / rc.width * WORM.W;
-    const f = Math.min(endF, Math.max(0, (sx - _worm.l) / pw));
-    let p = pts[0];
-    for(const q of pts){ if(q.f<=f) p = q; else break; }
+    let f = Math.min(endF, Math.max(0, (sx - _worm.l) / pw)), p = pts[0];
+    if(m.sport==='afl'){
+      // AFL snaps to the nearest score, or to "now" at the end of the line
+      const cand = pts.filter(c => c.e || c.end);
+      p = cand.reduce((best, c) => Math.abs(c.f - f) < Math.abs(best.f - f) ? c : best, cand[cand.length-1]);
+      f = p.f;
+    } else {
+      for(const c of pts){ if(c.f<=f) p = c; else break; }
+    }
     xl.setAttribute('x1', X(f)); xl.setAttribute('x2', X(f)); xl.setAttribute('opacity', '.5');
-    const q = Math.min(n, Math.floor(f*n)+1), secs = (f*n-(q-1))*pts.lens[q-1];
-    tip.querySelector('b').textContent = p.mg>0 ? `${hAb} by ${p.mg}` : p.mg<0 ? `${aAb} by ${-p.mg}` : 'Scores level';
-    tip.querySelector('span').textContent = `${sp.per(q)} ${gameClock(m.sport, q, secs)} · ${p.h}–${p.a}`;
-    tip.classList.remove('hidden');
-    const wrap = svg.parentElement;
+    if(p.e){
+      tip.className = 'worm-tip ev';
+      tip.innerHTML = wormEventTipHTML(m, p.e, pts.filter(c => c.e && c.f <= p.f).map(c => c.e));
+    } else {
+      // the end of the line is now; anywhere else, the game time under the pointer (its own quarter at a boundary)
+      const q = Math.min(n, Math.max(1, Math.ceil(f*n))), secs = (f*n-(q-1))*pts.lens[q-1];
+      const when = p.end ? (m.status==='concluded' ? 'Full Time' : liveClock(m)) : `${sp.per(q)} ${gameClock(m.sport, q, secs)}`;
+      tip.className = 'worm-tip';
+      tip.innerHTML = `<b>${esc(margin(p))}</b><span>${esc(when)} · ${p.h}–${p.a}</span>`;
+    }
+    const wrap = svg.parentElement, half = tip.offsetWidth/2 || 60;
     const px = X(f) / WORM.W * rc.width + (rc.left - wrap.getBoundingClientRect().left);
-    tip.style.left = Math.max(60, Math.min(wrap.clientWidth-60, px)) + 'px';
+    tip.style.left = Math.max(half, Math.min(wrap.clientWidth-half, px)) + 'px';
   };
   const hide = () => { tip.classList.add('hidden'); xl.setAttribute('opacity','0'); };
   hit.addEventListener('pointermove', show);
