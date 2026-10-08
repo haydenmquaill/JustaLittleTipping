@@ -253,7 +253,7 @@
   .tl-toggle svg{width:20px;height:20px}
   .worm-wrap{position:relative;padding:0 8px 10px}
   .worm svg{display:block;width:100%;height:auto;touch-action:pan-y}
-  .worm-tip{position:absolute;top:30px;pointer-events:none;background:var(--blue-deep);color:#fff;border-radius:6px;
+  .worm-tip{position:absolute;z-index:5;pointer-events:none;background:var(--blue-deep);color:#fff;border-radius:6px;
     padding:6px 9px;box-shadow:0 4px 14px rgba(0,0,0,.3);white-space:nowrap;transform:translateX(-50%)}
   .worm-tip:not(.ev) b{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;line-height:1.05}
   .worm-tip:not(.ev) span{display:block;font-size:10px;color:rgba(255,255,255,.7)}
@@ -2931,8 +2931,9 @@ function wireWorm(m){
     const sx = (ev.clientX - rc.left) / rc.width * WORM.W;
     let f = Math.min(endF, Math.max(0, (sx - _worm.l) / pw)), p = pts[0];
     if(m.sport==='afl'){
-      // AFL snaps to the nearest score, or to "now" at the end of the line
-      const cand = pts.filter(c => c.e || c.end);
+      // AFL snaps to the nearest score (nothing to show before the first one)
+      const cand = pts.filter(c => c.e);
+      if(!cand.length){ hide(); return; }
       p = cand.reduce((best, c) => Math.abs(c.f - f) < Math.abs(best.f - f) ? c : best, cand[cand.length-1]);
       f = p.f;
     } else {
@@ -2949,9 +2950,11 @@ function wireWorm(m){
       tip.className = 'worm-tip';
       tip.innerHTML = `<b>${esc(margin(p))}</b><span>${esc(when)} · ${p.h}–${p.a}</span>`;
     }
-    const wrap = svg.parentElement, half = tip.offsetWidth/2 || 60;
-    const px = X(f) / WORM.W * rc.width + (rc.left - wrap.getBoundingClientRect().left);
+    const wrap = svg.parentElement, wr = wrap.getBoundingClientRect(), half = tip.offsetWidth/2 || 60;
+    const px = X(f) / WORM.W * rc.width + (rc.left - wr.left);
     tip.style.left = Math.max(half, Math.min(wrap.clientWidth-half, px)) + 'px';
+    // sits above the plot so the line stays in view
+    tip.style.top = (hit.getBoundingClientRect().top - wr.top - tip.offsetHeight - 4) + 'px';
   };
   const hide = () => { tip.classList.add('hidden'); xl.setAttribute('opacity','0'); };
   hit.addEventListener('pointermove', show);
