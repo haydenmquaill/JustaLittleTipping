@@ -458,6 +458,10 @@
   .lad-tag{position:absolute;left:0;bottom:-9px;padding:1px 7px;font-size:9px;font-weight:800;color:#fff;border-radius:0 8px 8px 0;line-height:14px}
   .lad-tag.top{background:var(--err)} .lad-tag.wild{background:var(--blue)}
   .lad-lgd{align-items:center}
+  .lad-step{display:flex;align-items:center;gap:4px;background:#fff;border-radius:18px;padding:3px 6px}
+  .lad-step span{min-width:84px;text-align:center;font-size:14px;font-weight:700;color:var(--ink)}
+  .lad-step button{border:none;background:none;font-size:22px;line-height:1;width:30px;height:30px;cursor:pointer;color:var(--ink)}
+  .lad-step button:disabled{color:#c4ccdb;cursor:default}
   .lad-lgd span{display:inline-flex;align-items:center;gap:5px}
   .lad-ln{width:16px;height:2px;display:inline-block}
   .lad-ln.top{background:var(--err)} .lad-ln.wild{background:var(--blue)}
@@ -4118,32 +4122,38 @@ function paintLadder(list, lad, have, sel){
   renderNav2();
   const seasons = [...new Set(have.map(x => x.season))];
   const rounds = have.filter(x => x.season===sel.season).map(x => x.round);
+  const cur = lad ? lad.round : sel.round, at = rounds.indexOf(cur);      // rounds are newest first
+  const roundSel = nrl
+    ? `<div class="lad-step"><button type="button" data-rnd="${rounds[at+1] ?? ''}"${at+1 < rounds.length ? '' : ' disabled'} aria-label="Previous round">‹</button>`+
+      `<span>${roundName(cur)}</span><button type="button" data-rnd="${rounds[at-1] ?? ''}"${at > 0 ? '' : ' disabled'} aria-label="Next round">›</button></div>`
+    : `<label><span>Round</span><select id="lad-round">${rounds.map(r => `<option value="${r}"${r===cur ? ' selected' : ''}>${roundName(r)}</option>`).join('')}</select></label>`;
   const selects = have.length ? `<div class="lad-sel">`+
     `<label><span>Season</span><select id="lad-season">${seasons.map(s => `<option value="${s}"${s===sel.season ? ' selected' : ''}>${s}</option>`).join('')}</select></label>`+
-    `<label><span>Round</span><select id="lad-round">${rounds.map(r => `<option value="${r}"${r===(lad ? lad.round : sel.round) ? ' selected' : ''}>${roundName(r)}</option>`).join('')}</select></label></div>` : '';
+    roundSel + `</div>` : '';
   if(!lad || !lad.rows || !lad.rows.length){ list.innerHTML = selects + '<div class="empty">The ladder appears once the season is under way.</div>'; wireLadderSel(list, have); return; }
   const cols = nrl
-    ? [['played','P'],['pts','Pts'],['won','W'],['drawn','D'],['lost','L'],['byes','B'],['pf','PF'],['pa','PA'],['diff','PD']]
+    ? [['played','Played'],['pts','Points'],['won','Wins'],['drawn','Drawn'],['lost','Lost'],['byes','Byes'],['pf','For'],['pa','Against'],['diff','Diff.'],
+       ['home','Home'],['away','Away'],['fs','Form']]
     : [['played','P'],['pts','Pts'],['pct','%'],['won','W'],['lost','L'],['drawn','D'],['pf','PF'],['pa','PA']];
-  const fmt = (k, v) => v==null ? '' : k==='pct' ? Number(v).toFixed(1) : k==='diff' && v>0 ? '+'+v : esc(v);
-  const head = `<tr><th class="pn">Club</th>${cols.map(([k, l]) => `<th class="${k==='pts' ? 'pts' : ''}">${l}</th>`).join('')}<th>Form</th><th>Up Next</th></tr>`;
+  const fmt = (k, v) => v==null || v==='' ? '—' : k==='pct' ? Number(v).toFixed(1) : esc(v);
+  const head = `<tr><th class="pn">${nrl ? 'Team' : 'Club'}</th>${cols.map(([k, l]) => `<th class="${k==='pts' ? 'pts' : ''}">${l}</th>`).join('')}`+
+    (nrl ? '' : '<th>Form</th>') + `<th>${nrl ? 'Next' : 'Up Next'}</th></tr>`;
   const rows = lad.rows.map(r => {
     const mv = r.move>0 ? '<i class="lad-mv up">▲</i>' : r.move<0 ? '<i class="lad-mv down">▼</i>' : '<i class="lad-mv">–</i>';
     const form = (r.form || []).slice(-5).map(x => `<i class="fc ${x==='W' ? 'w' : x==='L' ? 'l' : x==='D' ? 'd' : 'b'}">${esc(x)}</i>`).join('');
-    const next = r.next ? `${teamBadge(r.next, 'sm')}<span>${esc(teamInfo(r.next).abbr)}</span>` : '';
+    const next = r.next ? teamBadge(r.next, 'sm') + (nrl ? '' : `<span>${esc(teamInfo(r.next).abbr)}</span>`) : '';
     // the last row of the finals / wildcard zone carries the line, and its fixed club cell the label, so both stay in view
     const end = r.pos===f.top ? 'top' : f.wild && r.pos===f.wild ? 'wild' : '';
     const tag = end ? `<span class="lad-tag ${end}">${end==='top' ? `Top ${f.top}` : 'WC'}</span>` : '';
     return `<tr${end ? ` class="lad-end ${end}"` : ''}><td class="pn"><span class="lad-pos">${r.pos}</span>${mv}${teamBadge(r.team, 'sm')}<span class="nm">${esc(teamName(r.team))}</span>${tag}</td>`+
       cols.map(([k]) => `<td class="${k==='pts' ? 'pts' : ''}">${fmt(k, r[k])}</td>`).join('')+
-      `<td><span class="lad-form">${form}</span></td><td><span class="lad-next">${next}</span></td></tr>`;
+      (nrl ? '' : `<td><span class="lad-form">${form}</span></td>`) + `<td><span class="lad-next">${next}</span></td></tr>`;
   }).join('');
   const legend = `<div class="lgd lad-lgd"><span><i class="lad-ln top"></i><b>Top ${f.top}:</b> ${nrl ? 'Qualify for the finals' : 'Qualify to play finals'}</span>`+
     (f.wild ? `<span><i class="lad-ln wild"></i><b>WC:</b> ${f.top+1}th–${f.wild}th play Wildcard Finals</span>` : '')+
-    `<span><i class="fc w">W</i> Won</span><span><i class="fc l">L</i> Lost</span><span><i class="fc d">D</i> Drawn</span>${nrl ? '<span><i class="fc b">B</i> Bye</span>' : ''}</div>`+
-    legendHTML(nrl
-      ? [['P','Played'],['Pts','Points'],['W','Won'],['D','Drawn'],['L','Lost'],['B','Byes'],['PF','Points For'],['PA','Points Against'],['PD','Points Difference'],['Form','Last 5 Games']]
-      : [['P','Played'],['Pts','Points'],['%','Percentage'],['W','Won'],['L','Lost'],['D','Drawn'],['PF','Points For'],['PA','Points Against'],['Form','Last 5 Games']]);
+    (nrl ? `<span><b>Form:</b> wins - losses, last 5 games</span></div>`
+         : `<span><i class="fc w">W</i> Won</span><span><i class="fc l">L</i> Lost</span><span><i class="fc d">D</i> Drawn</span><span><i class="fc b">B</i> Bye</span></div>`+
+           legendHTML([['P','Played'],['Pts','Points'],['%','Percentage'],['W','Won'],['L','Lost'],['D','Drawn'],['PF','Points For'],['PA','Points Against'],['Form','Last 5 Games']]));
   list.innerHTML = selects + `<div class="lad"><div class="ptw"><table class="nt ladt"><thead>${head}</thead><tbody>${rows}</tbody></table></div>${legend}</div>`;
   wireLadderSel(list, have);
 }
@@ -4155,6 +4165,7 @@ function wireLadderSel(list, have){
     go(s, latest ? latest.round : null);
   });
   if(round) round.addEventListener('change', () => go(Number(season.value), Number(round.value)));
+  list.querySelectorAll('[data-rnd]').forEach(b => b.addEventListener('click', () => { if(b.dataset.rnd!=='') go(Number(season.value), Number(b.dataset.rnd)); }));
 }
 
 /* ════════ LEADERBOARD ════════

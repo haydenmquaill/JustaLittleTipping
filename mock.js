@@ -559,9 +559,11 @@ window.createMockApi = function(page){
           const avg = nrl ? 21 : 82, swing = nrl ? 6 : 16;
           const pf = Math.round(played*(avg + (strength-.5)*swing*2 + rnd()*4));
           const pa = Math.round(played*(avg - (strength-.5)*swing*2 + rnd()*4));
-          const form = results.slice(-5);
+          const form = results.slice(-5), hw = Math.ceil(won/2), hl = Math.floor(lost/2);
+          const rec = (w, l) => `${w} - ${l}`;
           return { team, played, won, lost, drawn, byes, pf, pa, pct:pa ? Math.round(pf/pa*1000)/10 : 0, diff:pf-pa,
-            pts:won*(nrl?2:4) + drawn*(nrl?1:2) + byes*2, form };
+            pts:won*(nrl?2:4) + drawn*(nrl?1:2) + byes*2, form,
+            ...(nrl ? { home:rec(hw, hl), away:rec(won - hw, lost - hl), fs:rec(form.filter(x => x==='W').length, form.filter(x => x==='L').length) } : {}) };
         }).sort((a,b) => b.pts-a.pts || (nrl ? b.diff-a.diff : b.pct-a.pct));
         rows.forEach((r,i) => {
           r.pos = i+1;
