@@ -818,6 +818,7 @@
     color:var(--ink);background:var(--offwhite);text-align:center}
   .gate input:focus{outline:none;border-color:var(--blue)}
   .gate{overflow-y:auto;padding-top:calc(24px + env(safe-area-inset-top))}
+  .gate > .card{margin:auto}          /* centred, but a card taller than the screen scrolls from its top */
   .gate .card.wide{max-width:420px;text-align:left;padding:26px 22px}
   .gate .card.wide h2{text-align:center}
   .gate .card.wide > p{text-align:center}
@@ -1201,15 +1202,15 @@ const MOCK = new URLSearchParams(location.search).has('mock');
 /* ════════ state ════════ */
 const SPORT = 'afl';                // default code when a comp doesn't say
 const LEG_CAP = 15;                 // hard ceiling on multi legs — each comp picks its own max (rules.max_legs)
-const QLEN = 1800;                  // nominal AFL quarter length (s) — the worm's time axis
+const QLEN = 1800;                  // nominal AFL quarter length (s), when the feed doesn't give the real one
 /* everything that differs between the codes. A comp is one sport; SP() gives its profile. */
 const SPORT_INFO = {
-  afl:{ label:'AFL', periods:4, periodLen:QLEN, per:q => 'Q'+q, perName:'Quarter',
+  afl:{ label:'AFL', periods:4, periodLen:QLEN, per:q => 'Q'+q, perName:'Quarter', breaks:['Quarter Time','Half Time','Three Quarter Time'],
         periodsTitle:'Quarters & Halves', scorersTitle:'Goal Scorers', scorersCard:'Goal Kickers', wormStep:20,
         stats:[['d','Disposals'],['k','Kicks'],['h','Handballs'],['m','Marks'],['t','Tackles'],['g','Goals'],['af','Fantasy']],
         pts:{ goal:6, behind:1 }, evLabel:{ goal:'GOAL', behind:'BEHIND' },
         finals:{ top:6, wild:10 } },     // from 2026: top 6 straight in, 7th–10th play the Wildcard Round
-  nrl:{ label:'NRL', periods:2, periodLen:2400, per:q => q+'H', perName:'Half',
+  nrl:{ label:'NRL', periods:2, periodLen:2400, fixedLen:true, per:q => q+'H', perName:'Half', breaks:['Half Time'],
         periodsTitle:'Halves', scorersTitle:'Try Scorers', scorersCard:'Try Scorers', wormStep:12,
         stats:[['rm','Run Metres'],['t','Tackles'],['tr','Tries'],['lb','Line Breaks'],['tb','Tackle Busts'],['o','Offloads']],
         pts:{ try:4, conversion:2, penalty:2, field_goal:1, field_goal_2:2 },
@@ -1222,12 +1223,22 @@ function SP(sport){ return SPORT_INFO[sport || curSport()] || SPORT_INFO.afl; }
 function gameClock(sport, q, secs){ return sport==='nrl' ? clock((q-1)*SPORT_INFO.nrl.periodLen + secs) : clock(secs); }
 // the hero's clock pill. The feed only sends the clock along with other changes, so while it's
 // running the page counts on from clockSecs (read at 'at', epoch secs) every second itself
+function liveSecs(m){
+  const L = m.live || {}, sp = SP(m.sport);
+  let s = L.clockSecs || 0;
+  if(L.running && L.at) s = Math.min(s + Math.max(0, Date.now()/1000 - L.at), sp.periodLen*1.25);
+  return s;
+}
+// the feed stops the clock (running:false) at the breaks
+function atBreak(m){
+  const L = m.live || {};
+  return m.status==='live' && L.running===false && L.q < SP(m.sport).periods;
+}
 function liveClock(m){
   const L = m.live || {}, sp = SP(m.sport);
   if(!L.q) return 'In-Play';
-  let s = L.clockSecs || 0;
-  if(L.running && L.at) s = Math.min(s + Math.max(0, Date.now()/1000 - L.at), sp.periodLen*1.25);
-  return `${sp.per(L.q)} ${gameClock(m.sport, L.q, Math.floor(s))}`;
+  if(atBreak(m)) return sp.breaks[L.q-1];
+  return `${sp.per(L.q)} ${gameClock(m.sport, L.q, Math.floor(liveSecs(m)))}`;
 }
 const SPORTS_VIEWS = ['round','match','mybets'];
 const S = {
@@ -1497,15 +1508,22 @@ async function showMissedUnlocks(){
 }
 function teamsOf(userId){ return (S.profiles[userId] || {}).teams || {}; }
 // fetch profiles we haven't seen yet; resolves true if anything new came in
+const _profLoading = {};             // user id → the fetch it's waiting on
 async function ensureProfiles(ids, force=false){
-  const need = [...new Set(ids.filter(id => id && (force || !(id in S.profiles))))];
-  if(!need.length) return false;
+  const need = [...new Set(ids.filter(id => id && (force || !(id in S.profiles) || (S.profiles[id] && S.profiles[id].partial))))];
+  // anyone already being fetched by another call: wait for that rather than painting without them
+  const pending = [...new Set(ids.filter(id => _profLoading[id] && !need.includes(id)).map(id => _profLoading[id]))];
+  if(!need.length){ await Promise.all(pending); return false; }
   need.forEach(id => { if(!(id in S.profiles)) S.profiles[id] = null; });     // don't ask twice while it loads
+  const load = api.profiles(need), waiting = load.catch(() => {});
+  need.forEach(id => { _profLoading[id] = waiting; });
   try{
-    const got = await api.profiles(need);
+    const got = await load;
     need.forEach(id => { S.profiles[id] = got[id] || null; });
+    await Promise.all(pending);
     return need.some(id => S.profiles[id]);
   }catch(e){ console.warn(e); return false; }
+  finally{ need.forEach(id => { if(_profLoading[id]===waiting) delete _profLoading[id]; }); }
 }
 
 /* ════════ helpers ════════ */
@@ -1747,12 +1765,10 @@ async function boot(){
     if(api.recovering){ api.recovering = false; showAuth('reset'); return; }   // arrived from a password-reset email
     S.season = await api.season();
     S.comps = await api.myComps();
-    // links from notifications: ?comp=<id>&chat=<room> / &overview=1, or ?achievements=1
     const q = new URLSearchParams(location.search);
-    const link = { comp:q.get('comp'), chat:q.get('chat'), overview:q.has('overview'), achievements:q.has('achievements'), view:q.get('view'),
-                   thread:q.get('thread'), friends:q.has('friends'), player:q.get('player') };
+    const link = readLink(q);
     if(Object.values(link).some(Boolean)){
-      ['comp','chat','overview','achievements','view','thread','friends','player'].forEach(k => q.delete(k));
+      LINK_KEYS.forEach(k => q.delete(k));
       history.replaceState(null, '', location.pathname + (q.toString() ? '?'+q : '') + location.hash);
     }
     const last = api.lastComp();
@@ -1770,7 +1786,7 @@ async function openComp(id, opts={}){
   closeChat(); closeSlip();
   // a different comp: forget every saved view and clear every page, so nothing from the last comp shows
   CACHE.clear();
-  ['round-list','match-list','mybets-list','ladder-list','board-list','account-body','player-body'].forEach(p => { $(p).innerHTML = ''; delete $(p).dataset.k; });
+  ['round-list','match-list','mybets-list','ladder-list','board-list','account-body','player-body'].forEach(p => { $(p).innerHTML = ''; delete $(p).dataset.k; delete $(p).dataset.sig; });
   S.player = { id:null, name:'' };
   S.comp = await api.comp(id);
   await loadMatches(S.comp.sport);             // each comp is one code — load that fixture
@@ -1793,6 +1809,15 @@ async function openComp(id, opts={}){
   // afterwards: pop-ups for anything unlocked while away, the round wrap if there's a new one,
   // then wherever a notification was pointing
   showMissedUnlocks();
+  await applyLink(opts);
+}
+// links from notifications: ?comp=<id>&chat=<room> / &overview=1, or ?achievements=1
+const LINK_KEYS = ['comp','chat','overview','achievements','view','thread','friends','player'];
+function readLink(q){
+  return { comp:q.get('comp'), chat:q.get('chat'), overview:q.has('overview'), achievements:q.has('achievements'), view:q.get('view'),
+           thread:q.get('thread'), friends:q.has('friends'), player:q.get('player') };
+}
+async function applyLink(opts){
   if(opts.achievements){ S.achOpen = true; setView('account'); return; }
   await maybeRoundOverview(opts.overview).catch(e => console.warn(e));
   if(opts.chat && ROOMS.includes(opts.chat)){ openChat(); setRoom(opts.chat); }
@@ -1800,6 +1825,16 @@ async function openComp(id, opts={}){
   if(opts.player) openPlayer(opts.player);
   if(opts.friends){ S.friendsOpen = true; setView('account'); }
   if(opts.thread) openThread(opts.thread);
+}
+// a notification tapped while the app is already open: go where it points without reloading the page
+async function openLink(url){
+  if(!S.user || !S.comp){ location.href = url; return; }
+  const link = readLink(new URL(url, location.href).searchParams);
+  if(link.comp && link.comp!==S.comp.id && S.comps.some(c => c.id===link.comp)){ await openComp(link.comp, link); return; }
+  closeSlip();
+  if(!link.chat && !link.thread) closeChat();
+  showGate(null);
+  await applyLink(link);
 }
 
 /* live updates for the open comp: chat, pins, your balance, your bets settling, scores */
@@ -2103,6 +2138,7 @@ function startTicker(){
     document.querySelectorAll('[data-clk]').forEach(el => {
       const m = S.matchIdx[el.dataset.clk]; if(m) el.textContent = liveClock(m);
     });
+    refreshWorm();
     document.querySelectorAll('[data-cd]').forEach(el => {
       const m = S.matchIdx[el.dataset.cd]; if(!m) return;
       const c = cdInfo(m);
@@ -2263,10 +2299,10 @@ function matchTileHTML(m){
    m.live (match-centre feed):
      AFL { q, clockSecs, home:[[g,b],…], away:[[g,b],…], events, players }  — cumulative goals.behinds per quarter
      NRL { q, clockSecs, home:[pts,…],   away:[pts,…],   events, players }  — cumulative points per half */
-function heroHTML(m){
-  const started = !isOpen(m), done = m.status==='concluded', L = m.live || {}, sp = SP(m.sport);
-  const hs = m.home_score ?? 0, as = m.away_score ?? 0;
-  // under the score: goals.behinds for AFL, tries for NRL
+function heroPhase(m){ return isOpen(m) ? 'pre' : m.status==='concluded' ? 'done' : 'live'; }
+// the hero's figures once under way: scores, goals.behinds (AFL) or tries (NRL), and the margin
+function heroVals(m){
+  const L = m.live || {}, hs = m.home_score ?? 0, as = m.away_score ?? 0, mg = hs - as;
   const breakdown = side => {
     if(m.sport==='nrl'){
       const n = (L.events||[]).filter(e => e.team===side && e.type==='try').length;
@@ -2275,22 +2311,35 @@ function heroHTML(m){
     const per = L[side];
     return per && per.length ? `${per[per.length-1][0]}.${per[per.length-1][1]}` : '';
   };
+  const sub = mg>0 ? `<b>${esc(teamInfo(m.home_team).abbr)}</b> by ${mg}`
+            : mg<0 ? `<b>${esc(teamInfo(m.away_team).abbr)}</b> by ${-mg}` : 'Scores level';
+  return { hs:esc(hs), as:esc(as), gbH:breakdown('home'), gbA:breakdown('away'), sub };
+}
+function heroHTML(m){
+  const ph = heroPhase(m);
   const team = t => `<div class="hero-team">${teamBadge(t,'xl')}<div class="hn">${esc(teamName(t))}</div></div>`;
   let rows;
-  if(!started){
+  if(ph==='pre'){
     rows = `<div></div><div>${cdHTML(m)}</div><div></div>`+
       `<div></div><div class="hero-sub">${esc(fmtWhen(m.commence_time))}</div><div></div>`;
   } else {
-    const mg = hs - as;
-    const pill = done ? `<span class="hero-st ft">Full Time</span>`
+    const v = heroVals(m);
+    const pill = ph==='done' ? `<span class="hero-st ft">Full Time</span>`
       : `<span class="hero-st" data-clk="${esc(m.id)}">${liveClock(m)}</span>`;
-    const sub = mg>0 ? `<b>${esc(teamInfo(m.home_team).abbr)}</b> by ${mg}`
-              : mg<0 ? `<b>${esc(teamInfo(m.away_team).abbr)}</b> by ${-mg}` : 'Scores level';
-    rows = `<div class="hero-pts">${esc(hs)}</div><div>${pill}</div><div class="hero-pts">${esc(as)}</div>`+
-      `<div class="hero-gb">${breakdown('home')}</div><div class="hero-sub">${sub}</div><div class="hero-gb">${breakdown('away')}</div>`;
+    rows = `<div class="hero-pts" data-h="hs">${v.hs}</div><div>${pill}</div><div class="hero-pts" data-h="as">${v.as}</div>`+
+      `<div class="hero-gb" data-h="gbH">${v.gbH}</div><div class="hero-sub" data-h="sub">${v.sub}</div><div class="hero-gb" data-h="gbA">${v.gbA}</div>`;
   }
-  return `<div class="hero"><div class="hero-meta">Round ${esc(m.round)}${m.venue ? ' · '+esc(m.venue) : ''}</div>`+
+  return `<div class="hero" data-ph="${ph}"><div class="hero-meta">Round ${esc(m.round)}${m.venue ? ' · '+esc(m.venue) : ''}</div>`+
     `<div class="hero-grid">${team(m.home_team)}<div class="hero-v">V</div>${team(m.away_team)}${rows}</div></div>`;
+}
+// update the hero's figures where they are; a change of phase (kick-off, full time) redraws it
+function patchHero(list, m){
+  const hero = list.querySelector('.hero'); if(!hero) return;
+  const ph = heroPhase(m);
+  if(hero.dataset.ph!==ph){ hero.outerHTML = heroHTML(m); return; }
+  if(ph==='pre') return;
+  const v = heroVals(m);
+  hero.querySelectorAll('[data-h]').forEach(el => { if(el.innerHTML!==v[el.dataset.h]) el.innerHTML = v[el.dataset.h]; });
 }
 
 /* ════════ MATCH VIEW ════════ */
@@ -2301,7 +2350,7 @@ async function openMatch(id, tab){
   const m = S.matchIdx[id];
   const needLive = m && !isOpen(m) && m.live===undefined;
   if(!(id in S.markets) || needLive){
-    $('match-list').innerHTML = '';                // not the last match's markets under the dimming
+    $('match-list').innerHTML = ''; delete $('match-list').dataset.sig;   // not the last match's markets under the dimming
     setBusy($('match-list'), true, 'Loading markets');
     await Promise.all([ensureMarkets(id), ensureLive(m)]);
     setBusy($('match-list'), false);
@@ -2322,6 +2371,10 @@ function renderMatch(){
   const od = S.markets[m.id];
   const open = isOpen(m);
   $('pane-match').classList.toggle('locked', !open);
+  // already built for this match, tab and mode: only the figures, picks and note change
+  const sig = ['mk', m.id, S.mtab, S.mode, propsOn(), od && od.pulled_at].join('|');
+  if(list.dataset.sig===sig){ patchMarkets(list, m, od); return; }
+  list.dataset.sig = sig;
   const board = heroHTML(m);
   if(!od || !od.markets){ list.innerHTML = board + '<div class="empty">Odds for this match haven’t been pulled yet.</div>'; return; }
 
@@ -2330,11 +2383,6 @@ function renderMatch(){
   const byGroup = {};
   keys.forEach(k => { const g = marketInfo(k).group; (byGroup[g] = byGroup[g] || []).push(k); });
 
-  let note = '';
-  if(!open) note = `<p class="mk-note">Betting on this match has closed.</p>`;
-  else if(S.mtab==='sgm') note = `<p class="mk-note">Tap two or more selections to build a Same Game Multi, then add it to your slip. Picking another outcome in the same market swaps it.</p>`;
-  else if(S.mode==='multi') note = `<p class="mk-note"><b>Multi mode.</b> Taps add a leg to your multi. One leg per match, so another pick here swaps it. <button class="note-link" id="to-singles">Switch to singles</button></p>`;
-
   const html = groups().filter(([g]) => byGroup[g]).map(([g, title]) => {
     const ks = byGroup[g].sort((a,b) => marketInfo(a).ord - marketInfo(b).ord);
     return `<div class="grp"><div class="grp-head"><span class="gt">${esc(title)}</span><span class="gn">${ks.length}</span></div>`+
@@ -2342,21 +2390,58 @@ function renderMatch(){
   }).join('');
 
   const src = `<div class="mk-src">Prices: ${esc(od.bookmaker||'')} · pulled ${esc(fmtWhen(od.pulled_at))}</div>`;
-  list.innerHTML = board + note + (html || '<div class="empty">No markets available for this match.</div>') + src;
+  list.innerHTML = board + `<div id="mk-note">${marketNote(open)}</div>` + (html || '<div class="empty">No markets available for this match.</div>') + src;
 
   wireCollapse(list);
-  const ts = $('to-singles'); if(ts) ts.addEventListener('click', () => setMode('singles'));
+  wireMarketNote();
   list.querySelectorAll('.rib[data-rk]').forEach(r => r.addEventListener('click', () => {
-    S.ribbon[r.dataset.rk] = r.dataset.opt; renderMatch();
+    S.ribbon[r.dataset.rk] = r.dataset.opt;
+    const card = r.closest('.mk');
+    card.querySelectorAll('.rib[data-rk]').forEach(b => b.classList.toggle('active', b===r));
+    repaintMarketRows(card, m);
   }));
-  list.querySelectorAll('.mk-more[data-all]').forEach(b => b.addEventListener('click', () => {
+  wireMarketRows(list, m);
+}
+function marketNote(open){
+  if(!open) return `<p class="mk-note">Betting on this match has closed.</p>`;
+  if(S.mtab==='sgm') return `<p class="mk-note">Tap two or more selections to build a Same Game Multi, then add it to your slip. Picking another outcome in the same market swaps it.</p>`;
+  if(S.mode==='multi') return `<p class="mk-note"><b>Multi mode.</b> Taps add a leg to your multi. One leg per match, so another pick here swaps it. <button class="note-link" id="to-singles">Switch to singles</button></p>`;
+  return '';
+}
+function wireMarketNote(){ const ts = $('to-singles'); if(ts) ts.addEventListener('click', () => setMode('singles')); }
+// prices and "view all" inside one card (or the whole list)
+function wireMarketRows(root, m){
+  root.querySelectorAll('.mk-more[data-all]').forEach(b => b.addEventListener('click', () => {
     const k = b.dataset.all;
     if(S.showAll.has(k)) S.showAll.delete(k); else S.showAll.add(k);
-    renderMatch();
+    repaintMarketRows(b.closest('.mk'), m);
   }));
-  list.querySelectorAll('.chip[data-leg]').forEach(c => c.addEventListener('click', () => {
+  root.querySelectorAll('.chip[data-leg]').forEach(c => c.addEventListener('click', () => {
     const leg = LEGS.get(c.dataset.leg); if(leg) pick(leg);
   }));
+}
+function repaintMarketRows(card, m){
+  const key = card.querySelector('.mk-head').dataset.mk, rows = card.querySelector('.mk-rows');
+  const outs = ((S.markets[m.id] || {}).markets || {})[key];
+  if(!rows || !outs) return;
+  rows.innerHTML = marketParts(m, key, outs).rows;
+  wireMarketRows(rows, m);
+}
+// after a pick, kick-off or a feed update: the hero's figures, the note, and which prices are picked
+function patchMarkets(list, m, od){
+  patchHero(list, m);
+  const slot = $('mk-note'), note = marketNote(isOpen(m));
+  if(slot && slot.innerHTML!==note){ slot.innerHTML = note; wireMarketNote(); }
+  if(!od || !od.markets) return;
+  list.querySelectorAll('.chip[data-leg]').forEach(c => c.classList.toggle('on', isPicked(c.dataset.leg, m.id)));
+  list.querySelectorAll('.mk-head[data-mk]').forEach(h => {
+    const outs = od.markets[h.dataset.mk]; if(!outs) return;
+    const n = pickedIn(m, h.dataset.mk, outs);
+    let b = h.querySelector('.mk-sel');
+    if(!n){ if(b) b.remove(); return; }
+    if(!b){ b = document.createElement('span'); b.className = 'mk-sel'; h.insertBefore(b, h.querySelector('.mk-cv')); }
+    b.textContent = n;
+  });
 }
 // collapsible white cards: header carries data-mk
 function wireCollapse(root){
@@ -2373,11 +2458,16 @@ function cardHTML(key, title, body, badge=''){
   return `<div class="mk${col?' collapsed':''}"><div class="mk-head" data-mk="${esc(key)}"><span class="mk-t">${esc(title)}</span>`+
     badge+`<span class="mk-cv">${col?'+':'−'}</span></div><div class="mk-body">${body}</div></div>`;
 }
+// selections from this market already picked (counted across every ribbon option)
+function pickedIn(m, key, outs){ return outs.filter(o => isPicked(legKey(makeLeg(m, key, o)), m.id)).length; }
 function marketCardHTML(m, key, outs){
+  const p = marketParts(m, key, outs), selected = pickedIn(m, key, outs);
+  // collapsed cards still show how many of their selections are picked
+  return cardHTML(key, marketInfo(key).title, p.ribbon + `<div class="mk-rows">${p.rows}</div>`, selected ? `<span class="mk-sel">${selected}</span>` : '');
+}
+// a market card's ribbon (player markets with options) and its selection rows
+function marketParts(m, key, outs){
   const ck = `${m.id}|${key}`;
-  // selections from this market already picked (counted across every ribbon option)
-  const selected = outs.filter(o => isPicked(legKey(makeLeg(m, key, o)), m.id)).length;
-
   let ribbon = '', rows;
   if(key.startsWith('player_')){
     const list = outs.filter(o => o.name!=='No');
@@ -2407,9 +2497,7 @@ function marketCardHTML(m, key, outs){
     return `<div class="mk-row"><span class="o-name">${esc(label)}</span>`+
       `<span class="chip${isPicked(k, m.id)?' on':''}" data-leg="${esc(k)}"><span class="v">${fmtPx(o.price)}</span></span></div>`;
   }).join('');
-
-  // collapsed cards still show how many of their selections are picked
-  return cardHTML(key, marketInfo(key).title, ribbon + body + more, selected ? `<span class="mk-sel">${selected}</span>` : '');
+  return { ribbon, rows:body + more };
 }
 
 /* ════════ MATCH STATS ════════
@@ -2419,11 +2507,14 @@ function renderStats(m){
   const list = $('match-list');
   $('pane-match').classList.remove('locked');
   const L = m.live, sp = SP(m.sport);
+  const sig = ['st', m.id, !isOpen(m) && !!L].join('|');
+  if(list.dataset.sig===sig){ patchStats(list, m); return; }
+  list.dataset.sig = sig;
   if(isOpen(m) || !L){
     list.innerHTML = heroHTML(m) + `<div class="empty">Match stats go live at kick-off.</div>`;
     return;
   }
-  const events = (L.events||[]).slice().sort((a,b) => a.q-b.q || a.secs-b.secs);
+  const events = statEvents(m);
   // timeline card: the worm, or the same scoring as a table
   const toggle = `<div class="tl-toggle">`+
     `<button class="${S.tlView==='worm'?'active':''}" data-tl="worm" aria-label="Worm" title="Worm">`+
@@ -2432,15 +2523,43 @@ function renderStats(m){
       `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M3 10h18M3 14.5h18M9 5v14M15 5v14"/></svg></button>`+
   `</div>`;
   list.innerHTML = heroHTML(m) +
-    cardHTML('stats-timeline', 'Timeline', toggle + (S.tlView==='worm' ? wormHTML(m, events) : timelineHTML(m, events))) +
-    cardHTML('stats-goals', sp.scorersCard, scorersHTML(m, events)) +
-    cardHTML('stats-leaders', 'Player Stats', leadersHTML(m));
+    cardHTML('stats-timeline', 'Timeline', toggle + `<div class="tl-body"></div>`) +
+    cardHTML('stats-goals', sp.scorersCard, `<div class="gk-body">${scorersHTML(m, events)}</div>`) +
+    cardHTML('stats-leaders', 'Player Stats', leadersRibHTML(m) + `<div class="st-rows"></div>`);
+  paintTimeline(list, m, events);
+  paintLeaders(list, m);
   wireCollapse(list);
+  list.querySelectorAll('[data-tl]').forEach(b => b.addEventListener('click', () => {
+    S.tlView = b.dataset.tl;
+    list.querySelectorAll('[data-tl]').forEach(x => x.classList.toggle('active', x===b));
+    paintTimeline(list, m, statEvents(m));
+  }));
+  list.querySelectorAll('.rib[data-stat]').forEach(b => b.addEventListener('click', () => {
+    S.statKey = b.dataset.stat;
+    list.querySelectorAll('.rib[data-stat]').forEach(x => x.classList.toggle('active', x===b));
+    paintLeaders(list, m);
+  }));
+}
+function paintTimeline(list, m, events){
+  const el = list.querySelector('.tl-body'); if(!el) return;
+  el.innerHTML = S.tlView==='worm' ? wormHTML(m, events) : timelineHTML(m, events);
   if(S.tlView==='worm') wireWorm(m);
-  list.querySelectorAll('[data-tl]').forEach(b => b.addEventListener('click', () => { S.tlView = b.dataset.tl; renderStats(m); }));
-  list.querySelectorAll('.rib[data-stat]').forEach(b => b.addEventListener('click', () => { S.statKey = b.dataset.stat; renderStats(m); }));
-  const more = list.querySelector('.mk-more[data-stats-all]');
-  if(more) more.addEventListener('click', () => { S.statsAll = !S.statsAll; renderStats(m); });
+}
+function paintLeaders(list, m){
+  const el = list.querySelector('.st-rows'); if(!el) return;
+  el.innerHTML = leadersRowsHTML(m);
+  const more = el.querySelector('.mk-more[data-stats-all]');
+  if(more) more.addEventListener('click', () => { S.statsAll = !S.statsAll; paintLeaders(list, m); });
+}
+// a feed update: the hero's figures, the timeline, scorers and player stats, all where they are
+function patchStats(list, m){
+  patchHero(list, m);
+  if(isOpen(m) || !m.live) return;
+  const events = statEvents(m);
+  const tip = $('worm-tip');
+  if(S.tlView!=='worm' || !tip || tip.classList.contains('hidden')) paintTimeline(list, m, events);
+  const gk = list.querySelector('.gk-body'); if(gk) gk.innerHTML = scorersHTML(m, events);
+  paintLeaders(list, m);
 }
 
 /* the worm, AFL-app style: margin (home − away) over game time as a stepped line.
@@ -2449,26 +2568,45 @@ function renderStats(m){
    away team's along the bottom; club badges on the left and the margin scale on the right. */
 const WORM = { W:340, H:236, L:38, R:30, B:30 };
 let _worm = null;                   // geometry + points for the hover layer
+// each period's column spans its real length (live.plen) once it's over, and the one being played
+// stretches to the clock; NRL halves are a fixed length
+function periodLens(m, events){
+  const L = m.live || {}, sp = SP(m.sport), done = m.status==='concluded';
+  return Array.from({ length:sp.periods }, (_, i) => {
+    const q = i+1, known = Number((L.plen || [])[i]);
+    if(sp.fixedLen) return sp.periodLen;
+    if(known > 0) return known;
+    const last = Math.max(0, ...events.filter(e => e.q===q).map(e => e.secs));
+    if(!done && q===L.q) return Math.max(1, last, liveSecs(m));
+    return Math.max(sp.periodLen, last);
+  });
+}
 function wormPoints(m, events){
-  const L = m.live || {}, sp = SP(m.sport), n = sp.periods, len = sp.periodLen;
+  const L = m.live || {}, sp = SP(m.sport), n = sp.periods, lens = periodLens(m, events);
+  const at = (q, secs) => ((q-1) + Math.min(secs, lens[q-1])/lens[q-1])/n;
   let h = 0, a = 0;
   const pts = [{ f:0, mg:0, h:0, a:0 }];
   events.forEach(e => {
     const v = sp.pts[e.type] || 0;
     if(e.team==='home') h += v; else a += v;
-    pts.push({ f:((e.q-1) + Math.min(e.secs, len)/len)/n, mg:h-a, h, a });
+    pts.push({ f:at(e.q, e.secs), mg:h-a, h, a });
   });
-  const endF = m.status==='concluded' ? 1 : (((L.q||1)-1) + Math.min(L.clockSecs||0, len)/len)/n;
+  const endF = m.status==='concluded' ? 1 : at(L.q||1, liveSecs(m));
   pts.push({ f:Math.max(endF, pts[pts.length-1].f), mg:h-a, h, a, end:true });
+  pts.lens = lens;
   return pts;
 }
+// club logo; the colour tile when there isn't one (or it fails to load)
 function svgBadge(team, cx, cy){
   const t = teamInfo(team), s = 26, x = cx-s/2, y = cy-s/2;
-  return `<polygon points="${x},${y} ${x+s},${y} ${x},${y+s}" fill="${t.c1}"/>`+
+  const tile = `<polygon points="${x},${y} ${x+s},${y} ${x},${y+s}" fill="${t.c1}"/>`+
     `<polygon points="${x+s},${y} ${x+s},${y+s} ${x},${y+s}" fill="${t.c2}"/>`+
     `<rect x="${x}" y="${y}" width="${s}" height="${s}" fill="none" stroke="rgba(0,0,0,.15)"/>`+
     `<text x="${cx}" y="${cy+3.5}" text-anchor="middle" font-size="9" font-weight="700" font-family="Oswald,sans-serif" `+
       `fill="#fff" stroke="#000" stroke-width="2" paint-order="stroke">${esc(t.abbr)}</text>`;
+  if(!t.known) return tile;
+  return `<g display="none">${tile}</g><image href="assets/teams/${curSport()}/${t.abbr}.svg" x="${x}" y="${y}" width="${s}" height="${s}" `+
+    `onerror="this.previousElementSibling.removeAttribute('display');this.remove()"/>`;
 }
 function wormHTML(m, events){
   if(m.sport==='nrl') return wormNrlHTML(m, events);
@@ -2530,6 +2668,17 @@ function wormHTML(m, events){
     `<div class="worm-tip hidden" id="worm-tip"><b></b><span></span></div>`+
   `</div>`;
 }
+function statEvents(m){ return ((m.live || {}).events || []).slice().sort((a,b) => a.q-b.q || a.secs-b.secs); }
+// redraw just the worm as the clock runs (skipped while its tooltip is showing)
+function refreshWorm(){
+  const m = S.matchIdx[S.matchId];
+  if(S.view!=='match' || S.mtab!=='stats' || S.tlView!=='worm' || !m || m.status!=='live' || !(m.live && m.live.running)) return;
+  const wrap = document.querySelector('#match-list .worm-wrap'), tip = $('worm-tip');
+  if(!wrap || (tip && !tip.classList.contains('hidden'))) return;
+  wrap.outerHTML = wormHTML(m, statEvents(m));
+  wireWorm(m);
+}
+
 /* NRL worm, NRL-app style: a dark stepped margin line with the gap to zero washed in
    the leading team's colour (home above, away below), the first half shaded, a dashed
    zero line, small badges inside the plot and 0' · 40' · FT along the bottom. */
@@ -2586,7 +2735,7 @@ function wireWorm(m){
     let p = pts[0];
     for(const q of pts){ if(q.f<=f) p = q; else break; }
     xl.setAttribute('x1', X(f)); xl.setAttribute('x2', X(f)); xl.setAttribute('opacity', '.5');
-    const q = Math.min(n, Math.floor(f*n)+1), secs = (f*n-(q-1))*sp.periodLen;
+    const q = Math.min(n, Math.floor(f*n)+1), secs = (f*n-(q-1))*pts.lens[q-1];
     tip.querySelector('b').textContent = p.mg>0 ? `${hAb} by ${p.mg}` : p.mg<0 ? `${aAb} by ${-p.mg}` : 'Scores level';
     tip.querySelector('span').textContent = `${sp.per(q)} ${gameClock(m.sport, q, secs)} · ${p.h}–${p.a}`;
     tip.classList.remove('hidden');
@@ -2618,15 +2767,18 @@ function scorersHTML(m, events){
   };
   return `<div class="gk">${col('home')}${col('away')}</div>`;
 }
-function leadersHTML(m){
-  const players = (m.live && m.live.players) || [];
+function leadersRibHTML(m){
   const stats = SP(m.sport).stats;
   if(!stats.some(([k]) => k===S.statKey)) S.statKey = stats[0][0];     // e.g. switched from an AFL comp to NRL
+  return `<div class="mk-rib">${stats.map(([k,l]) =>
+    `<button class="rib${k===S.statKey?' active':''}" data-stat="${k}">${l}</button>`).join('')}</div>`;
+}
+function leadersRowsHTML(m){
+  const players = (m.live && m.live.players) || [];
+  const stats = SP(m.sport).stats;
   const key = S.statKey, first = stats[0][0];
   const sorted = players.slice().sort((a,b) => (b[key]||0)-(a[key]||0) || (b[first]||0)-(a[first]||0));
   const shown = S.statsAll ? sorted : sorted.slice(0, TOP_N);
-  const rib = `<div class="mk-rib">${stats.map(([k,l]) =>
-    `<button class="rib${k===key?' active':''}" data-stat="${k}">${l}</button>`).join('')}</div>`;
   const sub = p => m.sport==='nrl'
     ? (key==='rm' ? `${p.t} tackles` : `${p.rm}m run`)
     : (key==='d' ? `${p.k} K · ${p.h} H` : key==='g' ? `${p.g}.${p.b}` : `${p.d} disposals`);
@@ -2637,7 +2789,7 @@ function leadersHTML(m){
   }).join('');
   const more = sorted.length>TOP_N
     ? `<button class="mk-more" data-stats-all="1">${S.statsAll ? `View top ${TOP_N} players` : `View all ${sorted.length} players`}</button>` : '';
-  return rib + rows + more;
+  return rows + more;
 }
 function timelineHTML(m, events){
   if(!events.length) return `<div class="tl-row"><span class="w">No scores yet</span></div>`;
@@ -3716,7 +3868,10 @@ function threadTitle(t){
 function threadOther(t){ return (t.members || []).find(m => m.user_id!==S.user.id) || {}; }
 async function loadThreads(){
   try{ S.threads = await api.threads(); }catch(e){ console.warn(e); S.threads = S.threads || []; }
-  (S.threads || []).forEach(t => (t.members || []).forEach(m => { if(m.avatar_url) S.profiles[m.user_id] = { ...(S.profiles[m.user_id] || {}), avatar_url:m.avatar_url }; }));
+  // just the avatar until their full profile loads (partial: ensureProfiles still fetches it)
+  (S.threads || []).forEach(t => (t.members || []).forEach(m => {
+    if(m.avatar_url) S.profiles[m.user_id] = S.profiles[m.user_id] ? { ...S.profiles[m.user_id], avatar_url:m.avatar_url } : { avatar_url:m.avatar_url, partial:true };
+  }));
   S.chat.unread.friends = (S.threads || []).reduce((a, t) => a + (t.unread || 0), 0);
   renderChatBadges();
   if(S.chat.open && S.chat.room==='friends' && !S.chat.thread) renderChat();
@@ -5029,7 +5184,7 @@ async function liveApi(){
 if('serviceWorker' in navigator && !MOCK){
   navigator.serviceWorker.register('./sw.js').catch(() => {});
   navigator.serviceWorker.addEventListener('message', e => {
-    if(e.data && e.data.type==='open' && e.data.url) location.href = e.data.url;
+    if(e.data && e.data.type==='open' && e.data.url) openLink(e.data.url).catch(err => { console.warn(err); location.href = e.data.url; });
   });
 }
 boot();
